@@ -494,8 +494,8 @@ const SEOUL=[
   {lng:127.0566,lat:37.5177,name:"삼성동"},{lng:126.9879,lat:37.5838,name:"성수동"},
 ];
 const CITIES={
-  busan:{center:[129.0590,35.1563],zoom:14.5,pitch:65,bearing:-15,spots:BUSAN,name:"부산",count:183},
-  seoul:{center:[127.0276,37.4979],zoom:14.5,pitch:65,bearing:15,spots:SEOUL,name:"서울",count:312},
+  busan:{center:[129.0590,35.1563],zoom:14,pitch:62,bearing:-15,spots:BUSAN,name:"부산",count:183},
+  seoul:{center:[127.0276,37.4979],zoom:14,pitch:62,bearing:15,spots:SEOUL,name:"서울",count:312},
 };
 
 let currentCity="busan";
@@ -566,6 +566,16 @@ map.on("load",()=>{
   map.addLayer({id:"ad-glow-ring",source:"ad-spots",type:"circle",paint:{"circle-radius":18,"circle-color":"rgba(0,0,0,0)","circle-stroke-width":2,"circle-stroke-color":["get","color"],"circle-stroke-opacity":0.6}});
   map.setFog({color:"rgb(3,3,10)","high-color":"rgb(8,6,20)","horizon-blend":0.04,"space-color":"rgb(3,3,10)","star-intensity":0.5});
   spawnMarkers("busan");spawnAdLayer("busan");spawnAdMarkers("busan");
+
+  // 줌 레벨에 따라 마커 크기 조절
+  map.on("zoom", function(){
+    const z = map.getZoom();
+    const scale = z < 11 ? 0 : z < 13 ? 0.5 : 1;
+    document.querySelectorAll(".noct-marker").forEach(function(el){
+      el.style.opacity = scale === 0 ? "0" : "1";
+      el.style.transform = "scale("+scale+")";
+    });
+  });
 });
 
 function spawnAdLayer(k){
@@ -575,11 +585,11 @@ function spawnAdLayer(k){
 function spawnMarkers(k){
   markers.forEach(m=>m.remove());markers.length=0;
   CITIES[k].spots.forEach(spot=>{
-    const n=Math.floor(10+Math.random()*18);
+    const n=Math.floor(4+Math.random()*8);
     for(let i=0;i<n;i++){
       const s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];
-      const lng=spot.lng+(Math.random()-0.5)*0.011;
-      const lat=spot.lat+(Math.random()-0.5)*0.008;
+      const lng=spot.lng+(Math.random()-0.5)*0.025;
+      const lat=spot.lat+(Math.random()-0.5)*0.018;
       const el=document.createElement("div");el.className="noct-marker";
       el.innerHTML="<div class='m-ring' style='border-color:"+s.color+";animation-delay:"+Math.random()*2+"s'></div><div class='m-ring2' style='background:"+s.color+"'></div><div class='m-core' style='background:"+s.color+";box-shadow:0 0 10px "+s.color+"88'></div><div class='m-shine'></div>";
       el.addEventListener("click",e=>{e.stopPropagation();closeAdCard();showFakeCard(s,spot.name);});
