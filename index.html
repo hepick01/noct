@@ -453,7 +453,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 mapboxgl.accessToken = 'pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
 const SUPABASE_URL = 'https://ivnwqfqhbooxsqerweah.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const YT_API_KEY = 'AIzaSyDLxKzWB8niqOb8vg21LRlmgkDzHM7PIwM';
 
 const FAKE_SONGS=[
@@ -1026,8 +1026,7 @@ async function upsertMyUser(song){
 
   if(!myUserId){
     // 새 유저 등록
-    const {data, error} = await supabase
-      .from("live_users")
+    const {data, error} = await _sb.from("live_users")
       .insert({
         nick: myNick,
         song_title: song.title,
@@ -1046,9 +1045,7 @@ async function upsertMyUser(song){
     }
   } else {
     // 기존 유저 업데이트
-    await supabase
-      .from("live_users")
-      .update({
+    await _sb.from("live_users").update({
         nick: myNick,
         song_title: song.title,
         song_channel: song.channel,
@@ -1066,7 +1063,7 @@ async function upsertMyUser(song){
 // 내 유저 삭제 (종료 시)
 async function deleteMyUser(){
   if(!myUserId) return;
-  await supabase.from("live_users").delete().eq("id", myUserId);
+  await _sb.from("live_users").delete().eq("id", myUserId);
   myUserId = null;
   localStorage.removeItem("noct_uid");
 }
@@ -1137,8 +1134,7 @@ function removeStaleLiveMarker(userId){
 // 전체 실시간 유저 불러오기
 async function loadAllLiveUsers(){
   const fiveMinAgo = new Date(Date.now() - 5*60*1000).toISOString();
-  const {data} = await supabase
-    .from("live_users")
+  const {data} = await _sb.from("live_users")
     .select("*")
     .gte("updated_at", fiveMinAgo);
 
@@ -1158,8 +1154,7 @@ async function loadAllLiveUsers(){
 
 // Realtime 구독
 function subscribeRealtime(){
-  supabase
-    .channel("live-users-channel")
+  _sb.channel("live-users-channel")
     .on("postgres_changes", {
       event: "INSERT",
       schema: "public",
