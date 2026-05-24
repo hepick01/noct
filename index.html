@@ -767,9 +767,7 @@ async function doSearch(){
   res.innerHTML='<div class="search-loading">🔍 검색 중...</div>';
 
   // YouTube API 키가 없으면 샘플 결과 표시
-  if(YT_API_KEY==='AIzaSyDLxKzWB8niqOb8vg21LRlmgkDzHM7PIwM'){
-    showSampleResults(q);return;
-  }
+  // API key is set - proceed with real search
 
   try{
     const url=`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q+" official audio")}&type=video&videoCategoryId=10&maxResults=8&key=${YT_API_KEY}`;
@@ -798,7 +796,7 @@ function showSampleResults(q){
   ].filter(s=>s.title.toLowerCase().includes(q.toLowerCase())||q.length<2);
 
   const show=samples.length>0?samples:samples.concat([
-    {id:'sample1',title:`"${q}" 검색 결과 (YouTube API 키 필요)`,channel:'YouTube API 키를 설정하면 실제 검색이 됩니다',thumb:''},
+    {id:'sample1',title:`"${q}" 검색 중...`,channel:'YouTube API 키를 설정하면 실제 검색이 됩니다',thumb:''},
   ]);
 
   document.getElementById('searchResults').innerHTML=show.slice(0,6).map(s=>`
