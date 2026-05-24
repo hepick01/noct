@@ -715,7 +715,7 @@ function stopAndClear(){
 
 function shareNow(){
   if(!currentSong) return;
-  const text=`🎵 noct에서 "${currentSong.title}" 듣는 중\n지금 이 도시의 음악을 지도에서 확인하세요 👉 noct.vercel.app`;
+  const text=`🎵 noct에서 "${currentSong.title}" 듣는 중\n지금 이 도시의 음악을 지도에서 확인하세요 👉 hepick01.github.io/noct`;
   if(navigator.share){navigator.share({title:'noct',text});}
   else{navigator.clipboard.writeText(text).then(()=>showToastMsg('📋 공유 텍스트가 복사됐어요!'));}
 }
