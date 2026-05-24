@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>noct — 지금 이 도시의 음악</title>
+<meta name="description" content="지금 이 도시 사람들이 듣고 있는 음악을 3D 지도 위에서 확인하세요">
+<meta property="og:title" content="noct — 지금 이 도시의 음악">
+<meta property="og:description" content="지금 부산/서울에서 183명이 음악 듣는 중 🎵 3D 지도 위에서 실시간으로 확인하세요">
+<meta property="og:image" content="https://i.imgur.com/8mBPKzV.png">
+<meta property="og:url" content="https://hepick01.github.io/noct">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#c77dff">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -228,6 +236,56 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .adc-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.35);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,0.55);cursor:pointer;font-size:15px;line-height:26px;text-align:center;font-family:inherit;}
 
 #ytPlayer{position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;}
+
+/* 닉네임 모달 */
+#nickOverlay{position:fixed;inset:0;z-index:2000;background:rgba(3,3,10,0.92);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#nickOverlay.open{opacity:1;pointer-events:all;}
+#nickBox{background:rgba(10,8,24,0.99);border:1px solid rgba(199,125,255,0.2);border-radius:24px;padding:32px 24px;width:calc(100vw - 48px);max-width:340px;text-align:center;}
+.nick-emoji{font-size:48px;margin-bottom:16px;}
+.nick-title{color:#fff;font-size:20px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px;}
+.nick-sub{color:rgba(255,255,255,0.35);font-size:13px;margin-bottom:24px;line-height:1.6;}
+.nick-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(199,125,255,0.3);border-radius:12px;padding:13px 16px;color:#fff;font-size:16px;font-family:inherit;outline:none;text-align:center;margin-bottom:12px;}
+.nick-input::placeholder{color:rgba(255,255,255,0.2);}
+.nick-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 6px 20px #c77dff44;}
+
+/* TOP 5 패널 */
+#topPanel{position:fixed;top:68px;right:16px;z-index:100;width:200px;
+  background:rgba(6,4,16,0.88);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;
+  opacity:0;transform:translateY(-8px);pointer-events:none;
+  transition:opacity 0.25s,transform 0.25s;}
+#topPanel.visible{opacity:1;transform:translateY(0);pointer-events:all;}
+.top-title{color:rgba(255,255,255,0.4);font-size:10px;font-weight:500;letter-spacing:0.05em;margin-bottom:10px;}
+.top-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.top-item:last-child{border-bottom:none;}
+.top-rank{color:#c77dff;font-size:11px;font-weight:700;width:14px;flex-shrink:0;}
+.top-info{flex:1;min-width:0;}
+.top-track{color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-artist{color:rgba(255,255,255,0.3);font-size:10px;}
+.top-bar{width:3px;background:rgba(199,125,255,0.4);border-radius:2px;flex-shrink:0;}
+
+/* TOP5 토글 버튼 */
+#topBtn{position:fixed;top:68px;right:16px;z-index:101;
+  background:rgba(6,4,16,0.88);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.07);border-radius:12px;
+  padding:7px 12px;cursor:pointer;color:rgba(255,255,255,0.6);
+  font-size:11px;font-weight:500;font-family:inherit;
+  display:flex;align-items:center;gap:5px;
+  transition:all 0.2s;}
+#topBtn:active{background:rgba(199,125,255,0.1);}
+
+/* 공유 카드 생성 */
+#shareCardOverlay{position:fixed;inset:0;z-index:3000;background:rgba(3,3,10,0.95);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#shareCardOverlay.open{opacity:1;pointer-events:all;}
+#shareCanvas{border-radius:16px;max-width:calc(100vw - 48px);box-shadow:0 20px 60px rgba(0,0,0,0.8);}
+.share-card-btns{display:flex;gap:10px;}
+.sc-btn{padding:12px 22px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;}
+.sc-save{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;}
+.sc-close{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);}
+
+/* 닉네임 표시 */
+.my-marker-label{position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:8px;padding:2px 8px;color:#fff;font-size:10px;font-weight:700;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis;}
+
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
 </style>
 </head>
@@ -358,6 +416,36 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   <span class="toast-pill">NEW</span>
   <span style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="ttrack"></span>
   <span style="color:rgba(255,255,255,0.35);font-size:12px;flex-shrink:0;" id="tartist"></span>
+</div>
+
+<!-- 닉네임 모달 -->
+<div id="nickOverlay">
+  <div id="nickBox">
+    <div class="nick-emoji">🎵</div>
+    <div class="nick-title">noct에 오신 걸 환영해요</div>
+    <div class="nick-sub">지도에 표시될 닉네임을 입력하세요<br>나중에 언제든지 바꿀 수 있어요</div>
+    <input class="nick-input" id="nickInput" placeholder="닉네임 입력..." maxlength="10"
+      onkeydown="if(event.key==='Enter')saveNick()">
+    <button class="nick-btn" onclick="saveNick()">시작하기 🚀</button>
+  </div>
+</div>
+
+<!-- TOP 5 버튼 -->
+<button id="topBtn" onclick="toggleTop()">🔥 TOP 5</button>
+
+<!-- TOP 5 패널 -->
+<div id="topPanel">
+  <div class="top-title">🔥 지금 이 도시 TOP 5</div>
+  <div id="topList"></div>
+</div>
+
+<!-- 공유 카드 오버레이 -->
+<div id="shareCardOverlay">
+  <canvas id="shareCanvas" width="360" height="640"></canvas>
+  <div class="share-card-btns">
+    <button class="sc-btn sc-save" onclick="downloadCard()">📥 이미지 저장</button>
+    <button class="sc-btn sc-close" onclick="closeShareCard()">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -655,6 +743,254 @@ setInterval(()=>{
   const b=CITIES[currentCity].count;
   document.getElementById("livenum").textContent=b+Math.floor((Math.random()-0.5)*8);
 },9000);
+
+// ════ 닉네임 ════
+let myNick = localStorage.getItem("noct_nick") || "";
+function initNick(){
+  if(!myNick){ document.getElementById("nickOverlay").classList.add("open"); }
+}
+function saveNick(){
+  const v = document.getElementById("nickInput").value.trim();
+  if(!v){ document.getElementById("nickInput").focus(); return; }
+  myNick = v;
+  localStorage.setItem("noct_nick", v);
+  document.getElementById("nickOverlay").classList.remove("open");
+  showToastMsg("👋 안녕하세요, "+v+"님!");
+}
+setTimeout(initNick, 1500);
+
+// ════ TOP 5 ════
+const TOP5_DATA = {
+  busan:[
+    {track:"밤편지",artist:"IU",count:47,color:"#60a5fa"},
+    {track:"Slow Dancing in the Dark",artist:"Joji",count:38,color:"#c084fc"},
+    {track:"봄날",artist:"BTS",count:31,color:"#38bdf8"},
+    {track:"오래된 노래",artist:"혁오",count:28,color:"#34d399"},
+    {track:"Celebrity",artist:"IU",count:22,color:"#f9a8d4"},
+  ],
+  seoul:[
+    {track:"Attention",artist:"NewJeans",count:61,color:"#67e8f9"},
+    {track:"LOVE DIVE",artist:"IVE",count:49,color:"#c084fc"},
+    {track:"BLINDING LIGHTS",artist:"The Weeknd",count:43,color:"#f472b6"},
+    {track:"낙화",artist:"Epik High",count:35,color:"#818cf8"},
+    {track:"Golden Hour",artist:"JVKE",count:27,color:"#fbbf24"},
+  ],
+};
+let topVisible = false;
+function toggleTop(){
+  topVisible = !topVisible;
+  const panel = document.getElementById("topPanel");
+  const btn = document.getElementById("topBtn");
+  if(topVisible){
+    renderTop();
+    panel.classList.add("visible");
+    btn.style.display = "none";
+  } else {
+    panel.classList.remove("visible");
+  }
+}
+function renderTop(){
+  const data = TOP5_DATA[currentCity] || TOP5_DATA.busan;
+  const max = data[0].count;
+  document.getElementById("topList").innerHTML = data.map((s,i)=>
+    "<div class='top-item'>"
+    +"<span class='top-rank'>"+(i+1)+"</span>"
+    +"<div class='top-info'>"
+    +"<div class='top-track'>"+s.track+"</div>"
+    +"<div class='top-artist'>"+s.artist+"</div>"
+    +"</div>"
+    +"<div class='top-bar' style='height:"+(12+Math.floor(s.count/max*24))+"px;background:"+s.color+"66'></div>"
+    +"</div>"
+  ).join("");
+}
+// TOP 패널 닫기
+document.addEventListener("click", function(e){
+  if(topVisible && !document.getElementById("topPanel").contains(e.target) && e.target.id !== "topBtn"){
+    topVisible = false;
+    document.getElementById("topPanel").classList.remove("visible");
+    document.getElementById("topBtn").style.display = "flex";
+  }
+});
+
+// ════ 닉네임 반영 ════
+const _origPlaceMyMarker = placeMyMarker;
+placeMyMarker = function(title, thumb){
+  if(myMarker){myMarker.remove();myMarker=null;}
+  const city=CITIES[currentCity];
+  const lng=city.center[0]+(Math.random()-0.5)*0.006;
+  const lat=city.center[1]+(Math.random()-0.5)*0.004;
+  const el=document.createElement("div");
+  el.className="my-marker";
+  const label = myNick || "나";
+  el.innerHTML="<div class='my-marker-label'>"+label+"</div><div class='m-ring'></div><div class='m-core'></div><div class='m-shine'></div>";
+  el.addEventListener("click",function(e){
+    e.stopPropagation();
+    document.getElementById("cardtrack").textContent=currentSong.title;
+    document.getElementById("cardartist").textContent=currentSong.channel;
+    document.getElementById("cardfooter").textContent="내 위치";
+    document.getElementById("footerdot").style.background="#c77dff";
+    if(currentSong.thumb)document.getElementById("cardcover").src=currentSong.thumb;
+    document.getElementById("cardmoods").innerHTML="<span class='mood-tag' style='background:#c77dff18;border:1px solid #c77dff30;color:#c77dff'>지금 듣는 중 🎵</span>";
+    document.getElementById("songcard").classList.add("visible");
+  });
+  myMarker=new mapboxgl.Marker({element:el,anchor:"center"}).setLngLat([lng,lat]).addTo(map);
+  map.flyTo({center:[lng,lat],zoom:15,duration:1200});
+};
+
+// ════ 인스타 공유 카드 ════
+function shareNow(){
+  if(!currentSong) return;
+  // 카드 생성
+  generateShareCard();
+}
+
+function generateShareCard(){
+  const canvas = document.getElementById("shareCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = 360, H = 640;
+  canvas.width = W; canvas.height = H;
+
+  // 배경 그라디언트
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,"#03030a");
+  bg.addColorStop(0.5,"#0a0520");
+  bg.addColorStop(1,"#03030a");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // 그리드 라인
+  ctx.strokeStyle = "rgba(100,80,200,0.08)";
+  ctx.lineWidth = 0.5;
+  for(let i=0;i<20;i++){
+    ctx.beginPath();ctx.moveTo(0,i*H/20);ctx.lineTo(W,i*H/20);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(i*W/20,0);ctx.lineTo(i*W/20,H);ctx.stroke();
+  }
+
+  // 상단 noct 로고
+  ctx.fillStyle = "rgba(199,125,255,0.15)";
+  ctx.beginPath();
+  roundRect(ctx, 20, 30, 80, 32, 10);
+  ctx.fill();
+  ctx.fillStyle = "#c77dff";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("noct", 60, 51);
+
+  // 앨범아트 영역
+  const artSize = 200;
+  const artX = (W - artSize) / 2;
+  const artY = 100;
+
+  // 글로우 효과
+  const grd = ctx.createRadialGradient(W/2, artY+artSize/2, 10, W/2, artY+artSize/2, artSize);
+  grd.addColorStop(0,"rgba(199,125,255,0.3)");
+  grd.addColorStop(1,"rgba(199,125,255,0)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(artX-40, artY-40, artSize+80, artSize+80);
+
+  // 앨범 배경
+  ctx.fillStyle = "rgba(199,125,255,0.15)";
+  ctx.beginPath();
+  roundRect(ctx, artX, artY, artSize, artSize, 20);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(199,125,255,0.3)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // 음악 아이콘
+  ctx.fillStyle = "#c77dff";
+  ctx.font = "64px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("🎵", W/2, artY + artSize/2 + 22);
+
+  // 앨범 이미지 로드 시도
+  if(currentSong.thumb){
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function(){
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, artX, artY, artSize, artSize, 20);
+      ctx.clip();
+      ctx.drawImage(img, artX, artY, artSize, artSize);
+      ctx.restore();
+      finishCard(ctx, W, H, artY, artSize);
+    };
+    img.onerror = function(){ finishCard(ctx, W, H, artY, artSize); };
+    img.src = currentSong.thumb;
+  } else {
+    finishCard(ctx, W, H, artY, artSize);
+  }
+}
+
+function finishCard(ctx, W, H, artY, artSize){
+  // 곡명
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 22px sans-serif";
+  ctx.textAlign = "center";
+  const title = currentSong.title.length > 20 ? currentSong.title.substring(0,20)+"..." : currentSong.title;
+  ctx.fillText(title, W/2, artY + artSize + 44);
+
+  // 아티스트
+  ctx.fillStyle = "rgba(255,255,255,0.45)";
+  ctx.font = "15px sans-serif";
+  ctx.fillText(currentSong.channel, W/2, artY + artSize + 70);
+
+  // 구분선
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(40, artY + artSize + 90);
+  ctx.lineTo(W-40, artY + artSize + 90);
+  ctx.stroke();
+
+  // 닉네임 + 위치
+  const nick = myNick || "익명";
+  const city = CITIES[currentCity].name;
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.font = "12px sans-serif";
+  ctx.fillText(nick + " · " + city + " · 지금 듣는 중", W/2, artY + artSize + 115);
+
+  // 하단 noct 브랜딩
+  ctx.fillStyle = "rgba(199,125,255,0.12)";
+  ctx.beginPath();
+  roundRect(ctx, W/2-80, H-70, 160, 44, 12);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(199,125,255,0.25)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#c77dff";
+  ctx.font = "bold 13px sans-serif";
+  ctx.fillText("hepick01.github.io/noct", W/2, H-43);
+
+  document.getElementById("shareCardOverlay").classList.add("open");
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function downloadCard(){
+  const canvas = document.getElementById("shareCanvas");
+  const link = document.createElement("a");
+  link.download = "noct-" + (currentSong ? currentSong.title.substring(0,10) : "share") + ".png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  showToastMsg("📥 이미지 저장됐어요!");
+}
+function closeShareCard(){
+  document.getElementById("shareCardOverlay").classList.remove("open");
+}
 </script>
 </body>
 </html>
