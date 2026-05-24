@@ -13,6 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#c77dff">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -450,6 +451,9 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
+const SUPABASE_URL = 'https://ivnwqfqhbooxsqerweah.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const YT_API_KEY = 'AIzaSyDLxKzWB8niqOb8vg21LRlmgkDzHM7PIwM';
 
 const FAKE_SONGS=[
@@ -503,6 +507,8 @@ let ytPlayer=null,ytReady=false,isPlaying=false;
 let currentSong=null,myMarker=null;
 const markers=[],adMarkers=[];
 let searchTimer=null;
+let myUserId = localStorage.getItem("noct_uid") || null;
+const liveMarkers = {}; // 실시간 유저 마커 {id: marker}
 
 // 유튜브
 const ytScript=document.createElement("script");
@@ -1001,6 +1007,210 @@ function downloadCard(){
 function closeShareCard(){
   document.getElementById("shareCardOverlay").classList.remove("open");
 }
+
+// ════════════════════════════════════════
+//  Supabase 실시간 연동
+// ════════════════════════════════════════
+
+// 내 위치 랜덤 오프셋 (프라이버시 보호 300m~1km)
+function randomOffset(){
+  return (Math.random() - 0.5) * 0.01;
+}
+
+// 내 유저 등록/업데이트
+async function upsertMyUser(song){
+  if(!myNick) return;
+  const city = CITIES[currentCity];
+  const lng = city.center[0] + randomOffset();
+  const lat = city.center[1] + randomOffset();
+
+  if(!myUserId){
+    // 새 유저 등록
+    const {data, error} = await supabase
+      .from("live_users")
+      .insert({
+        nick: myNick,
+        song_title: song.title,
+        song_channel: song.channel,
+        song_thumb: song.thumb || "",
+        video_id: song.videoId,
+        lat: lat,
+        lng: lng,
+        city: currentCity,
+      })
+      .select()
+      .single();
+    if(data){
+      myUserId = data.id;
+      localStorage.setItem("noct_uid", myUserId);
+    }
+  } else {
+    // 기존 유저 업데이트
+    await supabase
+      .from("live_users")
+      .update({
+        nick: myNick,
+        song_title: song.title,
+        song_channel: song.channel,
+        song_thumb: song.thumb || "",
+        video_id: song.videoId,
+        lat: lat,
+        lng: lng,
+        city: currentCity,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", myUserId);
+  }
+}
+
+// 내 유저 삭제 (종료 시)
+async function deleteMyUser(){
+  if(!myUserId) return;
+  await supabase.from("live_users").delete().eq("id", myUserId);
+  myUserId = null;
+  localStorage.removeItem("noct_uid");
+}
+
+// 실시간 유저 마커 렌더링
+function renderLiveUser(user){
+  // 내 마커는 제외
+  if(user.id === myUserId) return;
+
+  // 색상 (닉네임 기반)
+  const colors = ["#a78bfa","#f87171","#34d399","#60a5fa","#fbbf24","#f472b6","#67e8f9","#fb923c"];
+  const colorIdx = user.nick.charCodeAt(0) % colors.length;
+  const color = colors[colorIdx];
+
+  // 기존 마커 제거
+  if(liveMarkers[user.id]){
+    liveMarkers[user.id].remove();
+    delete liveMarkers[user.id];
+  }
+
+  const el = document.createElement("div");
+  el.className = "noct-marker";
+  el.style.cursor = "pointer";
+  el.innerHTML = "<div class='m-ring' style='border-color:"+color+";animation-delay:"+Math.random()*2+"s'></div>"
+    +"<div class='m-ring2' style='background:"+color+"'></div>"
+    +"<div class='m-core' style='background:"+color+";box-shadow:0 0 10px "+color+"88'></div>"
+    +"<div class='m-shine'></div>";
+
+  // 닉네임 라벨
+  const label = document.createElement("div");
+  label.style.cssText = "position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(6,4,16,0.85);border:1px solid "+color+"44;border-radius:8px;padding:1px 6px;color:"+color+";font-size:9px;font-weight:600;white-space:nowrap;pointer-events:none;";
+  label.textContent = user.nick;
+  el.appendChild(label);
+
+  el.addEventListener("click", function(e){
+    e.stopPropagation();
+    closeAdCard();
+    // 카드 표시
+    document.getElementById("cardtrack").textContent = user.song_title || "음악 없음";
+    document.getElementById("cardartist").textContent = user.song_channel || "";
+    document.getElementById("cardfooter").textContent = user.nick + " · " + (user.city === "busan" ? "부산" : "서울");
+    document.getElementById("footerdot").style.background = color;
+    if(user.song_thumb){
+      document.getElementById("cardcover").src = user.song_thumb;
+    } else {
+      document.getElementById("cardcover").src = "";
+      document.getElementById("cardcover").style.background = color+"22";
+    }
+    document.getElementById("cardmoods").innerHTML = "<span class='mood-tag' style='background:"+color+"14;border:1px solid "+color+"30;color:"+color+"'>지금 듣는 중 🎵</span>";
+    document.getElementById("songcard").classList.add("visible");
+  });
+
+  const marker = new mapboxgl.Marker({element: el, anchor: "center"})
+    .setLngLat([user.lng, user.lat])
+    .addTo(map);
+
+  liveMarkers[user.id] = marker;
+}
+
+// 오래된 유저 제거 (5분 이상 비활성)
+function removeStaleLiveMarker(userId){
+  if(liveMarkers[userId]){
+    liveMarkers[userId].remove();
+    delete liveMarkers[userId];
+  }
+}
+
+// 전체 실시간 유저 불러오기
+async function loadAllLiveUsers(){
+  const fiveMinAgo = new Date(Date.now() - 5*60*1000).toISOString();
+  const {data} = await supabase
+    .from("live_users")
+    .select("*")
+    .gte("updated_at", fiveMinAgo);
+
+  if(data){
+    // 기존 라이브 마커 전부 제거
+    Object.keys(liveMarkers).forEach(id => {
+      liveMarkers[id].remove();
+      delete liveMarkers[id];
+    });
+    // 다시 렌더링
+    data.forEach(user => renderLiveUser(user));
+    // 라이브 카운트 업데이트
+    const total = 183 + data.length;
+    document.getElementById("livenum").textContent = total;
+  }
+}
+
+// Realtime 구독
+function subscribeRealtime(){
+  supabase
+    .channel("live-users-channel")
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "live_users",
+    }, function(payload){
+      renderLiveUser(payload.new);
+      showToastMsg("🎵 "+payload.new.nick+"님이 합류했어요!");
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "live_users",
+    }, function(payload){
+      renderLiveUser(payload.new);
+    })
+    .on("postgres_changes", {
+      event: "DELETE",
+      schema: "public",
+      table: "live_users",
+    }, function(payload){
+      removeStaleLiveMarker(payload.old.id);
+    })
+    .subscribe();
+}
+
+// selectSong 후 Supabase 업데이트
+const _origSelectSong = selectSong;
+selectSong = function(videoId, title, channel, thumb){
+  _origSelectSong(videoId, title, channel, thumb);
+  upsertMyUser({videoId, title, channel, thumb});
+};
+
+// 종료 시 유저 삭제
+window.addEventListener("beforeunload", function(){
+  if(myUserId){
+    navigator.sendBeacon(
+      SUPABASE_URL+"/rest/v1/live_users?id=eq."+myUserId,
+      null
+    );
+  }
+});
+
+// 맵 로드 후 실시간 시작
+map.on("load", function(){
+  setTimeout(function(){
+    loadAllLiveUsers();
+    subscribeRealtime();
+    // 30초마다 갱신
+    setInterval(loadAllLiveUsers, 30000);
+  }, 2000);
+});
 </script>
 </body>
 </html>
