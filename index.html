@@ -268,6 +268,140 @@ body{background:#03030a;font-family:'Noto Sans KR',-apple-system,sans-serif;over
 /* 유튜브 플레이어 (숨김) */
 #ytPlayer{position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;}
 
+/* ════ 플레이리스트 버튼 ════ */
+#plBtn{
+  position:fixed;bottom:100px;right:180px;z-index:100;
+  background:rgba(199,125,255,0.12);
+  border:1px solid rgba(199,125,255,0.3);
+  border-radius:16px;padding:13px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;color:#c77dff;
+  font-family:inherit;
+  transition:all 0.2s;
+}
+#plBtn:hover{background:rgba(199,125,255,0.2);}
+#plBtn .pl-count{
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;
+}
+
+/* ════ 플레이리스트 패널 ════ */
+#plPanel{
+  position:fixed;top:0;right:0;bottom:0;z-index:600;
+  width:320px;
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  border-left:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+#plPanel.open{transform:translateX(0);}
+
+.pl-header{
+  padding:20px 20px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pl-header-left{display:flex;flex-direction:column;gap:4px;}
+.pl-title-row{display:flex;align-items:center;gap:8px;}
+.pl-icon{font-size:18px;}
+.pl-title{color:#fff;font-size:16px;font-weight:700;}
+.pl-sub{color:rgba(255,255,255,0.25);font-size:11px;}
+.pl-close{background:rgba(255,255,255,0.06);border:none;border-radius:50%;width:28px;height:28px;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;line-height:28px;text-align:center;font-family:inherit;}
+
+/* 플리 이름 입력 */
+.pl-name-wrap{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.pl-name-input{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:9px 13px;
+  color:#fff;font-size:13px;font-family:inherit;outline:none;
+  transition:border-color 0.2s;
+}
+.pl-name-input:focus{border-color:rgba(199,125,255,0.4);}
+.pl-name-input::placeholder{color:rgba(255,255,255,0.2);}
+
+/* 곡 목록 */
+.pl-list{flex:1;overflow-y:auto;padding:8px 0;}
+.pl-list::-webkit-scrollbar{width:3px;}
+.pl-list::-webkit-scrollbar-thumb{background:rgba(199,125,255,0.2);border-radius:2px;}
+
+.pl-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;gap:10px;}
+.pl-empty-icon{font-size:36px;opacity:0.4;}
+.pl-empty-text{color:rgba(255,255,255,0.2);font-size:13px;}
+
+.pl-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 20px;cursor:pointer;
+  transition:background 0.15s;position:relative;
+}
+.pl-item:hover{background:rgba(255,255,255,0.04);}
+.pl-item.playing{background:rgba(199,125,255,0.08);}
+.pl-item-num{color:rgba(255,255,255,0.2);font-size:11px;width:16px;text-align:center;flex-shrink:0;}
+.pl-item.playing .pl-item-num{color:#c77dff;}
+.pl-item-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,0.05);flex-shrink:0;}
+.pl-item-info{flex:1;min-width:0;}
+.pl-item-title{color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.pl-item.playing .pl-item-title{color:#c77dff;}
+.pl-item-ch{color:rgba(255,255,255,0.3);font-size:10px;}
+.pl-item-del{background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;transition:color 0.15s;font-family:inherit;}
+.pl-item-del:hover{color:#f87171;}
+
+/* 하단 버튼들 */
+.pl-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:8px;}
+.pl-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);
+  border-radius:12px;padding:11px;cursor:pointer;
+  color:rgba(255,255,255,0.35);font-size:12px;font-family:inherit;
+  transition:all 0.15s;
+}
+.pl-add-btn:hover{border-color:rgba(199,125,255,0.3);color:#c77dff;background:rgba(199,125,255,0.05);}
+
+.pl-action-row{display:flex;gap:8px;}
+.pl-share-btn{
+  flex:1;padding:11px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  color:#fff;font-size:12px;font-weight:700;font-family:inherit;
+  box-shadow:0 4px 16px #c77dff33;transition:transform 0.15s;
+}
+.pl-share-btn:hover{transform:translateY(-1px);}
+.pl-play-btn{
+  flex:1;padding:11px;border-radius:12px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;
+  transition:background 0.15s;
+}
+.pl-play-btn:hover{background:rgba(255,255,255,0.1);}
+
+/* 다른 유저 플리 카드 */
+#plCard{
+  position:fixed;bottom:180px;left:22px;z-index:200;
+  background:rgba(8,6,18,0.96);backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,0.08);border-radius:20px;
+  padding:0;width:290px;
+  opacity:0;transform:translateY(12px) scale(0.97);
+  transition:opacity 0.22s,transform 0.22s;pointer-events:none;overflow:hidden;
+}
+#plCard.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+.plc-header{padding:16px 18px 12px;display:flex;align-items:center;gap:12px;}
+.plc-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.plc-name{color:#fff;font-size:14px;font-weight:700;margin-bottom:3px;}
+.plc-meta{color:rgba(255,255,255,0.35);font-size:11px;}
+.plc-divider{height:1px;background:rgba(255,255,255,0.05);margin:0 18px;}
+.plc-tracks{padding:10px 18px;max-height:130px;overflow-y:auto;}
+.plc-track-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.plc-track-item:last-child{border-bottom:none;}
+.plc-track-num{color:rgba(255,255,255,0.2);font-size:10px;width:14px;}
+.plc-track-title{color:rgba(255,255,255,0.7);font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.plc-footer{padding:12px 18px 16px;display:flex;gap:7px;}
+.plc-listen-btn{
+  flex:1;padding:10px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  color:#fff;font-size:12px;font-weight:700;font-family:inherit;
+}
+.plc-close-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;font-family:inherit;}
+
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
 </style>
 </head>
@@ -303,11 +437,63 @@ body{background:#03030a;font-family:'Noto Sans KR',-apple-system,sans-serif;over
   <div class="live-sub">실시간으로 음악 듣는 중 · 20초마다 갱신</div>
 </div>
 
+<!-- 플레이리스트 버튼 -->
+<button id="plBtn" onclick="togglePlaylist()">
+  🎧 내 플리 <span class="pl-count" id="plCount">0</span>
+</button>
+
 <!-- 내 음악 올리기 버튼 -->
 <button id="mainBtn" onclick="openSearch()">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
   내 음악 올리기
 </button>
+
+<!-- 플레이리스트 패널 -->
+<div id="plPanel">
+  <div class="pl-header">
+    <div class="pl-header-left">
+      <div class="pl-title-row">
+        <span class="pl-icon">🎧</span>
+        <span class="pl-title">내 플레이리스트</span>
+      </div>
+      <span class="pl-sub">곡을 추가하고 지도에 공유하세요</span>
+    </div>
+    <button class="pl-close" onclick="togglePlaylist()">×</button>
+  </div>
+  <div class="pl-name-wrap">
+    <input class="pl-name-input" id="plNameInput" placeholder="플리 이름 (예: 새벽 드라이브 플리 🌙)" maxlength="30">
+  </div>
+  <div class="pl-list" id="plList">
+    <div class="pl-empty">
+      <div class="pl-empty-icon">🎵</div>
+      <div class="pl-empty-text">곡을 추가해보세요</div>
+    </div>
+  </div>
+  <div class="pl-footer">
+    <button class="pl-add-btn" onclick="openSearchForPlaylist()">＋ 곡 검색해서 추가하기</button>
+    <div class="pl-action-row">
+      <button class="pl-play-btn" onclick="playPlaylist()">▶ 전체 재생</button>
+      <button class="pl-share-btn" onclick="sharePlaylist()">📍 지도에 공유</button>
+    </div>
+  </div>
+</div>
+
+<!-- 다른 유저 플리 카드 -->
+<div id="plCard">
+  <div class="plc-header">
+    <div class="plc-icon-wrap" id="plcIconWrap"></div>
+    <div>
+      <div class="plc-name" id="plcName"></div>
+      <div class="plc-meta" id="plcMeta"></div>
+    </div>
+  </div>
+  <div class="plc-divider"></div>
+  <div class="plc-tracks" id="plcTracks"></div>
+  <div class="plc-footer">
+    <button class="plc-listen-btn" id="plcListenBtn">▶ 같이 듣기</button>
+    <button class="plc-close-btn" onclick="closePlCard()">닫기</button>
+  </div>
+</div>
 
 <!-- 검색 모달 -->
 <div id="searchOverlay" onclick="handleOverlayClick(event)">
@@ -464,20 +650,7 @@ let currentSong=null, myMarker=null;
 const markers=[], adMarkers=[];
 let searchTimer=null;
 
-// ══ 유튜브 IFrame API ══
-function onYouTubeIframeAPIReady(){
-  ytPlayer=new YT.Player('ytPlayer',{
-    height:'1',width:'1',
-    playerVars:{autoplay:0,controls:0},
-    events:{
-      onReady:()=>{ytReady=true;},
-      onStateChange:(e)=>{
-        if(e.data===YT.PlayerState.PLAYING){isPlaying=true;document.getElementById('playBtn').textContent='⏸';}
-        else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED){isPlaying=false;document.getElementById('playBtn').textContent='▶';}
-      }
-    }
-  });
-}
+// ══ 유튜브 IFrame API (하단에서 재정의됨) ══
 const ytScript=document.createElement('script');
 ytScript.src='https://www.youtube.com/iframe_api';
 document.head.appendChild(ytScript);
@@ -715,7 +888,7 @@ function stopAndClear(){
 
 function shareNow(){
   if(!currentSong) return;
-  const text=`🎵 noct에서 "${currentSong.title}" 듣는 중\n지금 이 도시의 음악을 지도에서 확인하세요 👉 hepick01.github.io/noct`;
+  const text=`🎵 noct에서 "${currentSong.title}" 듣는 중\n지금 이 도시의 음악을 지도에서 확인하세요 👉 noct.vercel.app`;
   if(navigator.share){navigator.share({title:'noct',text});}
   else{navigator.clipboard.writeText(text).then(()=>showToastMsg('📋 공유 텍스트가 복사됐어요!'));}
 }
@@ -779,6 +952,303 @@ setInterval(()=>{
   setTimeout(()=>document.getElementById('toast').classList.remove('show'),3200);
 },7000);
 setInterval(()=>{const b=CITIES[currentCity].count;document.getElementById('livenum').textContent=b+Math.floor((Math.random()-0.5)*8);},9000);
+
+// YT 상태 변경 이벤트 발생
+function onYouTubeIframeAPIReady(){
+  ytPlayer=new YT.Player('ytPlayer',{
+    height:'1',width:'1',
+    playerVars:{autoplay:0,controls:0},
+    events:{
+      onReady:()=>{ytReady=true;},
+      onStateChange:(e)=>{
+        if(e.data===YT.PlayerState.PLAYING){isPlaying=true;document.getElementById('playBtn').textContent='⏸';}
+        else if(e.data===YT.PlayerState.PAUSED){isPlaying=false;document.getElementById('playBtn').textContent='▶';}
+        else if(e.data===YT.PlayerState.ENDED){
+          isPlaying=false;document.getElementById('playBtn').textContent='▶';
+          if(plPlaying) playNextInPlaylist();
+        }
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════
+//  플레이리스트 기능
+// ════════════════════════════════════════
+let playlist = [];          // 내 플리 곡 목록
+let plCurrentIdx = -1;      // 현재 재생 인덱스
+let addingToPlaylist = false; // 검색 → 플리에 추가 모드
+let plMarkers = [];         // 공유된 플리 마커들
+let plPlaying = false;      // 플리 재생 중 여부
+
+// 공유된 가짜 플리 데이터 (다른 유저들)
+const SHARED_PLAYLISTS = [
+  {
+    id:'pl1', name:'새벽 드라이브 플리 🌙', emoji:'🌙',
+    color:'#a78bfa', district:'서면',
+    lng:129.0580, lat:35.1580,
+    tracks:[
+      {title:'밤편지',channel:'IU'},
+      {title:'Slow Dancing in the Dark',channel:'Joji'},
+      {title:'오래된 노래',channel:'혁오'},
+      {title:'After Hours',channel:'The Weeknd'},
+    ]
+  },
+  {
+    id:'pl2', name:'헬스 펌핑 🔥', emoji:'🔥',
+    color:'#f87171', district:'해운대',
+    lng:129.1600, lat:35.1600,
+    tracks:[
+      {title:'BLINDING LIGHTS',channel:'The Weeknd'},
+      {title:'Levitating',channel:'Dua Lipa'},
+      {title:'Attention',channel:'NewJeans'},
+    ]
+  },
+  {
+    id:'pl3', name:'봄날 감성 🌸', emoji:'🌸',
+    color:'#34d399', district:'광안리',
+    lng:129.1190, lat:35.1540,
+    tracks:[
+      {title:'봄날',channel:'BTS'},
+      {title:'Celebrity',channel:'IU'},
+      {title:'Golden Hour',channel:'JVKE'},
+      {title:'고마워',channel:'10CM'},
+    ]
+  },
+  {
+    id:'pl4', name:'감성 힙합 🎤', emoji:'🎤',
+    color:'#818cf8', district:'센텀시티',
+    lng:129.1300, lat:35.1700,
+    tracks:[
+      {title:'낙화',channel:'Epik High'},
+      {title:'LOVE DIVE',channel:'IVE'},
+    ]
+  },
+];
+
+// 플리 패널 열고 닫기
+function togglePlaylist(){
+  document.getElementById('plPanel').classList.toggle('open');
+}
+
+// 검색 → 플리 추가 모드
+function openSearchForPlaylist(){
+  addingToPlaylist = true;
+  openSearch();
+  document.getElementById('searchSheet').querySelector('.sheet-title').textContent = '🎧 플레이리스트에 추가할 곡 검색';
+}
+
+// 곡 선택 (기존 함수 확장)
+const _origSelectSong = selectSong;
+window.selectSong = function(videoId, title, channel, thumb){
+  if(addingToPlaylist){
+    addToPlaylist(videoId, title, channel, thumb);
+    addingToPlaylist = false;
+    document.getElementById('searchSheet').querySelector('.sheet-title').textContent = '🎵 지금 듣고 싶은 곡을 검색하세요';
+  } else {
+    _origSelectSong(videoId, title, channel, thumb);
+  }
+};
+
+// 플리에 곡 추가
+function addToPlaylist(videoId, title, channel, thumb){
+  if(playlist.find(s=>s.videoId===videoId)) {
+    closeSearch();
+    showToastMsg('이미 추가된 곡이에요!');
+    return;
+  }
+  playlist.push({videoId, title, channel, thumb});
+  closeSearch();
+  renderPlaylist();
+  showToastMsg('🎧 플리에 추가됐어요!');
+  document.getElementById('plPanel').classList.add('open');
+}
+
+// 플리 목록 렌더링
+function renderPlaylist(){
+  document.getElementById('plCount').textContent = playlist.length;
+  const list = document.getElementById('plList');
+  if(playlist.length === 0){
+    list.innerHTML = '<div class="pl-empty"><div class="pl-empty-icon">🎵</div><div class="pl-empty-text">곡을 추가해보세요</div></div>';
+    return;
+  }
+  list.innerHTML = playlist.map((s,i) => `
+    <div class="pl-item ${plCurrentIdx===i?'playing':''}" onclick="playFromIdx(${i})">
+      <span class="pl-item-num">${plCurrentIdx===i ? '▶' : i+1}</span>
+      ${s.thumb ? `<img class="pl-item-thumb" src="${s.thumb}" alt="">` : '<div class="pl-item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px">🎵</div>'}
+      <div class="pl-item-info">
+        <div class="pl-item-title">${s.title}</div>
+        <div class="pl-item-ch">${s.channel}</div>
+      </div>
+      <button class="pl-item-del" onclick="removeFromPlaylist(event,${i})">×</button>
+    </div>
+  `).join('');
+}
+
+// 플리에서 제거
+function removeFromPlaylist(e, idx){
+  e.stopPropagation();
+  playlist.splice(idx, 1);
+  if(plCurrentIdx >= playlist.length) plCurrentIdx = playlist.length - 1;
+  renderPlaylist();
+}
+
+// 특정 인덱스부터 재생
+function playFromIdx(idx){
+  plCurrentIdx = idx;
+  plPlaying = true;
+  const s = playlist[idx];
+  currentSong = s;
+  document.getElementById('playerTitle').textContent = s.title;
+  document.getElementById('playerChannel').textContent = s.channel + ' · ' + (idx+1) + '/' + playlist.length;
+  if(s.thumb) document.getElementById('playerThumb').src = s.thumb;
+  document.getElementById('miniPlayer').classList.add('open');
+  document.getElementById('livebadge').style.bottom = '168px';
+  document.getElementById('mainBtn').style.bottom = '168px';
+  document.getElementById('plBtn').style.bottom = '168px';
+  if(ytReady && ytPlayer){
+    ytPlayer.loadVideoById(s.videoId);
+    ytPlayer.playVideo();
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸';
+  }
+  placeMyMarker(s.title, s.thumb);
+  renderPlaylist();
+}
+
+// 전체 재생
+function playPlaylist(){
+  if(playlist.length === 0){ showToastMsg('곡을 먼저 추가해주세요!'); return; }
+  playFromIdx(0);
+}
+
+// 다음 곡 자동재생
+function playNextInPlaylist(){
+  if(!plPlaying || playlist.length === 0) return;
+  const next = plCurrentIdx + 1;
+  if(next < playlist.length){ playFromIdx(next); }
+  else { showToastMsg('🎧 플리가 끝났어요!'); plPlaying = false; plCurrentIdx = -1; renderPlaylist(); }
+}
+
+// 플리 지도에 공유
+function sharePlaylist(){
+  if(playlist.length === 0){ showToastMsg('곡을 먼저 추가해주세요!'); return; }
+  const name = document.getElementById('plNameInput').value.trim() || '나의 플레이리스트';
+  
+  // 내 위치에 플리 마커 생성
+  const city = CITIES[currentCity];
+  const lng = city.center[0] + (Math.random()-0.5)*0.008;
+  const lat = city.center[1] + (Math.random()-0.5)*0.006;
+  
+  const plData = {
+    id: 'my_pl', name, emoji:'🎧', color:'#c77dff',
+    district: city.name, lng, lat,
+    tracks: playlist.map(s=>({title:s.title, channel:s.channel})),
+    fullTracks: playlist,
+  };
+  
+  spawnPlMarker(plData, true);
+  showToastMsg('📍 플리가 지도에 공유됐어요!');
+  togglePlaylist();
+  
+  // 공유 텍스트
+  const text = `🎧 noct에서 "${name}" 플리 공유 중
+${playlist.slice(0,3).map(s=>'🎵 '+s.title).join('\n')}
+👉 hepick01.github.io/noct`;
+  setTimeout(()=>{
+    if(navigator.share){ navigator.share({title:'noct', text}); }
+    else { navigator.clipboard.writeText(text).then(()=>showToastMsg('📋 공유 텍스트 복사됐어요!')); }
+  }, 1000);
+}
+
+// 플리 마커 생성
+function spawnPlMarker(pl, isMe=false){
+  const el = document.createElement('div');
+  el.style.cssText = 'display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.7));animation:bbFloat 4s ease-in-out infinite;';
+  el.innerHTML = `
+    <div style="background:rgba(6,4,16,0.95);border:1px solid ${pl.color}55;border-radius:14px;padding:8px 12px;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:0 0 20px ${pl.color}22;min-width:130px;position:relative;">
+      ${isMe?'<div style="position:absolute;top:-9px;right:8px;background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:8px;padding:2px 7px;color:#fff;font-size:9px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">나</div>':''}
+      <span style="font-size:18px">${pl.emoji}</span>
+      <div>
+        <div style="color:#fff;font-size:11px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">${pl.name}</div>
+        <div style="color:rgba(255,255,255,0.35);font-size:10px;font-family:'Noto Sans KR',sans-serif;">${pl.tracks.length}곡 · ${pl.district}</div>
+      </div>
+    </div>
+    <div style="width:2px;height:20px;background:linear-gradient(to bottom,${pl.color}88,transparent)"></div>
+    <div style="width:7px;height:7px;border-radius:50%;background:${pl.color};box-shadow:0 0 10px ${pl.color}"></div>
+  `;
+  el.addEventListener('click', e=>{e.stopPropagation(); showPlCard(pl);});
+  const m = new mapboxgl.Marker({element:el,anchor:'bottom',offset:[0,-2]}).setLngLat([pl.lng,pl.lat]).addTo(map);
+  plMarkers.push(m);
+}
+
+// 공유된 플리 카드 표시
+function showPlCard(pl){
+  closeCard(); closeAdCard();
+  document.getElementById('plcIconWrap').style.background = pl.color+'22';
+  document.getElementById('plcIconWrap').style.border = '1px solid '+pl.color+'33';
+  document.getElementById('plcIconWrap').textContent = pl.emoji;
+  document.getElementById('plCard').style.borderColor = pl.color+'33';
+  document.getElementById('plcName').textContent = pl.name;
+  document.getElementById('plcMeta').textContent = pl.tracks.length+'곡 · '+pl.district;
+  document.getElementById('plcTracks').innerHTML = pl.tracks.map((t,i)=>`
+    <div class="plc-track-item">
+      <span class="plc-track-num">${i+1}</span>
+      <span class="plc-track-title">${t.title} — ${t.channel}</span>
+    </div>
+  `).join('');
+  const btn = document.getElementById('plcListenBtn');
+  btn.style.background = 'linear-gradient(135deg,'+pl.color+','+pl.color+'cc)';
+  btn.onclick = ()=>{
+    // fullTracks 있으면 실제 재생, 없으면 첫 곡만
+    if(pl.fullTracks && pl.fullTracks.length>0){
+      playlist = [...pl.fullTracks];
+      plCurrentIdx = -1;
+      renderPlaylist();
+      playFromIdx(0);
+      closePlCard();
+      showToastMsg('🎧 이 플리를 같이 듣고 있어요!');
+    } else {
+      showToastMsg('🎵 같이 듣기 시작!');
+    }
+  };
+  document.getElementById('plCard').classList.add('visible');
+}
+function closePlCard(){ document.getElementById('plCard').classList.remove('visible'); }
+
+// 공유된 플리 마커 스폰
+function spawnSharedPlaylists(cityKey){
+  plMarkers.forEach(m=>m.remove()); plMarkers=[];
+  const cityPls = cityKey==='busan' ? SHARED_PLAYLISTS : SHARED_PLAYLISTS.map(p=>({...p,district:'강남/홍대/성수/잠실'.split('/')[SHARED_PLAYLISTS.indexOf(p)%4]}));
+  cityPls.forEach(pl=>spawnPlMarker(pl));
+}
+
+// 플리 재생 중 곡 끝나면 자동으로 다음 곡
+const origOnStateChange = null;
+function setupPlAutoNext(){
+  if(!ytPlayer) return;
+  const origEvents = ytPlayer.getOptions ? ytPlayer : null;
+}
+
+// YT 상태 변경 훅 (자동 다음 곡)
+document.addEventListener('ytStateChange', (e)=>{
+  if(e.detail === 0 && plPlaying){ playNextInPlaylist(); }
+});
+
+// plBtn 위치 조정
+document.getElementById('plBtn').style.right = '180px';
+
+// 맵 로드 후 공유 플리 스폰
+map.on('load',()=>{
+  setTimeout(()=>spawnSharedPlaylists('busan'), 1500);
+});
+
+// flyTo에 플리 마커 추가
+const _origFlyTo = flyTo;
+flyTo = function(k,el){
+  _origFlyTo(k,el);
+  setTimeout(()=>spawnSharedPlaylists(k), 2000);
+};
 </script>
 </body>
 </html>
