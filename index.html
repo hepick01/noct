@@ -292,6 +292,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 @keyframes ro{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
 @keyframes gb{0%,100%{opacity:.1}50%{opacity:.35}}
 @keyframes myp{0%{box-shadow:0 0 0 0 rgba(199,125,255,.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}
+/* ambient text */
+#ambientText{position:fixed;bottom:160px;left:50%;transform:translateX(-50%);z-index:15;pointer-events:none;text-align:center;opacity:0;transition:opacity 2s ease;}
+#ambientText.visible{opacity:1;}
+.at-main{color:rgba(255,255,255,0.18);font-size:13px;font-weight:300;letter-spacing:0.15em;white-space:nowrap;}
+.at-sub{color:rgba(199,125,255,0.25);font-size:10px;font-weight:400;letter-spacing:0.2em;margin-top:4px;}
 /* 모바일 */
 @media(max-width:480px){.city-tabs{max-width:calc(100vw - 130px);}#songcard{left:12px;right:12px;width:auto;}#adcard{left:12px;right:12px;max-width:none;}.rbg{gap:4px;}.ib{padding:5px 9px;font-size:10px;}}
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
@@ -349,6 +354,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 <div id="miniPlayer"><div class="pi"><img class="pt" id="playerThumb" src="" alt=""><div class="pinfo"><div class="ptitle" id="playerTitle">곡을 선택해주세요</div><div class="pch" id="playerChannel">지도에 내 위치가 표시됩니다</div></div><div class="pctrl"><button id="playBtn" onclick="togglePlay()">▶</button><button class="cb" onclick="stopAndClear()">✕</button></div><button class="sbtn" onclick="generateShareCard()">공유 📤</button></div></div>
 <div id="songcard"><div class="cbg"></div><div class="cglow" id="cardGlow"></div><button class="cclose" onclick="closeCard()">×</button><div class="cinner"><div class="car"><img class="ca" id="cardcover" src="" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div id="cardcoverFallback" style="display:none;width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#c77dff33,#c77dff11);flex-shrink:0;align-items:center;justify-content:center;font-size:22px;">🎵</div><div class="ct"><div class="ctrack" id="cardtrack"></div><div class="cartist" id="cardartist"></div></div></div><div class="cmr" id="cardmoods"></div><div class="cf"><div class="floc"><div class="fdot" id="footerdot"></div><span class="ftxt" id="cardfooter"></span></div><span class="fago">방금 전</span></div></div></div>
 <div id="adcard"><button class="adcl" onclick="closeAdCard()">×</button><div class="adh" id="adhero"></div><div class="adb"><div class="adsp">✦ SPONSORED</div><div class="adt" id="adtitle"></div><div class="add" id="adsub"></div><button class="adcta" id="adcta"></button><div class="adstats"><div class="si"><div class="sn" id="s1n"></div><div class="sl2" id="s1l"></div></div><div class="si"><div class="sn" id="s2n"></div><div class="sl2" id="s2l"></div></div><div class="si"><div class="sn" id="s3n"></div><div class="sl2" id="s3l"></div></div></div></div></div>
+<div id="ambientText">
+  <div class="at-main" id="ambientMain">183 souls listening tonight</div>
+  <div class="at-sub" id="ambientSub">BUSAN · LIVE</div>
+</div>
 <div id="toast"><span class="tp">noct</span><span id="toastMsg" style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span></div>
 <div id="neighborAlert"><div style="width:7px;height:7px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;"></div><span style="color:rgba(255,255,255,.8);font-size:12px;font-weight:500;"><span id="neighborCount" style="color:#c77dff;font-weight:700;">0</span>명이 근처에서 같이 듣는 중</span></div>
 <div id="nickOverlay"><div id="nickBox"><div class="ne">🎵</div><div class="nt">noct에 오신 걸 환영해요</div><div class="ns">지도에 표시될 닉네임을 입력하세요</div><input id="nickInput" placeholder="닉네임 입력..." maxlength="10" onkeydown="if(event.key==='Enter')saveNick()"><button class="nb" onclick="saveNick()">시작하기 🚀</button></div></div>
@@ -879,6 +888,21 @@ function updateVibe(){
 }
 updateVibe();setInterval(updateVibe,60000);
 
+// Ambient text 업데이트
+function updateAmbientText(){
+  var cityNames={busan:'BUSAN',seoul:'SEOUL',daegu:'DAEGU',incheon:'INCHEON',gwangju:'GWANGJU'};
+  var cityName=document.getElementById('cityname').textContent.toUpperCase();
+  var count=document.getElementById('livenum').textContent;
+  var h=new Date().getHours();
+  var feels=['feels electric tonight','is alive with music','glows through the night','hums with melody','breathes music tonight'];
+  var feel=feels[Math.floor(Math.random()*feels.length)];
+  document.getElementById('ambientMain').textContent=count+' souls listening tonight';
+  document.getElementById('ambientSub').textContent=cityName+' · LIVE';
+  document.getElementById('ambientText').classList.add('visible');
+}
+setTimeout(updateAmbientText,5000);
+setInterval(updateAmbientText,15000);
+
 // ── 새벽 모드 ──
 function checkDawn(){
   var h=new Date().getHours(),isDawn=(h<5);
@@ -897,11 +921,50 @@ map.on('load',function(){
   map.addLayer({id:'bld-top',source:'composite','source-layer':'building',filter:['all',['==','extrude','true'],['>=','height',20]],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#2d1b69','fill-extrusion-height':['+',['get','height'],0.5],'fill-extrusion-base':['get','height'],'fill-extrusion-opacity':0.4}});
   map.setFog({color:'rgb(3,3,10)','high-color':'rgb(8,6,20)','horizon-blend':0.05,'space-color':'rgb(3,3,10)','star-intensity':0.6});
 
+  // 지도 텍스트 contrast 낮추기 (음악 불빛이 주인공)
+  map.getStyle().layers.forEach(function(layer){
+    if(layer.type==='symbol'){
+      try{
+        map.setPaintProperty(layer.id,'text-opacity',0.25);
+        map.setPaintProperty(layer.id,'icon-opacity',0.2);
+      }catch(e){}
+    }
+    if(layer.type==='line'&&layer.id.includes('road')){
+      try{map.setPaintProperty(layer.id,'line-opacity',0.15);}catch(e){}
+    }
+  });
+
+  // 서울 ambient glow 소스 추가
+  map.addSource('seoul-glow',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.9780,37.5665]},properties:{}}});
+  map.addLayer({id:'seoul-aura',source:'seoul-glow',type:'circle',paint:{
+    'circle-radius':['interpolate',['linear'],['zoom'],8,80,12,200,15,400],
+    'circle-color':'#7B68EE',
+    'circle-opacity':0.04,
+    'circle-blur':1,
+  }});
+  map.addLayer({id:'seoul-haze',source:'seoul-glow',type:'circle',paint:{
+    'circle-radius':['interpolate',['linear'],['zoom'],8,40,12,100,15,180],
+    'circle-color':'#c77dff',
+    'circle-opacity':0.06,
+    'circle-blur':1,
+  }});
+
   // 더미 마커 소스 (GPU 렌더링)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,8,12,16,15,22],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.14,15,0.2],'circle-blur':1}});
-  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,3,12,7,15,10],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.2,12,0.35,15,0.5],'circle-blur':0.4}});
-  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,1.5,12,3.5,15,5],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.95,15,1]}});
+  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],5],12,['*',['get','size'],11],15,['*',['get','size'],16]],
+    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.05,12,0.13,15,0.22],
+    'circle-blur':1.2}});
+  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2],12,['*',['get','size'],5],15,['*',['get','size'],7]],
+    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.5],
+    'circle-blur':0.5}});
+  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],0.8],12,['*',['get','size'],2.2],15,['*',['get','size'],3.2]],
+    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.65,12,0.9,15,1]}});
   map.addLayer({id:'dummy-label',source:'dummy',type:'symbol',minzoom:13,layout:{'text-field':['get','title'],'text-size':10,'text-anchor':'top','text-offset':[0,0.8],'text-font':['DIN Offc Pro Regular','Arial Unicode MS Regular']},paint:{'text-color':['get','color'],'text-opacity':0.7,'text-halo-color':'rgba(0,0,0,0.8)','text-halo-width':1}});
   map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color},p.district);});
   map.on('mouseenter','dummy-core',function(){map.getCanvas().style.cursor='pointer';});
@@ -943,7 +1006,7 @@ function startDrift(){if(driftActive)return;driftActive=true;doDrift();}
 function doDrift(){
   if(!driftActive)return;
   var c=CITIES[currentCity];
-  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.008,c.center[1]+(Math.random()-.5)*.005],bearing:c.bearing+(Math.random()-.5)*6,pitch:52+(Math.random()-.5)*8,duration:14000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
+  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:58+(Math.random()-.5)*8,duration:16000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
   driftTimer=setTimeout(doDrift,15000);
 }
 function stopDrift(){driftActive=false;clearTimeout(driftTimer);}
@@ -962,10 +1025,12 @@ setTimeout(runIntro,300);
 // ── GeoJSON 더미 ──
 function spawnDummy(k){
   var features=[],shuffled=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),idx=0;
-  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg':''}});}}
+  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;var sz=0.5+Math.random()*2.5;
+features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg':'',size:sz}});}}
   CITIES[k].spots.forEach(function(s){mf(s,Math.floor(2+Math.random()*4));});
   var ns=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),ni=0;
-  NATIONAL_SPOTS.forEach(function(s){var f=ns[ni%ns.length];ni++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',color:f.color,district:s.name}});});
+  NATIONAL_SPOTS.forEach(function(s){var f=ns[ni%ns.length];ni++;var nsz=0.4+Math.random()*1.8;
+features.push({type:'Feature',geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',color:f.color,district:s.name,thumb:f.vid?'https://i.ytimg.com/vi/'+f.vid+'/mqdefault.jpg':'',size:nsz}});});
   if(map.getSource('dummy'))map.getSource('dummy').setData({type:'FeatureCollection',features:features});
 }
 function spawnAdLayer(k){
