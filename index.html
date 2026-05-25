@@ -297,32 +297,10 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 @keyframes glowBreath{0%,100%{opacity:0.15}50%{opacity:0.3}}
 
 /* 내 마커 */
-.my-marker-wrap{
-  cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;
-  position:relative;
-}
-.my-nick-label{
-  background:linear-gradient(135deg,#c77dff,#7B68EE);
-  border-radius:8px;padding:3px 10px;margin-bottom:4px;
-  color:#fff;font-size:11px;font-weight:700;white-space:nowrap;
-  box-shadow:0 2px 12px #c77dff66;
-  max-width:100px;overflow:hidden;text-overflow:ellipsis;
-}
-.my-marker-dot{
-  width:20px;height:20px;border-radius:50%;
-  background:linear-gradient(135deg,#c77dff,#7B68EE);
-  box-shadow:0 0 0 0 #c77dff;
-  animation:myPulse 1.8s ease-out infinite;
-  position:relative;
-}
-.my-marker-dot::after{
-  content:"";position:absolute;inset:5px;border-radius:50%;
-  background:rgba(255,255,255,0.95);
-}
+/* 내 마커 펄스 */
 @keyframes myPulse{
-  0%{box-shadow:0 0 0 0 rgba(199,125,255,0.8);}
-  70%{box-shadow:0 0 0 18px rgba(199,125,255,0);}
+  0%{box-shadow:0 0 0 0 rgba(199,125,255,0.9);}
+  70%{box-shadow:0 0 0 20px rgba(199,125,255,0);}
   100%{box-shadow:0 0 0 0 rgba(199,125,255,0);}
 }
 
@@ -889,6 +867,7 @@ function getMyLocation(callback) {
         myLat = lat;
         if (myMarker) {
           myMarker.setLngLat([lng, lat]);
+          myMarker.getElement().style.transition = 'none';
         }
         if (currentSong) {
           upsertUser(lng, lat);
@@ -958,46 +937,82 @@ function placeMyMarker(title, thumb, lng, lat) {
 
   var label = myNick || '나';
 
-  // 마커 엘리먼트 생성
-  var wrap = document.createElement('div');
-  wrap.className = 'my-marker-wrap';
+  // ── 외부 컨테이너 (인라인 스타일만 사용)
+  var container = document.createElement('div');
+  container.style.cssText = [
+    'position:relative',
+    'display:flex',
+    'flex-direction:column',
+    'align-items:center',
+    'cursor:pointer',
+    'pointer-events:all',
+  ].join(';');
 
-  var nickEl = document.createElement('div');
-  nickEl.className = 'my-nick-label';
-  nickEl.textContent = label;
+  // ── 닉네임 라벨
+  var nick = document.createElement('div');
+  nick.textContent = label;
+  nick.style.cssText = [
+    'background:linear-gradient(135deg,#c77dff,#7B68EE)',
+    'color:#fff',
+    'font-size:11px',
+    'font-weight:700',
+    'font-family:sans-serif',
+    'padding:3px 10px',
+    'border-radius:8px',
+    'margin-bottom:5px',
+    'white-space:nowrap',
+    'box-shadow:0 2px 10px rgba(199,125,255,0.5)',
+    'max-width:100px',
+    'overflow:hidden',
+    'text-overflow:ellipsis',
+  ].join(';');
 
-  var dotEl = document.createElement('div');
-  dotEl.className = 'my-marker-dot';
+  // ── 메인 점 (펄스 애니메이션)
+  var dot = document.createElement('div');
+  dot.style.cssText = [
+    'width:22px',
+    'height:22px',
+    'border-radius:50%',
+    'background:linear-gradient(135deg,#c77dff,#7B68EE)',
+    'border:3px solid rgba(255,255,255,0.9)',
+    'box-shadow:0 0 0 0 rgba(199,125,255,0.9)',
+    'animation:myPulse 1.8s ease-out infinite',
+  ].join(';');
 
-  wrap.appendChild(nickEl);
-  wrap.appendChild(dotEl);
+  container.appendChild(nick);
+  container.appendChild(dot);
 
-  wrap.addEventListener('click', function(e) {
+  // ── 클릭 이벤트
+  container.addEventListener('click', function(e) {
     e.stopPropagation();
     if (!currentSong) return;
     document.getElementById('cardtrack').textContent = currentSong.title;
     document.getElementById('cardartist').textContent = currentSong.channel;
     document.getElementById('cardfooter').textContent = '내 위치';
     document.getElementById('footerdot').style.background = '#c77dff';
-    if (currentSong.thumb) {
-      document.getElementById('cardcover').src = currentSong.thumb;
-    }
+    if (currentSong.thumb) document.getElementById('cardcover').src = currentSong.thumb;
     document.getElementById('cardmoods').innerHTML =
-      '<span class="mood-tag" style="background:#c77dff18;border:1px solid #c77dff30;color:#c77dff">지금 듣는 중 🎵</span>';
+      '<span style="background:#c77dff18;border:1px solid #c77dff30;color:#c77dff;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:500;">지금 듣는 중 🎵</span>';
     document.getElementById('songcard').classList.add('visible');
   });
 
-  // Mapbox 마커 생성 — anchor:'bottom' 으로 dot 위치 정확히 맞춤
+  // ── Mapbox 마커 등록
   myMarker = new mapboxgl.Marker({
-    element: wrap,
+    element: container,
     anchor: 'bottom',
-    offset: [0, 0]
   })
   .setLngLat([lng, lat])
   .addTo(map);
 
-  // 내 위치로 지도 이동
-  map.flyTo({center: [lng, lat], zoom: 16, duration: 1500, pitch: 45});
+  // ── 내 위치로 지도 이동
+  map.flyTo({
+    center: [lng, lat],
+    zoom: 16,
+    pitch: 50,
+    duration: 1500,
+  });
+
+  showToast('📍 ' + label + ' 마커가 지도에 생성됐어요!');
 }
 
 // ── 내 위치로 이동 버튼 ──
