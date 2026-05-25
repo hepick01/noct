@@ -1470,18 +1470,50 @@ function selectPkg(n) {
   });
 }
 
-function submitApply() {
+async function submitApply() {
   var brand = document.getElementById('applyBrand').value.trim();
   var contact = document.getElementById('applyContact').value.trim();
+  var area = document.getElementById('applyArea').value.trim();
+  var pkgNames = {1:'Basic (월 30만원)', 2:'Premium (월 100만원)', 3:'Exclusive (월 300만원)'};
+
   if (!brand || !contact || selectedPkg === 0) {
     showToast('브랜드명, 연락처, 패키지를 모두 선택해주세요');
     return;
   }
-  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(1)').style.display = 'none';
-  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(2)').style.display = 'none';
-  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(3)').style.display = 'none';
-  document.getElementById('applySuccess').style.display = 'block';
-  showToast('🎉 광고 신청이 완료됐어요!');
+
+  var btn = document.querySelector('.apply-submit');
+  btn.textContent = '전송 중...';
+  btn.disabled = true;
+
+  try {
+    var res = await fetch('https://formspree.io/f/mjgzeadg', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify({
+        브랜드명: brand,
+        연락처: contact,
+        희망지역: area || '미입력',
+        패키지: pkgNames[selectedPkg],
+        신청시간: new Date().toLocaleString('ko-KR'),
+      })
+    });
+
+    if (res.ok) {
+      document.querySelectorAll('.pkg-card').forEach(function(el){ el.style.display='none'; });
+      document.querySelector('.apply-submit').style.display = 'none';
+      document.querySelectorAll('.apply-label, .apply-input').forEach(function(el){ el.style.display='none'; });
+      document.getElementById('applySuccess').style.display = 'block';
+      showToast('🎉 광고 신청이 완료됐어요!');
+    } else {
+      showToast('전송 실패했어요. 다시 시도해주세요.');
+      btn.textContent = '신청하기 🚀';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showToast('네트워크 오류. 다시 시도해주세요.');
+    btn.textContent = '신청하기 🚀';
+    btn.disabled = false;
+  }
 }
 
 // ── 닉네임 ──
