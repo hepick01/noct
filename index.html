@@ -77,12 +77,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 #visitorBadge{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;background:rgba(3,3,10,.7);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:5px 14px;color:rgba(255,255,255,.25);font-size:10px;white-space:nowrap;opacity:0;transition:opacity .5s;}
 #visitorBadge span{color:rgba(199,125,255,.6);font-weight:600;}
 /* 지도 검색 */
-#mapSearch{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:8px;background:rgba(6,4,16,.9);border:1px solid rgba(255,255,255,.1);border-radius:30px;padding:10px 16px;width:calc(100vw - 200px);max-width:300px;pointer-events:none;opacity:0;transition:opacity .5s;}
+#mapSearch{position:fixed;top:105px;left:16px;z-index:20;display:flex;align-items:center;gap:8px;background:rgba(6,4,16,.88);border:1px solid rgba(255,255,255,.1);border-radius:30px;padding:8px 14px;width:160px;pointer-events:none;opacity:0;transition:opacity .5s;}
 #mapSearch.visible{opacity:1;pointer-events:all;}
-#msi{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:inherit;}
+#msi{flex:1;background:none;border:none;outline:none;color:#fff;font-size:13px;font-family:inherit;width:0;min-width:0;}
 #msi::placeholder{color:rgba(255,255,255,.2);}
-#msr{position:fixed;bottom:158px;left:50%;transform:translateX(-50%);z-index:101;width:calc(100vw - 200px);max-width:300px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;display:none;pointer-events:all;}
-.msi-item{padding:11px 16px;cursor:pointer;color:rgba(255,255,255,.7);font-size:13px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;}
+#msr{position:fixed;top:148px;left:16px;z-index:101;width:220px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;display:none;pointer-events:all;box-shadow:0 8px 24px rgba(0,0,0,.6);}
+.msi-item{padding:10px 14px;cursor:pointer;color:rgba(255,255,255,.7);font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;}
 .msi-item:last-child{border-bottom:none;}
 /* 검색 오버레이 */
 #searchOverlay{position:fixed;inset:0;z-index:1000;background:rgba(3,3,10,.85);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -1118,7 +1118,12 @@ function getNearestRegion(lat,lng){
 }
 async function updateRegionCount(name,lat,lng){
   var seed=Math.abs(Math.floor(lat*100+lng*100))%200;
-  document.getElementById('cityname').textContent=name;document.getElementById('livenum').textContent=30+seed;
+  document.getElementById('cityname').textContent=name;
+  document.getElementById('livenum').textContent=30+seed;
+  // 감성 리포트 도시도 함께 업데이트
+  document.getElementById('reportCity').textContent=name;
+  // 리포트 열려있으면 내용도 갱신
+  if(reportVisible)renderReportByName(name);
   if(!db)return;
   try{var r=await db.from('live_users').select('id,lat,lng').gte('updated_at',new Date(Date.now()-300000).toISOString());if(!r.data)return;
     var nb=r.data.filter(function(u){if(!u.lat||!u.lng)return false;var dl=(u.lat-lat)*111320,dg=(u.lng-lng)*111320*Math.cos(lat*Math.PI/180);return Math.sqrt(dl*dl+dg*dg)<30000;});
@@ -1184,8 +1189,35 @@ async function renderVs(){
 
 // ── 리포트 ──
 function toggleReport(){reportVisible=!reportVisible;document.getElementById('reportPanel').classList.toggle('visible',reportVisible);document.getElementById('reportBtn').classList.toggle('active',reportVisible);if(reportVisible)renderReport();}
+
+// 지역 이름으로 가장 가까운 MOODS 데이터 찾기
+function getMoodsByName(name){
+  var cityMap={
+    '서울':'seoul','부산':'busan','대구':'daegu','인천':'incheon','광주':'gwangju',
+    '대전':'daejeon','수원':'seoul','성남':'seoul','분당':'seoul','고양':'seoul',
+    '일산':'seoul','용인':'seoul','부천':'seoul','안양':'seoul','화성':'seoul',
+    '동탄':'seoul','울산':'busan','창원':'busan','진주':'busan','거제':'busan',
+    '양산':'busan','포항':'daegu','경주':'daegu','구미':'daegu','안동':'daegu',
+    '전주':'gwangju','군산':'gwangju','여수':'gwangju','순천':'gwangju','목포':'gwangju',
+    '천안':'daejeon','청주':'daejeon','세종':'daejeon','아산':'daejeon',
+    '춘천':'chuncheon','원주':'chuncheon','강릉':'chuncheon','속초':'chuncheon',
+    '제주':'jeju','서귀포':'jeju',
+  };
+  for(var key in cityMap){if(name.includes(key))return MOODS[cityMap[key]]||MOODS.busan;}
+  return MOODS.busan;
+}
+
+function renderReportByName(name){
+  var data=getMoodsByName(name);
+  renderReportData(data);
+}
+
 function renderReport(){
   var data=MOODS[currentCity]||MOODS.busan;
+  renderReportData(data);
+}
+
+function renderReportData(data){
   document.getElementById('reportBars').innerHTML=data.map(function(m){return'<div class="rpbar"><div class="rpbn"><span class="rpbl">'+m.name+'</span><span class="rpbp">'+m.pct+'%</span></div><div class="rptrack"><div class="rpfill" style="width:0%;background:'+m.color+'" data-pct="'+m.pct+'%"></div></div></div>';}).join('');
   var s={busan:'오늘 부산은 새벽 감성이 지배적이에요.그리움과 감성적인 곡들이 많이 흘러요.',seoul:'오늘 서울은 트렌디한 팝이 주류예요.힙합과 R&B 비중이 높아요.',daegu:'오늘 대구는 감성 발라드가 가득해요.',incheon:'오늘 인천은 댄스팝이 강세예요.',gwangju:'오늘 광주는 인디 감성이 흘러요.'};
   document.getElementById('reportSummary').textContent=s[currentCity]||s.busan;
