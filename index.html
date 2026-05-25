@@ -189,7 +189,7 @@ box-shadow:0 16px 48px rgba(0,0,0,0.7);
 </div>
 </div>
 <!-- 인트로 화면 -->
-<div id="introScreen">
+<div id="introScreen" style="pointer-events:none;">
   <div class="intro-logo">noct</div>
   <div class="intro-sub">지금 이 도시의 음악</div>
   <div class="intro-count" id="introCount">
@@ -2234,6 +2234,9 @@ setInterval(function() {
 if (topVisible) renderTop();
 }, 30000);
 function runIntro() {
+var introEl = document.getElementById('introScreen');
+if (!introEl) return;
+introEl.style.pointerEvents = 'auto';
 var target = 183 + Math.floor(Math.random() * 50);
 var current = 0;
 var step = Math.ceil(target / 40);
@@ -2249,7 +2252,8 @@ document.querySelector('.top-right-btns').classList.add('visible');
 document.getElementById('livebadge').style.opacity = '1';
 document.getElementById('mainBtn').style.opacity = '1';
 setTimeout(function() {
-intro.style.display='none';
+intro.style.display = 'none';
+intro.style.pointerEvents = 'none';
 startCameraDrift();
 }, 1200);
 }, 3500);
