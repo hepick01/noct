@@ -14,7 +14,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="noct">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="data:application/json,{%22name%22:%22noct%22,%22short_name%22:%22noct%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%2303030a%22,%22theme_color%22:%22%23c77dff%22,%22icons%22:[{%22src%22:%22https://raw.githubusercontent.com/hepick01/noct/main/icon.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1970,11 +1969,9 @@ function createMarkerWithTooltip(song, spotName, lng, lat) {
 // 카카오톡 공유
 // ═══════════════════════════════════════
 function shareKakao() {
-  var text = currentSong
-    ? '🎵 noct에서 "' + currentSong.title + '" 듣는 중
-지금 이 도시의 음악을 지도에서 확인하세요 👉 hepick01.github.io/noct'
-    : '🎵 noct — 지금 이 도시의 음악을 3D 지도 위에서
-👉 hepick01.github.io/noct';
+  var line1 = currentSong ? '🎵 noct에서 "' + currentSong.title + '" 듣는 중' : '🎵 noct — 지금 이 도시의 음악을 3D 지도 위에서';
+  var line2 = '지금 이 도시의 음악을 지도에서 확인하세요 👉 hepick01.github.io/noct';
+  var text = line1 + String.fromCharCode(10) + line2;
 
   if (navigator.share) {
     navigator.share({
@@ -2123,8 +2120,8 @@ function shareDailyCard() {
   var text = document.getElementById('dailyText').textContent;
   var shareText = text + '
 
-🎵 noct — 지금 이 도시의 음악
-👉 hepick01.github.io/noct';
+' + '🎵 noct — 지금 이 도시의 음악' + '
+' + '👉 hepick01.github.io/noct';
   if (navigator.share) {
     navigator.share({title:'noct 오늘의 한 줄', text:shareText, url:'https://hepick01.github.io/noct'});
   } else {
