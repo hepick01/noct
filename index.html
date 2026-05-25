@@ -2063,42 +2063,28 @@ function dismissInstall() {
 // ═══════════════════════════════════════
 var DAILY_TEMPLATES = {
   busan: [
-    {emoji:'🌊', text:'오늘 부산은
-Joji가 지배했다'},
-    {emoji:'🌙', text:'새벽 3시 부산
-온 도시가 IU를 듣는다'},
-    {emoji:'🎸', text:'오늘 밤 부산
-혁오의 감성이 흘렀다'},
-    {emoji:'🚗', text:'광안리 야간 드라이브
-The Weeknd와 함께'},
+    {emoji:'🌊', text:'오늘 부산은 Joji가 지배했다'},
+    {emoji:'🌙', text:'새벽 3시 부산 온 도시가 IU를 듣는다'},
+    {emoji:'🎸', text:'오늘 밤 부산 혁오의 감성이 흘렀다'},
+    {emoji:'🚗', text:'광안리 야간 드라이브 The Weeknd와 함께'},
   ],
   seoul: [
-    {emoji:'🏙️', text:'오늘 서울은
-NewJeans가 장악했다'},
-    {emoji:'💜', text:'강남 새벽
-IVE의 멜로디가 울렸다'},
-    {emoji:'🎤', text:'홍대 밤거리
-Epik High의 감성'},
-    {emoji:'⚡', text:'오늘 서울
-The Weeknd가 빛났다'},
+    {emoji:'🏙️', text:'오늘 서울은 NewJeans가 장악했다'},
+    {emoji:'💜', text:'강남 새벽 IVE의 멜로디가 울렸다'},
+    {emoji:'🎤', text:'홍대 밤거리 Epik High의 감성'},
+    {emoji:'⚡', text:'오늘 서울 The Weeknd가 빛났다'},
   ],
   daegu: [
-    {emoji:'🍑', text:'오늘 대구는
-IU의 감성이 흘렀다'},
-    {emoji:'🌸', text:'대구의 봄날
-BTS와 함께했다'},
+    {emoji:'🍑', text:'오늘 대구는 IU의 감성이 흘렀다'},
+    {emoji:'🌸', text:'대구의 봄날 BTS와 함께했다'},
   ],
   incheon: [
-    {emoji:'✈️', text:'오늘 인천
-NewJeans가 날아올랐다'},
-    {emoji:'🌊', text:'인천 새벽
-IU의 밤편지가 울렸다'},
+    {emoji:'✈️', text:'오늘 인천 NewJeans가 날아올랐다'},
+    {emoji:'🌊', text:'인천 새벽 IU의 밤편지가 울렸다'},
   ],
   gwangju: [
-    {emoji:'🌿', text:'오늘 광주
-Epik High의 낙화가 흘렀다'},
-    {emoji:'🎵', text:'광주의 밤
-IU의 감성이 물들었다'},
+    {emoji:'🌿', text:'오늘 광주 Epik High의 낙화가 흘렀다'},
+    {emoji:'🎵', text:'광주의 밤 IU의 감성이 물들었다'},
   ],
 };
 
@@ -2118,10 +2104,7 @@ function closeDailyCard() {
 
 function shareDailyCard() {
   var text = document.getElementById('dailyText').textContent;
-  var shareText = text + '
-
-' + '🎵 noct — 지금 이 도시의 음악' + '
-' + '👉 hepick01.github.io/noct';
+  var shareText = text + '  ' + '🎵 noct — 지금 이 도시의 음악' + ' ' + '👉 hepick01.github.io/noct';
   if (navigator.share) {
     navigator.share({title:'noct 오늘의 한 줄', text:shareText, url:'https://hepick01.github.io/noct'});
   } else {
