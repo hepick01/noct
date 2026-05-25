@@ -733,32 +733,49 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   </div>
 </div>
 
-<!-- 부산 vs 서울 -->
+<!-- 도시 대결 -->
 <div id="vsPanel">
-  <div class="vs-title">⚔️ 부산 vs 서울 음악 취향</div>
+  <div class="vs-title">⚔️ 도시 음악 취향 대결</div>
+
+  <!-- 도시 선택 -->
+  <div style="display:flex;gap:6px;margin-bottom:14px;">
+    <div style="flex:1;">
+      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;">왼쪽 도시</div>
+      <select id="vsCity1" onchange="renderVs()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:7px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;">
+        <option value="busan">부산</option>
+        <option value="seoul">서울</option>
+        <option value="daegu">대구</option>
+        <option value="incheon">인천</option>
+        <option value="gwangju">광주</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:flex-end;padding-bottom:7px;color:rgba(255,255,255,0.3);font-size:16px;font-weight:700;">VS</div>
+    <div style="flex:1;">
+      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;">오른쪽 도시</div>
+      <select id="vsCity2" onchange="renderVs()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:7px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;">
+        <option value="busan">부산</option>
+        <option value="seoul" selected>서울</option>
+        <option value="daegu">대구</option>
+        <option value="incheon">인천</option>
+        <option value="gwangju">광주</option>
+      </select>
+    </div>
+  </div>
+
   <div class="vs-cities">
     <div class="vs-city">
-      <div class="vs-city-name" style="color:#60a5fa;">🌊 부산</div>
-      <div id="vsListBusan"></div>
+      <div class="vs-city-name" id="vsName1" style="color:#60a5fa;">🌊 부산</div>
+      <div id="vsList1"></div>
     </div>
-    <div class="vs-divider">VS</div>
-    <div class="vs-city">
-      <div class="vs-city-name" style="color:#c084fc;text-align:right;">서울 🏙️</div>
-      <div id="vsListSeoul"></div>
+    <div class="vs-divider"></div>
+    <div class="vs-city" style="align-items:flex-end;">
+      <div class="vs-city-name" id="vsName2" style="color:#c084fc;text-align:right;">서울 🏙️</div>
+      <div id="vsList2" style="text-align:right;"></div>
     </div>
   </div>
-  <div class="vs-bar-wrap">
-    <div class="vs-bar-label">
-      <span class="vs-bar-text">새벽 감성</span>
-      <span class="vs-bar-text">댄스/팝</span>
-    </div>
-    <div class="vs-bar"><div class="vs-bar-fill" id="vsBar1" style="background:#60a5fa;"></div></div>
-    <div class="vs-bar-label">
-      <span class="vs-bar-text">인디/감성</span>
-      <span class="vs-bar-text">힙합/R&B</span>
-    </div>
-    <div class="vs-bar"><div class="vs-bar-fill" id="vsBar2" style="background:#c084fc;"></div></div>
-  </div>
+
+  <div class="vs-bar-wrap" id="vsBarWrap"></div>
+  <div id="vsLiveTag" style="text-align:center;color:rgba(199,125,255,0.5);font-size:10px;margin-top:8px;"></div>
   <button class="vs-close" onclick="toggleVs()">닫기</button>
 </div>
 
@@ -1889,61 +1906,66 @@ function toggleVs() {
   if (vsVisible) renderVs();
 }
 async function renderVs() {
-  ['busan','seoul'].forEach(function(city) {
-    var el = document.getElementById('vsList' + (city === 'busan' ? 'Busan' : 'Seoul'));
-    el.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
-  });
+  var c1 = document.getElementById('vsCity1').value;
+  var c2 = document.getElementById('vsCity2').value;
+  var cityEmojis = {busan:'🌊',seoul:'🏙️',daegu:'🍑',incheon:'✈️',gwangju:'🌿'};
+  var colors1 = '#60a5fa', colors2 = '#c084fc';
 
+  document.getElementById('vsName1').textContent = (cityEmojis[c1]||'') + ' ' + (CITIES[c1]||{name:c1}).name;
+  document.getElementById('vsName2').textContent = (CITIES[c2]||{name:c2}).name + ' ' + (cityEmojis[c2]||'');
+  document.getElementById('vsList1').innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
+  document.getElementById('vsList2').innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
+
+  var isLive = false;
   for (var ci = 0; ci < 2; ci++) {
-    var city = ['busan','seoul'][ci];
-    var color = city === 'busan' ? '#60a5fa' : '#c084fc';
-    var el = document.getElementById('vsList' + (city === 'busan' ? 'Busan' : 'Seoul'));
+    var city = [c1, c2][ci];
+    var color = ci === 0 ? colors1 : colors2;
+    var elId = ci === 0 ? 'vsList1' : 'vsList2';
+    var el = document.getElementById(elId);
     var liveData = null;
 
     if (db) {
       try {
-        var fiveMinAgo = new Date(Date.now() - 60*60*1000).toISOString(); // 1시간
-        var result = await db.from('live_users')
-          .select('song_title, song_channel')
-          .eq('city', city)
-          .gte('updated_at', fiveMinAgo)
-          .not('song_title', 'is', null);
-
-        if (result.data && result.data.length > 0) {
+        var r = await db.from('live_users').select('song_title,song_channel')
+          .eq('city', city).gte('updated_at', new Date(Date.now()-3600000).toISOString())
+          .not('song_title','is',null);
+        if (r.data && r.data.length > 0) {
           var counts = {};
-          result.data.forEach(function(u) {
-            if (!u.song_title) return;
-            var key = u.song_title + '||' + (u.song_channel || '');
-            counts[key] = (counts[key] || 0) + 1;
-          });
-          liveData = Object.keys(counts).map(function(k) {
-            var p = k.split('||');
-            return {track:p[0], artist:p[1], count:counts[k]};
-          }).sort(function(a,b){ return b.count-a.count; }).slice(0,5);
+          r.data.forEach(function(u){ if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');counts[k]=(counts[k]||0)+1;} });
+          liveData = Object.keys(counts).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:counts[k]};})
+            .sort(function(a,b){return b.count-a.count;}).slice(0,5);
+          if (liveData.length > 0) isLive = true;
         }
-      } catch(e) {}
+      } catch(e){}
     }
 
-    var data = liveData || TOP5[city];
-    var isLive = !!liveData;
-
-    el.innerHTML = (isLive ? '<div style="color:' + color + ';font-size:9px;opacity:0.6;margin-bottom:4px;">🔴 LIVE</div>' : '') +
-      data.map(function(s, i) {
-        return '<div class="vs-track">' +
-          '<span class="vs-rank" style="color:' + color + '">' + (i+1) + '</span>' +
-          '<div class="vs-info">' +
-          '<div class="vs-name">' + s.track + '</div>' +
-          '<div class="vs-artist">' + s.artist + (s.count ? ' · ' + s.count + '명' : '') + '</div>' +
-          '</div></div>';
-      }).join('');
+    var data = liveData || (TOP5[city] || TOP5.busan);
+    el.innerHTML = data.map(function(s,i){
+      return '<div class="vs-track">'
+        +'<span class="vs-rank" style="color:'+color+'">'+(i+1)+'</span>'
+        +'<div class="vs-info"><div class="vs-name">'+s.track+'</div>'
+        +'<div class="vs-artist">'+s.artist+(s.count?' · '+s.count+'명':'')+'</div></div></div>';
+    }).join('');
   }
 
-  setTimeout(function() {
-    document.getElementById('vsBar1').style.width = '72%';
-    document.getElementById('vsBar2').style.width = '55%';
-  }, 200);
-}
+  document.getElementById('vsLiveTag').textContent = isLive ? '🔴 LIVE 데이터 반영 중' : '📊 기본 데이터';
 
+  // 무드 바 업데이트
+  var m1 = MOODS[c1]||MOODS.busan;
+  var m2 = MOODS[c2]||MOODS.busan;
+  var barHtml = '<div class="vs-bar-label"><span class="vs-bar-text">' + (CITIES[c1]||{name:c1}).name + ' 주요 감성</span></div>';
+  m1.slice(0,3).forEach(function(m){
+    barHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
+      +'<span style="color:rgba(255,255,255,0.4);font-size:10px;width:60px;flex-shrink:0;">'+m.name+'</span>'
+      +'<div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;">'
+      +'<div style="height:100%;border-radius:2px;background:'+m.color+';width:0%;transition:width 0.8s;" data-w="'+m.pct+'%"></div></div>'
+      +'<span style="color:'+m.color+';font-size:10px;width:28px;text-align:right;">'+m.pct+'%</span></div>';
+  });
+  document.getElementById('vsBarWrap').innerHTML = barHtml;
+  setTimeout(function(){
+    document.querySelectorAll('#vsBarWrap [data-w]').forEach(function(el){el.style.width=el.dataset.w;});
+  }, 100);
+}
 // ── 감성 리포트 ──
 function toggleReport() {
   reportVisible = !reportVisible;
@@ -2679,6 +2701,50 @@ function runIntro() {
 
 // 맵 로드 완료 후 인트로 시작
 
+
+// ═══════════════════════════════════════
+// 내 감성 분석
+// ═══════════════════════════════════════
+var MOOD_TYPES = [
+  {type:'🌙', name:'새벽 감성형', desc:'혼자만의 시간을 즐기는 타입이에요. 음악으로 감정을 정리하는 당신.', keywords:['밤편지','Ivy','Slow Dancing','After Hours','낙화','Through the Night','흰눈']},
+  {type:'⚡', name:'에너지 폭발형', desc:'활기찬 에너지로 하루를 채우는 타입. 음악이 당신의 원동력이에요.', keywords:['BLINDING','Dynamite','Attention','Levitating','Butter','Savage','Rollin']},
+  {type:'💜', name:'감성 인디형', desc:'남들이 모르는 좋은 음악을 아는 타입. 깊이 있는 감성을 가졌어요.', keywords:['혁오','오래된','DEAN','She','폴킴','적재','춤을 춰','나는 나비']},
+  {type:'🌸', name:'로맨틱 팝형', desc:'사랑스럽고 설레는 감성을 가진 타입. 음악으로 감정을 표현해요.', keywords:['LOVE DIVE','Celebrity','봄날','Golden Hour','Perfect','사랑인가봐','봄봄봄','소나기']},
+  {type:'🎤', name:'트렌드 리더형', desc:'항상 최신 음악을 빠르게 접하는 타입. 당신의 취향이 곧 트렌드예요.', keywords:['NewJeans','IVE','BTS','Olivia','Harry','drivers','ELEVEN','Peaches']},
+];
+
+function showMoodAnalysis() {
+  var history = JSON.parse(localStorage.getItem('noct_history') || '[]');
+  if (history.length === 0) {
+    showToast('🎵 먼저 곡을 들어보세요!');
+    return;
+  }
+  var scores = MOOD_TYPES.map(function(){ return 0; });
+  history.slice(0,20).forEach(function(item) {
+    MOOD_TYPES.forEach(function(type, i) {
+      type.keywords.forEach(function(kw) {
+        if (item.title && item.title.includes(kw)) scores[i] += 2;
+        if (item.channel && item.channel.includes(kw)) scores[i] += 1;
+      });
+    });
+  });
+  var maxIdx = scores.indexOf(Math.max.apply(null, scores));
+  if (Math.max.apply(null, scores) === 0) maxIdx = Math.floor(Math.random()*MOOD_TYPES.length);
+  var moodType = MOOD_TYPES[maxIdx];
+  document.getElementById('maType').textContent = moodType.type;
+  document.getElementById('maName').textContent = moodType.name;
+  document.getElementById('maDesc').textContent = moodType.desc;
+  document.getElementById('maTracks').innerHTML = history.slice(0,4).map(function(item){
+    return '<div class="ma-track-item">🎵 ' + item.title + ' — ' + item.channel + '</div>';
+  }).join('');
+  document.getElementById('moodAnalysis').classList.add('visible');
+  document.getElementById('moodBtn').classList.add('active');
+}
+
+function closeMoodAnalysis() {
+  document.getElementById('moodAnalysis').classList.remove('visible');
+  document.getElementById('moodBtn').classList.remove('active');
+}
 
 // ═══ 첫 접속 내 위치 자동이동 ═══
 function autoLocate() {
