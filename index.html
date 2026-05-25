@@ -18,8 +18,8 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;overflow:hidden;height:100dvh}#map{position:fixed;inset:0;width:100%;height:100%}#dawnOverlay{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(30,0,60,0.3),transparent,rgba(0,10,40,0.4));opacity:0;transition:opacity 2s}#dawnOverlay.active{opacity:1}#introScreen{position:fixed;inset:0;z-index:9999;background:#03030a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.2s ease;pointer-events:none;}
-#introScreen.fade-out{opacity:0;pointer-events:none;}
+<style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;overflow:hidden;height:100dvh}#map{position:fixed;inset:0;width:100%;height:100%}#dawnOverlay{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(30,0,60,0.3),transparent,rgba(0,10,40,0.4));opacity:0;transition:opacity 2s}#dawnOverlay.active{opacity:1}#introScreen{position:fixed;inset:0;z-index:9999;background:#03030a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s ease;pointer-events:none;}
+
 #vibestrip{position:fixed;top:0;left:0;right:0;z-index:200;height:2px;pointer-events:none;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);background-size:200% 100%;animation:rainbowSlide 6s linear infinite}@keyframes rainbowSlide{0%{background-position:0%}100%{background-position:200%}}.intro-logo{font-size:32px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:8px;opacity:0;animation:introFadeUp 0.8s ease 0.3s forwards;}
 .intro-sub{color:rgba(255,255,255,0.35);font-size:13px;margin-bottom:48px;opacity:0;animation:introFadeUp 0.8s ease 0.6s forwards;}
 .intro-count{color:#fff;font-size:22px;font-weight:700;text-align:center;line-height:1.6;opacity:0;animation:introFadeUp 0.8s ease 0.9s forwards;}
@@ -55,11 +55,28 @@ box-shadow:0 16px 48px rgba(0,0,0,0.7);
 .card-art-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
 .card-text{flex:1;min-width:0;}
 .card-mood-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
-@keyframes myPulse{0%{box-shadow:0 0 0 0 rgba(199,125,255,0.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}.mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}@media (max-width:480px){#topbar{padding:10px 12px 14px}.logo-text{font-size:15px}.tab{padding:4px 10px;font-size:11px}#vibebadge{top:62px;left:12px}.vibe-tag{font-size:10px;padding:3px 9px}.top-right-btns{top:62px;right:12px;gap:4px}.icon-btn{padding:5px 9px;font-size:10px}#livebadge{left:12px;bottom:88px;padding:8px 12px}.live-main{font-size:11px}#mainBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px}#myLocBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px}#songcard{left:12px;width:calc(100vw - 24px);max-width:none}#adcard{right:12px;width:calc(100vw - 24px);max-width:none}#togetherBadge{top:88px;left:12px}.top-right-btns .icon-btn span{display:none}.icon-btn-text{display:inline!important}#vsPanel{width:calc(100vw - 24px)}#reportPanel{width:calc(100vw - 24px)}#topPanel{width:190px}.history-header,.apply-header{padding:16px 14px 12px}#historyPanel,#adApplyPanel{width:min(300px,100vw);pointer-events:none}.player-inner{gap:8px}.player-title{font-size:12px}.share-btn{padding:5px 9px;font-size:10px}}.marker-tooltip{pointer-events:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(6,4,16,0.95);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px 10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:100}.marker-tooltip .tt-track{color:#fff;font-size:11px;font-weight:600;margin-bottom:2px}.marker-tooltip .tt-artist{color:rgba(255,255,255,0.4);font-size:10px}.noct-marker-wrap:hover .marker-tooltip{pointer-events:none;opacity:1}#visitorBadge{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(3,3,10,0.75);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px 14px;color:rgba(255,255,255,0.3);font-size:10px;white-space:nowrap;pointer-events:none}#visitorBadge span{color:rgba(199,125,255,0.6);font-weight:600}#installBanner{pointer-events:none;position:fixed;bottom:0;left:0;right:0;z-index:4000;background:linear-gradient(135deg,rgba(199,125,255,0.15),rgba(123,104,238,0.15));backdrop-filter:blur(10px);border-top:1px solid rgba(199,125,255,0.25);padding:14px 16px max(16px,env(safe-area-inset-bottom));display:none;align-items:center;gap:12px;transform:translateY(100%);transition:transform 0.35s}#installBanner.show{display:flex;transform:translateY(0)}.install-icon{font-size:28px;flex-shrink:0}.install-text{flex:1}.install-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:2px}.install-sub{color:rgba(255,255,255,0.4);font-size:11px}.install-btn{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}.install-close{background:none;border:none;color:rgba(255,255,255,0.3);font-size:20px;cursor:pointer;font-family:inherit;flex-shrink:0}#dailyCard{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);z-index:600;width:calc(100vw - 32px);max-width:340px;background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);border:1px solid rgba(199,125,255,0.2);border-radius:22px;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;text-align:center}#dailyCard.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}.daily-emoji{font-size:44px;margin-bottom:12px}.daily-title{color:rgba(255,255,255,0.4);font-size:11px;font-weight:500;letter-spacing:0.08em;margin-bottom:8px}.daily-text{color:#fff;font-size:17px;font-weight:700;line-height:1.5;margin-bottom:16px}.daily-share{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:12px;padding:11px 24px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:8px}.daily-close{background:rgba(255,255,255,0.06);border:none;border-radius:12px;padding:11px 18px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;font-family:inherit}#historyPanel.open{pointer-events:all}#adApplyPanel.open{pointer-events:all}#installBanner.show{pointer-events:all}#introScreen.active{pointer-events:auto}#miniPlayer.open{pointer-events:all}.logo{pointer-events:all}.city-tabs{pointer-events:all}</style>
+@keyframes myPulse{0%{box-shadow:0 0 0 0 rgba(199,125,255,0.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}.mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}@media (max-width:480px){#topbar{padding:10px 12px 14px}.logo-text{font-size:15px}.tab{padding:4px 10px;font-size:11px}#vibebadge{top:62px;left:12px}.vibe-tag{font-size:10px;padding:3px 9px}.top-right-btns{top:62px;right:12px;gap:4px}.icon-btn{padding:5px 9px;font-size:10px}#livebadge{left:12px;bottom:88px;padding:8px 12px}.live-main{font-size:11px}#mainBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px}#myLocBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px}#songcard{left:12px;width:calc(100vw - 24px);max-width:none}#adcard{right:12px;width:calc(100vw - 24px);max-width:none}#togetherBadge{top:88px;left:12px}.top-right-btns .icon-btn span{display:none}.icon-btn-text{display:inline!important}#vsPanel{width:calc(100vw - 24px)}#reportPanel{width:calc(100vw - 24px)}#topPanel{width:190px}.history-header,.apply-header{padding:16px 14px 12px}#historyPanel,#adApplyPanel{width:min(300px,100vw);pointer-events:none}.player-inner{gap:8px}.player-title{font-size:12px}.share-btn{padding:5px 9px;font-size:10px}}.marker-tooltip{pointer-events:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(6,4,16,0.95);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px 10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:100}.marker-tooltip .tt-track{color:#fff;font-size:11px;font-weight:600;margin-bottom:2px}.marker-tooltip .tt-artist{color:rgba(255,255,255,0.4);font-size:10px}.noct-marker-wrap:hover .marker-tooltip{pointer-events:none;opacity:1}#visitorBadge{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(3,3,10,0.75);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px 14px;color:rgba(255,255,255,0.3);font-size:10px;white-space:nowrap;pointer-events:none}#visitorBadge span{color:rgba(199,125,255,0.6);font-weight:600}#installBanner{pointer-events:none;position:fixed;bottom:0;left:0;right:0;z-index:4000;background:linear-gradient(135deg,rgba(199,125,255,0.15),rgba(123,104,238,0.15));backdrop-filter:blur(10px);border-top:1px solid rgba(199,125,255,0.25);padding:14px 16px max(16px,env(safe-area-inset-bottom));display:none;align-items:center;gap:12px;transform:translateY(100%);transition:transform 0.35s}#installBanner.show{display:flex;transform:translateY(0)}.install-icon{font-size:28px;flex-shrink:0}.install-text{flex:1}.install-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:2px}.install-sub{color:rgba(255,255,255,0.4);font-size:11px}.install-btn{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}.install-close{background:none;border:none;color:rgba(255,255,255,0.3);font-size:20px;cursor:pointer;font-family:inherit;flex-shrink:0}#dailyCard{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);z-index:600;width:calc(100vw - 32px);max-width:340px;background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);border:1px solid rgba(199,125,255,0.2);border-radius:22px;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;text-align:center}#dailyCard.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}.daily-emoji{font-size:44px;margin-bottom:12px}.daily-title{color:rgba(255,255,255,0.4);font-size:11px;font-weight:500;letter-spacing:0.08em;margin-bottom:8px}.daily-text{color:#fff;font-size:17px;font-weight:700;line-height:1.5;margin-bottom:16px}.daily-share{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:12px;padding:11px 24px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:8px}.daily-close{background:rgba(255,255,255,0.06);border:none;border-radius:12px;padding:11px 18px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;font-family:inherit}#historyPanel.open{pointer-events:all}#adApplyPanel.open{pointer-events:all}#installBanner.show{pointer-events:all}#miniPlayer.open{pointer-events:all}.logo{pointer-events:all}.city-tabs{pointer-events:all}#introScreen.fade-out{opacity:0;pointer-events:none;}.mapboxgl-canvas{pointer-events:all!important;touch-action:none!important;}.mapboxgl-canvas-container{pointer-events:all!important;}</style>
 </head>
 <body>
 /div>
 
+<!-- 인트로 화면 -->
+<div id="introScreen">
+  <div class="intro-logo">noct</div>
+  <div class="intro-sub">지금 이 도시의 음악</div>
+  <div class="intro-count" id="introCount">
+    지금 <span id="introCityName">전국</span>에서<br>
+    <span id="introNum">0</span>명이 음악을 듣고 있어요
+  </div>
+  <div class="intro-dots">
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+  </div>
+  <div class="intro-hint">글로우 점을 클릭하면 음악이 보여요</div>
+</div>
 <div id="dawnOverlay"></div>
 <div id="vibestrip"></div>
 <div id="map"></div>
@@ -188,8 +205,10 @@ box-shadow:0 16px 48px rgba(0,0,0,0.7);
 </div>
 </div>
 </div>
+
+
 <!-- 인트로 화면 -->
-<div id="introScreen" style="pointer-events:none;">
+<div id="introScreen">
   <div class="intro-logo">noct</div>
   <div class="intro-sub">지금 이 도시의 음악</div>
   <div class="intro-count" id="introCount">
@@ -205,7 +224,6 @@ box-shadow:0 16px 48px rgba(0,0,0,0.7);
   </div>
   <div class="intro-hint">글로우 점을 클릭하면 음악이 보여요</div>
 </div>
-
 <div id="dawnOverlay"></div>
 <div id="vibestrip"></div>
 <div id="map"></div>
@@ -960,6 +978,13 @@ pitch: CITIES.busan.pitch,
 bearing: CITIES.busan.bearing,
 antialias: true,
 });
+// map canvas 클릭/드래그 보장
+map.once('load', function() {
+  var canvas = map.getCanvas();
+  canvas.style.pointerEvents = 'all';
+  canvas.style.touchAction = 'none';
+});
+
 map.on('load', function() {
 var layers = map.getStyle().layers;
 var labelId = null;
@@ -2234,7 +2259,6 @@ if (topVisible) renderTop();
 function runIntro() {
 var introEl = document.getElementById('introScreen');
 if (!introEl) return;
-introEl.classList.add('active');
 var target = 183 + Math.floor(Math.random() * 50);
 var current = 0;
 var step = Math.ceil(target / 40);
@@ -2251,7 +2275,6 @@ document.getElementById('livebadge').style.opacity = '1';
 document.getElementById('mainBtn').style.opacity = '1';
 setTimeout(function() {
 intro.style.display = 'none';
-intro.classList.remove('active');
 startCameraDrift();
 }, 1200);
 }, 3500);
