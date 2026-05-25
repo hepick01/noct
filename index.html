@@ -2164,13 +2164,9 @@ async function showDailyCard() {
   var text;
   if (topTrack && totalUsers >= 3) {
     // 실제 데이터 기반
-    text = '오늘 ' + cityName + ' ' + timeWord + '
-' + topArtist + '의 ' + topTrack + '
-' + totalUsers + '명이 함께 들었다';
+    text = '오늘 ' + cityName + ' ' + timeWord + '' + topArtist + '의 ' + topTrack + '' + totalUsers + '명이 함께 들었다';
   } else if (topTrack) {
-    text = '오늘 ' + cityName + '
-' + topTrack + '
-' + (topArtist || '') + '의 감성';
+    text = '오늘 ' + cityName + '' + topTrack + '' + (topArtist || '') + '의 감성';
   } else {
     // 기본 템플릿
     var templates = DAILY_TEMPLATES[currentCity] || DAILY_TEMPLATES.busan;
