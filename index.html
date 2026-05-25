@@ -2006,17 +2006,27 @@ var vsSel1 = 'busan', vsSel2 = 'seoul';
 function buildVsDropdown(num) {
   var sel = num === 1 ? vsSel1 : vsSel2;
   var el = document.getElementById('vsDrop' + num);
-  var html = '';
+  el.innerHTML = '';
   VS_CITIES.forEach(function(group) {
-    html += '<div class="vs-drop-group">' + group.group + '</div>';
+    var groupEl = document.createElement('div');
+    groupEl.className = 'vs-drop-group';
+    groupEl.textContent = group.group;
+    el.appendChild(groupEl);
     group.cities.forEach(function(city) {
-      html += '<div class="vs-drop-item' + (city.key === sel ? ' selected' : '') + '" onclick="selectVsCity(' + num + ','' + city.key + '','' + city.name + '')">'
-        + '<span>' + city.emoji + '</span>'
-        + '<span>' + city.name + '</span>'
-        + '</div>';
+      var item = document.createElement('div');
+      item.className = 'vs-drop-item' + (city.key === sel ? ' selected' : '');
+      var eSpan = document.createElement('span');
+      eSpan.textContent = city.emoji;
+      var nSpan = document.createElement('span');
+      nSpan.textContent = city.name;
+      item.appendChild(eSpan);
+      item.appendChild(nSpan);
+      (function(k, n) {
+        item.addEventListener('click', function() { selectVsCity(num, k, n); });
+      })(city.key, city.name);
+      el.appendChild(item);
     });
   });
-  el.innerHTML = html;
 }
 
 function toggleVsDropdown(num) {
