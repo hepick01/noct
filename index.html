@@ -824,18 +824,12 @@ async function doSearch() {
 }
 
 // ── GPS 위치 가져오기 ──
-// GPS 상태
+// GPS 추적
 var gpsWatchId = null;
-var gpsReady = false; // 첫 위치 수신 여부
+var gpsReady = false;
 
-function getMyLocation(callback) {
-  if (!navigator.geolocation) {
-    var city = CITIES[currentCity];
-    callback(city.center[0], city.center[1]);
-    return;
-  }
-
-  // 기존 감시 중지
+function startGPSTracking() {
+  if (!navigator.geolocation) return;
   stopGPS();
   gpsReady = false;
 
@@ -843,50 +837,30 @@ function getMyLocation(callback) {
     function(pos) {
       var lng = pos.coords.longitude;
       var lat = pos.coords.latitude;
-      var accuracy = Math.round(pos.coords.accuracy);
+      var acc = Math.round(pos.coords.accuracy);
 
-      // 정확도 텍스트
-      var accText = accuracy < 15  ? '🟢 GPS 정확 (' + accuracy + 'm)' :
-                    accuracy < 50  ? '🟡 GPS 양호 (' + accuracy + 'm)' :
-                    accuracy < 150 ? '🟠 GPS 보통 (' + accuracy + 'm)' :
-                                     '🔴 GPS 잡는 중... (' + accuracy + 'm)';
+      myLng = lng;
+      myLat = lat;
 
+      // 마커 위치 이동
+      if (myMarker) {
+        myMarker.setLngLat([lng, lat]);
+        if (!gpsReady) {
+          // 첫 GPS 수신 시 지도 이동
+          gpsReady = true;
+          map.flyTo({center:[lng,lat], zoom:16, pitch:50, duration:1200});
+        }
+      }
+
+      // 정확도 표시
+      var accText = acc < 20 ? '🟢 GPS 정확' : acc < 100 ? '🟡 GPS 양호' : '🔴 GPS 잡는 중';
       if (currentSong) {
         document.getElementById('playerChannel').textContent = currentSong.channel + ' · ' + accText;
-      }
-
-      if (!gpsReady) {
-        // 첫 위치 수신 → 마커 생성
-        gpsReady = true;
-        myLng = lng;
-        myLat = lat;
-        callback(lng, lat);
-      } else {
-        // 이후 업데이트 → 마커 이동
-        myLng = lng;
-        myLat = lat;
-        if (myMarker) {
-          myMarker.setLngLat([lng, lat]);
-          myMarker.getElement().style.transition = 'none';
-        }
-        if (currentSong) {
-          upsertUser(lng, lat);
-        }
+        upsertUser(lng, lat);
       }
     },
-    function(err) {
-      if (!gpsReady) {
-        // GPS 실패 시 도시 중심으로 fallback
-        var city = CITIES[currentCity];
-        callback(city.center[0], city.center[1]);
-        showToast('위치 허용이 필요해요! 설정에서 위치를 허용해주세요.');
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    }
+    function() { /* GPS 실패 무시 - 이미 마커 있음 */ },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
   );
 }
 
@@ -919,15 +893,16 @@ function selectSong(videoId, title, channel, thumb) {
     document.getElementById('playBtn').textContent = '⏸';
   }
 
-  // GPS로 내 위치 가져오기
-  getMyLocation(function(lng, lat) {
-    myLng = lng;
-    myLat = lat;
-    placeMyMarker(title, thumb, lng, lat);
-    upsertUser(lng, lat);
-  });
-
+  // 1단계: GPS 기다리지 않고 즉시 마커 생성 (도시 중심)
+  var city = CITIES[currentCity];
+  myLng = city.center[0];
+  myLat = city.center[1];
+  placeMyMarker(title, thumb, myLng, myLat);
+  upsertUser(myLng, myLat);
   showToast('📍 내 음악이 지도에 표시됐어요!');
+
+  // 2단계: GPS 위치 오면 마커 이동 (백그라운드)
+  startGPSTracking();
 }
 
 // ── 내 마커 ──
@@ -939,45 +914,38 @@ function placeMyMarker(title, thumb, lng, lat) {
 
   // ── 외부 컨테이너 (인라인 스타일만 사용)
   var container = document.createElement('div');
-  container.style.cssText = [
-    'position:relative',
-    'display:flex',
-    'flex-direction:column',
-    'align-items:center',
-    'cursor:pointer',
-    'pointer-events:all',
-  ].join(';');
+  container.style.position = 'relative';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.alignItems = 'center';
+  container.style.cursor = 'pointer';
 
-  // ── 닉네임 라벨
+  // 닉네임 라벨
   var nick = document.createElement('div');
   nick.textContent = label;
-  nick.style.cssText = [
-    'background:linear-gradient(135deg,#c77dff,#7B68EE)',
-    'color:#fff',
-    'font-size:11px',
-    'font-weight:700',
-    'font-family:sans-serif',
-    'padding:3px 10px',
-    'border-radius:8px',
-    'margin-bottom:5px',
-    'white-space:nowrap',
-    'box-shadow:0 2px 10px rgba(199,125,255,0.5)',
-    'max-width:100px',
-    'overflow:hidden',
-    'text-overflow:ellipsis',
-  ].join(';');
+  nick.style.background = 'linear-gradient(135deg,#c77dff,#7B68EE)';
+  nick.style.color = '#fff';
+  nick.style.fontSize = '11px';
+  nick.style.fontWeight = '700';
+  nick.style.fontFamily = 'sans-serif';
+  nick.style.padding = '3px 10px';
+  nick.style.borderRadius = '8px';
+  nick.style.marginBottom = '5px';
+  nick.style.whiteSpace = 'nowrap';
+  nick.style.boxShadow = '0 2px 10px rgba(199,125,255,0.5)';
+  nick.style.maxWidth = '100px';
+  nick.style.overflow = 'hidden';
+  nick.style.textOverflow = 'ellipsis';
 
-  // ── 메인 점 (펄스 애니메이션)
+  // 메인 점
   var dot = document.createElement('div');
-  dot.style.cssText = [
-    'width:22px',
-    'height:22px',
-    'border-radius:50%',
-    'background:linear-gradient(135deg,#c77dff,#7B68EE)',
-    'border:3px solid rgba(255,255,255,0.9)',
-    'box-shadow:0 0 0 0 rgba(199,125,255,0.9)',
-    'animation:myPulse 1.8s ease-out infinite',
-  ].join(';');
+  dot.style.width = '22px';
+  dot.style.height = '22px';
+  dot.style.borderRadius = '50%';
+  dot.style.background = 'linear-gradient(135deg,#c77dff,#7B68EE)';
+  dot.style.border = '3px solid rgba(255,255,255,0.9)';
+  dot.style.boxShadow = '0 0 16px rgba(199,125,255,0.8)';
+  dot.style.animation = 'myPulse 1.8s ease-out infinite';
 
   container.appendChild(nick);
   container.appendChild(dot);
