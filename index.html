@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- noct v1779742732 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -1315,7 +1316,7 @@ async function updateHotBanner(){
 
 // ── 지도 검색 ──
 setTimeout(function(){Object.keys(CITIES).forEach(function(k){CITIES[k].spots.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});});NATIONAL_SPOTS.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});},2000);
-function handleMapSearch(){var q=document.getElementById('msi').value.trim();var res=document.getElementById('msr');if(!q){res.style.display='none';return;}var results=ALL_LOCATIONS.filter(function(l){return l.name.includes(q);}).slice(0,6);if(!results.length){res.style.display='none';return;}res.style.display='block';res.innerHTML=results.map(function(l){return'<div class="msi-item" onclick="flyToLoc('+l.lng+','+l.lat+',''+l.name+'')">📍 '+l.name+'</div>';}).join('');}
+function handleMapSearch(){var q=document.getElementById('msi').value.trim();var res=document.getElementById('msr');if(!q){res.style.display='none';return;}var results=ALL_LOCATIONS.filter(function(l){return l.name.includes(q);}).slice(0,6);if(!results.length){res.style.display='none';return;}res.style.display='block';res.innerHTML='';results.forEach(function(l){var item=document.createElement('div');item.className='msi-item';item.textContent='📍 '+l.name;(function(lng,lat,name){item.addEventListener('click',function(){flyToLoc(lng,lat,name);});})(l.lng,l.lat,l.name);res.appendChild(item);});}
 function flyToLoc(lng,lat,name){map.flyTo({center:[lng,lat],zoom:15,pitch:60,duration:1500});clearMapSearch();showToast('📍 '+name+'으로 이동했어요');}
 function clearMapSearch(){document.getElementById('msi').value='';document.getElementById('msr').style.display='none';}
 
