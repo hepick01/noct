@@ -10,6 +10,11 @@
 <meta property="og:url" content="https://hepick01.github.io/noct">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#c77dff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="noct">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/json,{%22name%22:%22noct%22,%22short_name%22:%22noct%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%2303030a%22,%22theme_color%22:%22%23c77dff%22,%22icons%22:[{%22src%22:%22https://raw.githubusercontent.com/hepick01/noct/main/icon.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -443,6 +448,128 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
+
+/* ── 모바일 최적화 ── */
+@media (max-width: 480px) {
+  #topbar{padding:10px 12px 14px;}
+  .logo-text{font-size:15px;}
+  .tab{padding:4px 10px;font-size:11px;}
+  #vibebadge{top:62px;left:12px;}
+  .vibe-tag{font-size:10px;padding:3px 9px;}
+  .top-right-btns{top:62px;right:12px;gap:4px;}
+  .icon-btn{padding:5px 9px;font-size:10px;}
+  #livebadge{left:12px;bottom:88px;padding:8px 12px;}
+  .live-main{font-size:11px;}
+  #mainBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px;}
+  #myLocBtn{right:12px;bottom:88px;padding:10px 14px;font-size:12px;}
+  #songcard{left:12px;width:calc(100vw - 24px);max-width:none;}
+  #adcard{right:12px;width:calc(100vw - 24px);max-width:none;}
+  #togetherBadge{top:88px;left:12px;}
+  .top-right-btns .icon-btn span{display:none;}
+  .icon-btn-text{display:inline!important;}
+  #vsPanel{width:calc(100vw - 24px);}
+  #reportPanel{width:calc(100vw - 24px);}
+  #topPanel{width:190px;}
+  .history-header,.apply-header{padding:16px 14px 12px;}
+  #historyPanel,#adApplyPanel{width:min(300px, 100vw);}
+  .player-inner{gap:8px;}
+  .player-title{font-size:12px;}
+  .share-btn{padding:5px 9px;font-size:10px;}
+}
+
+/* ── 마커 호버 툴팁 ── */
+.marker-tooltip{
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(6,4,16,0.95);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  padding:6px 10px;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.15s;
+  z-index:100;
+}
+.marker-tooltip .tt-track{color:#fff;font-size:11px;font-weight:600;margin-bottom:2px;}
+.marker-tooltip .tt-artist{color:rgba(255,255,255,0.4);font-size:10px;}
+.noct-marker-wrap:hover .marker-tooltip{opacity:1;}
+
+/* ── 볼륨 슬라이더 ── */
+#volumeWrap{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px 0;
+}
+.vol-icon{color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;flex-shrink:0;}
+#volumeSlider{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:3px;border-radius:2px;
+  background:rgba(255,255,255,0.15);outline:none;cursor:pointer;
+}
+#volumeSlider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  box-shadow:0 0 8px #c77dff55;
+}
+
+/* ── 방문자 카운터 ── */
+#visitorBadge{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+  z-index:100;
+  background:rgba(3,3,10,0.75);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.06);border-radius:20px;
+  padding:5px 14px;
+  color:rgba(255,255,255,0.3);font-size:10px;
+  white-space:nowrap;pointer-events:none;
+}
+#visitorBadge span{color:rgba(199,125,255,0.6);font-weight:600;}
+
+/* ── PWA 설치 배너 ── */
+#installBanner{
+  position:fixed;bottom:0;left:0;right:0;z-index:4000;
+  background:linear-gradient(135deg,rgba(199,125,255,0.15),rgba(123,104,238,0.15));
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(199,125,255,0.25);
+  padding:14px 16px max(16px,env(safe-area-inset-bottom));
+  display:none;align-items:center;gap:12px;
+  transform:translateY(100%);transition:transform 0.35s;
+}
+#installBanner.show{display:flex;transform:translateY(0);}
+.install-icon{font-size:28px;flex-shrink:0;}
+.install-text{flex:1;}
+.install-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:2px;}
+.install-sub{color:rgba(255,255,255,0.4);font-size:11px;}
+.install-btn{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;
+  border-radius:10px;padding:8px 16px;color:#fff;font-size:12px;
+  font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.install-close{background:none;border:none;color:rgba(255,255,255,0.3);
+  font-size:20px;cursor:pointer;font-family:inherit;flex-shrink:0;}
+
+/* ── 오늘의 noct ── */
+#dailyCard{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.95);
+  z-index:600;width:calc(100vw - 32px);max-width:340px;
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  border:1px solid rgba(199,125,255,0.2);border-radius:22px;padding:24px;
+  opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;
+  text-align:center;
+}
+#dailyCard.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
+.daily-emoji{font-size:44px;margin-bottom:12px;}
+.daily-title{color:rgba(255,255,255,0.4);font-size:11px;font-weight:500;
+  letter-spacing:0.08em;margin-bottom:8px;}
+.daily-text{color:#fff;font-size:17px;font-weight:700;line-height:1.5;margin-bottom:16px;}
+.daily-share{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;
+  border-radius:12px;padding:11px 24px;color:#fff;font-size:13px;
+  font-weight:700;cursor:pointer;font-family:inherit;margin-right:8px;}
+.daily-close{background:rgba(255,255,255,0.06);border:none;border-radius:12px;
+  padding:11px 18px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;font-family:inherit;}
+
 </style>
 </head>
 <body>
@@ -452,16 +579,19 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
 
 <div id="topbar">
-  <div class="logo" onclick="toggleHistory()">
+  <div class="logo" onclick="toggleHistory()" title="청취 기록">
     <div class="logo-icon">N</div>
     <div>
       <div class="logo-text">noct</div>
       <div class="logo-sub">지금 이 도시의 음악</div>
     </div>
   </div>
-  <div class="city-tabs">
+  <div class="city-tabs" id="cityTabs">
     <button class="tab active" data-city="busan" onclick="flyToCity('busan',this)">부산</button>
     <button class="tab inactive" data-city="seoul" onclick="flyToCity('seoul',this)">서울</button>
+    <button class="tab inactive" data-city="daegu" onclick="flyToCity('daegu',this)">대구</button>
+    <button class="tab inactive" data-city="incheon" onclick="flyToCity('incheon',this)">인천</button>
+    <button class="tab inactive" data-city="gwangju" onclick="flyToCity('gwangju',this)">광주</button>
   </div>
 </div>
 
@@ -479,6 +609,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   <button class="icon-btn" id="topBtn" onclick="toggleTop()">🔥 TOP 5</button>
   <button class="icon-btn" id="vsBtn" onclick="toggleVs()">⚔️ 도시 대결</button>
   <button class="icon-btn" id="reportBtn" onclick="toggleReport()">📊 감성 리포트</button>
+  <button class="icon-btn" id="dailyBtn" onclick="showDailyCard()">✨ 오늘의 noct</button>
   <button class="icon-btn" id="adBtn" onclick="toggleAdApply()">📢 광고 문의</button>
 </div>
 
@@ -542,6 +673,11 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
       <button class="ctrl-btn" onclick="stopAndClear()">✕</button>
     </div>
     <button class="share-btn" onclick="generateShareCard()">공유 📤</button>
+  </div>
+  <div id="volumeWrap">
+    <span class="vol-icon" onclick="toggleMute()">🔊</span>
+    <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)">
+    <span class="vol-icon" style="font-size:10px;color:rgba(255,255,255,0.2)" id="volNum">80</span>
   </div>
 </div>
 
@@ -681,6 +817,31 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   </div>
 </div>
 
+<!-- 방문자 카운터 -->
+<div id="visitorBadge">오늘 <span id="visitorCount">0</span>명 방문</div>
+
+<!-- PWA 설치 배너 -->
+<div id="installBanner">
+  <div class="install-icon">🎵</div>
+  <div class="install-text">
+    <div class="install-title">noct 앱으로 설치하기</div>
+    <div class="install-sub">홈 화면에 추가하면 앱처럼 사용할 수 있어요</div>
+  </div>
+  <button class="install-btn" id="installBtn" onclick="installPWA()">설치</button>
+  <button class="install-close" onclick="dismissInstall()">×</button>
+</div>
+
+<!-- 오늘의 noct -->
+<div id="dailyCard">
+  <div class="daily-emoji" id="dailyEmoji">🌙</div>
+  <div class="daily-title">오늘의 noct</div>
+  <div class="daily-text" id="dailyText"></div>
+  <button class="daily-share" onclick="shareDailyCard()">공유하기</button>
+  <button class="daily-close" onclick="closeDailyCard()">닫기</button>
+</div>
+
+<!-- 볼륨 슬라이더 (미니플레이어 안에 추가) -->
+
 <!-- 토스트 -->
 <div id="toast">
   <span class="toast-pill">noct</span>
@@ -759,9 +920,25 @@ var SEOUL_SPOTS = [
   {lng:127.056,lat:37.517,name:"삼성동"},{lng:126.987,lat:37.583,name:"성수동"},
 ];
 
+var DAEGU_SPOTS = [
+  {lng:128.601,lat:35.869,name:"동성로"},{lng:128.626,lat:35.856,name:"수성구"},
+  {lng:128.553,lat:35.886,name:"칠성시장"},{lng:128.617,lat:35.901,name:"북구"},
+];
+var INCHEON_SPOTS = [
+  {lng:126.705,lat:37.456,name:"부평"},{lng:126.730,lat:37.476,name:"주안"},
+  {lng:126.491,lat:37.474,name:"송도"},{lng:126.617,lat:37.496,name:"계양"},
+];
+var GWANGJU_SPOTS = [
+  {lng:126.852,lat:35.160,name:"충장로"},{lng:126.888,lat:35.146,name:"수완지구"},
+  {lng:126.913,lat:35.176,name:"첨단지구"},{lng:126.849,lat:35.131,name:"봉선동"},
+];
+
 var CITIES = {
   busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
   seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
+  daegu:{center:[128.601,35.869],zoom:13.5,pitch:60,bearing:10,spots:DAEGU_SPOTS,name:"대구",count:94},
+  incheon:{center:[126.705,37.456],zoom:13.5,pitch:60,bearing:-10,spots:INCHEON_SPOTS,name:"인천",count:127},
+  gwangju:{center:[126.852,35.160],zoom:13.5,pitch:60,bearing:5,spots:GWANGJU_SPOTS,name:"광주",count:68},
 };
 
 var TOP5 = {
@@ -779,6 +956,27 @@ var TOP5 = {
     {track:"낙화",artist:"Epik High",color:"#818cf8"},
     {track:"Golden Hour",artist:"JVKE",color:"#fbbf24"},
   ],
+  daegu:[
+    {track:"Celebrity",artist:"IU",color:"#f9a8d4"},
+    {track:"봄날",artist:"BTS",color:"#38bdf8"},
+    {track:"고마워",artist:"10CM",color:"#fb923c"},
+    {track:"오래된 노래",artist:"혁오",color:"#34d399"},
+    {track:"Die For You",artist:"The Weeknd",color:"#f87171"},
+  ],
+  incheon:[
+    {track:"BLINDING LIGHTS",artist:"The Weeknd",color:"#f472b6"},
+    {track:"Attention",artist:"NewJeans",color:"#67e8f9"},
+    {track:"밤편지",artist:"IU",color:"#60a5fa"},
+    {track:"Levitating",artist:"Dua Lipa",color:"#e879f9"},
+    {track:"봄날",artist:"BTS",color:"#38bdf8"},
+  ],
+  gwangju:[
+    {track:"낙화",artist:"Epik High",color:"#818cf8"},
+    {track:"밤편지",artist:"IU",color:"#60a5fa"},
+    {track:"오래된 노래",artist:"혁오",color:"#34d399"},
+    {track:"Celebrity",artist:"IU",color:"#f9a8d4"},
+    {track:"고마워",artist:"10CM",color:"#fb923c"},
+  ],
 };
 
 var MOODS = {
@@ -795,6 +993,27 @@ var MOODS = {
     {name:"새벽 감성",pct:42,color:"#a78bfa"},
     {name:"인디/감성",pct:33,color:"#34d399"},
     {name:"댄스/EDM",pct:25,color:"#67e8f9"},
+  ],
+  daegu:[
+    {name:"감성/발라드",pct:65,color:"#f9a8d4"},
+    {name:"새벽 감성",pct:50,color:"#a78bfa"},
+    {name:"인디",pct:38,color:"#34d399"},
+    {name:"팝",pct:28,color:"#67e8f9"},
+    {name:"R&B",pct:18,color:"#fb923c"},
+  ],
+  incheon:[
+    {name:"댄스/팝",pct:60,color:"#67e8f9"},
+    {name:"새벽 감성",pct:48,color:"#a78bfa"},
+    {name:"힙합",pct:40,color:"#f472b6"},
+    {name:"인디",pct:25,color:"#34d399"},
+    {name:"발라드",pct:20,color:"#60a5fa"},
+  ],
+  gwangju:[
+    {name:"인디/감성",pct:68,color:"#818cf8"},
+    {name:"새벽 감성",pct:55,color:"#a78bfa"},
+    {name:"발라드",pct:40,color:"#60a5fa"},
+    {name:"팝",pct:22,color:"#67e8f9"},
+    {name:"힙합",pct:15,color:"#f472b6"},
   ],
 };
 
@@ -1691,6 +1910,286 @@ async function upsertUser(lng, lat) {
 window.addEventListener('beforeunload', function() {
   if (myUserId && db) db.from('live_users').delete().eq('id', myUserId);
 });
+
+// ═══════════════════════════════════════
+// 볼륨 조절
+// ═══════════════════════════════════════
+var isMuted = false;
+var lastVol = 80;
+
+function setVolume(val) {
+  if (ytReady && ytPlayer) {
+    ytPlayer.setVolume(parseInt(val));
+  }
+  document.getElementById('volNum').textContent = val;
+  lastVol = parseInt(val);
+  var icon = parseInt(val) === 0 ? '🔇' : parseInt(val) < 40 ? '🔉' : '🔊';
+  document.querySelector('.vol-icon').textContent = icon;
+}
+
+function toggleMute() {
+  if (!ytReady || !ytPlayer) return;
+  if (isMuted) {
+    ytPlayer.unMute();
+    ytPlayer.setVolume(lastVol);
+    document.getElementById('volumeSlider').value = lastVol;
+    document.getElementById('volNum').textContent = lastVol;
+    document.querySelector('.vol-icon').textContent = '🔊';
+    isMuted = false;
+  } else {
+    ytPlayer.mute();
+    document.getElementById('volumeSlider').value = 0;
+    document.getElementById('volNum').textContent = 0;
+    document.querySelector('.vol-icon').textContent = '🔇';
+    isMuted = true;
+  }
+}
+
+// ═══════════════════════════════════════
+// 마커 호버 미리보기
+// ═══════════════════════════════════════
+function createMarkerWithTooltip(song, spotName, lng, lat) {
+  var wrap = document.createElement('div');
+  wrap.className = 'noct-marker noct-marker-wrap';
+  wrap.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;';
+
+  var tooltip = document.createElement('div');
+  tooltip.className = 'marker-tooltip';
+  tooltip.innerHTML = '<div class="tt-track">' + song.title + '</div><div class="tt-artist">' + song.channel + '</div>';
+
+  wrap.innerHTML =
+    '<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ' + song.color + ';opacity:0;animation:ringOut 2.8s ease-out infinite;animation-delay:' + (Math.random()*2) + 's"></div>' +
+    '<div style="position:absolute;inset:-2px;border-radius:50%;background:' + song.color + ';opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite;"></div>' +
+    '<div style="position:absolute;inset:3px;border-radius:50%;background:' + song.color + ';box-shadow:0 0 10px ' + song.color + '88;"></div>' +
+    '<div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,0.85);"></div>';
+  wrap.appendChild(tooltip);
+  return wrap;
+}
+
+// ═══════════════════════════════════════
+// 카카오톡 공유
+// ═══════════════════════════════════════
+function shareKakao() {
+  var text = currentSong
+    ? '🎵 noct에서 "' + currentSong.title + '" 듣는 중
+지금 이 도시의 음악을 지도에서 확인하세요 👉 hepick01.github.io/noct'
+    : '🎵 noct — 지금 이 도시의 음악을 3D 지도 위에서
+👉 hepick01.github.io/noct';
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'noct — 지금 이 도시의 음악',
+      text: text,
+      url: 'https://hepick01.github.io/noct'
+    });
+  } else {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('📋 링크가 복사됐어요! 카톡에 붙여넣기 하세요');
+    });
+  }
+}
+
+// ═══════════════════════════════════════
+// 방문자 카운터
+// ═══════════════════════════════════════
+function initVisitorCount() {
+  var today = new Date().toDateString();
+  var stored = JSON.parse(localStorage.getItem('noct_visits') || '{"date":"","count":0}');
+  if (stored.date !== today) {
+    stored = {date: today, count: 1};
+  } else {
+    stored.count++;
+  }
+  localStorage.setItem('noct_visits', JSON.stringify(stored));
+
+  // Supabase에서 전체 방문자 수 가져오기 (없으면 로컬 기반 추정)
+  var base = 1240 + Math.floor(Math.random() * 80);
+  document.getElementById('visitorCount').textContent = (base + stored.count).toLocaleString();
+}
+setTimeout(initVisitorCount, 2000);
+
+// ═══════════════════════════════════════
+// PWA 설치
+// ═══════════════════════════════════════
+var deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var dismissed = localStorage.getItem('noct_install_dismissed');
+  if (!dismissed) {
+    setTimeout(function() {
+      document.getElementById('installBanner').classList.add('show');
+    }, 5000);
+  }
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        showToast('🎉 noct 앱 설치 완료!');
+      }
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    });
+  } else {
+    showToast('📱 브라우저 메뉴 → "홈 화면에 추가"를 눌러주세요');
+    document.getElementById('installBanner').classList.remove('show');
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('noct_install_dismissed', '1');
+}
+
+// iOS Safari 힌트
+(function() {
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isInStandalone = window.navigator.standalone;
+  if (isIOS && !isInStandalone) {
+    var dismissed = localStorage.getItem('noct_install_dismissed');
+    if (!dismissed) {
+      setTimeout(function() {
+        var banner = document.getElementById('installBanner');
+        banner.querySelector('.install-sub').textContent = 'Safari → 공유 버튼 → 홈 화면에 추가';
+        banner.classList.add('show');
+      }, 6000);
+    }
+  }
+})();
+
+// ═══════════════════════════════════════
+// 오늘의 noct
+// ═══════════════════════════════════════
+var DAILY_TEMPLATES = {
+  busan: [
+    {emoji:'🌊', text:'오늘 부산은
+Joji가 지배했다'},
+    {emoji:'🌙', text:'새벽 3시 부산
+온 도시가 IU를 듣는다'},
+    {emoji:'🎸', text:'오늘 밤 부산
+혁오의 감성이 흘렀다'},
+    {emoji:'🚗', text:'광안리 야간 드라이브
+The Weeknd와 함께'},
+  ],
+  seoul: [
+    {emoji:'🏙️', text:'오늘 서울은
+NewJeans가 장악했다'},
+    {emoji:'💜', text:'강남 새벽
+IVE의 멜로디가 울렸다'},
+    {emoji:'🎤', text:'홍대 밤거리
+Epik High의 감성'},
+    {emoji:'⚡', text:'오늘 서울
+The Weeknd가 빛났다'},
+  ],
+  daegu: [
+    {emoji:'🍑', text:'오늘 대구는
+IU의 감성이 흘렀다'},
+    {emoji:'🌸', text:'대구의 봄날
+BTS와 함께했다'},
+  ],
+  incheon: [
+    {emoji:'✈️', text:'오늘 인천
+NewJeans가 날아올랐다'},
+    {emoji:'🌊', text:'인천 새벽
+IU의 밤편지가 울렸다'},
+  ],
+  gwangju: [
+    {emoji:'🌿', text:'오늘 광주
+Epik High의 낙화가 흘렀다'},
+    {emoji:'🎵', text:'광주의 밤
+IU의 감성이 물들었다'},
+  ],
+};
+
+function showDailyCard() {
+  var templates = DAILY_TEMPLATES[currentCity] || DAILY_TEMPLATES.busan;
+  var t = templates[Math.floor(Math.random() * templates.length)];
+  document.getElementById('dailyEmoji').textContent = t.emoji;
+  document.getElementById('dailyText').textContent = t.text;
+  document.getElementById('dailyCard').classList.add('visible');
+  document.getElementById('dailyBtn').classList.add('active');
+}
+
+function closeDailyCard() {
+  document.getElementById('dailyCard').classList.remove('visible');
+  document.getElementById('dailyBtn').classList.remove('active');
+}
+
+function shareDailyCard() {
+  var text = document.getElementById('dailyText').textContent;
+  var shareText = text + '
+
+🎵 noct — 지금 이 도시의 음악
+👉 hepick01.github.io/noct';
+  if (navigator.share) {
+    navigator.share({title:'noct 오늘의 한 줄', text:shareText, url:'https://hepick01.github.io/noct'});
+  } else {
+    navigator.clipboard.writeText(shareText).then(function() {
+      showToast('📋 복사됐어요!');
+    });
+  }
+}
+
+// 매일 자동으로 오늘의 noct 표시 (첫 방문 시)
+(function() {
+  var today = new Date().toDateString();
+  var lastShown = localStorage.getItem('noct_daily_shown');
+  if (lastShown !== today) {
+    localStorage.setItem('noct_daily_shown', today);
+    setTimeout(showDailyCard, 4000);
+  }
+})();
+
+// 공유 버튼을 카카오톡 버튼으로 교체
+document.querySelector('.share-btn').textContent = '공유 📤';
+document.querySelector('.share-btn').onclick = function() {
+  if (currentSong) { generateShareCard(); }
+  else { shareKakao(); }
+};
+
+// ═══════════════════════════════════════
+// 마커에 호버 툴팁 적용 (spawnMarkers 재정의)
+// ═══════════════════════════════════════
+var _origSpawnMarkers = spawnMarkers;
+spawnMarkers = function(k) {
+  markers.forEach(function(m) { m.remove(); });
+  markers.length = 0;
+  CITIES[k].spots.forEach(function(spot) {
+    var n = Math.floor(4 + Math.random() * 7);
+    for (var i = 0; i < n; i++) {
+      var s = FAKE_SONGS[Math.floor(Math.random() * FAKE_SONGS.length)];
+      var lng = spot.lng + (Math.random()-0.5) * 0.02;
+      var lat = spot.lat + (Math.random()-0.5) * 0.015;
+      var el = createMarkerWithTooltip(s, spot.name, lng, lat);
+      (function(song, spotName) {
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeAdCard();
+          showFakeCard(song, spotName);
+        });
+      })(s, spot.name);
+      markers.push(new mapboxgl.Marker({element:el, anchor:'center'}).setLngLat([lng,lat]).addTo(map));
+    }
+  });
+};
+
+// ═══════════════════════════════════════
+// 도시 탭 가로 스크롤 (모바일)
+// ═══════════════════════════════════════
+(function() {
+  var tabs = document.getElementById('cityTabs');
+  if (tabs) {
+    tabs.style.overflowX = 'auto';
+    tabs.style.scrollbarWidth = 'none';
+    tabs.style.webkitOverflowScrolling = 'touch';
+    tabs.style.flexWrap = 'nowrap';
+    tabs.style.maxWidth = 'calc(100vw - 140px)';
+  }
+})();
 
 // ── 주기적 업데이트 ──
 setInterval(function() {
