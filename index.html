@@ -497,23 +497,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .marker-tooltip .tt-artist{color:rgba(255,255,255,0.4);font-size:10px;}
 .noct-marker-wrap:hover .marker-tooltip{opacity:1;}
 
-/* ── 볼륨 슬라이더 ── */
-#volumeWrap{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 16px 0;
-}
-.vol-icon{color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;flex-shrink:0;}
-#volumeSlider{
-  flex:1;-webkit-appearance:none;appearance:none;
-  height:3px;border-radius:2px;
-  background:rgba(255,255,255,0.15);outline:none;cursor:pointer;
-}
-#volumeSlider::-webkit-slider-thumb{
-  -webkit-appearance:none;appearance:none;
-  width:14px;height:14px;border-radius:50%;
-  background:linear-gradient(135deg,#c77dff,#7B68EE);
-  box-shadow:0 0 8px #c77dff55;
-}
+
 
 /* ── 방문자 카운터 ── */
 #visitorBadge{
@@ -673,11 +657,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
     </div>
     <button class="share-btn" onclick="generateShareCard()">공유 📤</button>
   </div>
-  <div id="volumeWrap">
-    <span class="vol-icon" onclick="toggleMute()">🔊</span>
-    <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="setVolume(this.value)">
-    <span class="vol-icon" style="font-size:10px;color:rgba(255,255,255,0.2)" id="volNum">80</span>
-  </div>
+
 </div>
 
 <!-- 곡 카드 -->
@@ -1556,16 +1536,59 @@ function toggleTop() {
   document.getElementById('topBtn').classList.toggle('active', topVisible);
   if (topVisible) renderTop();
 }
-function renderTop() {
-  var data = TOP5[currentCity] || TOP5.busan;
-  document.getElementById('topList').innerHTML = data.map(function(s, i) {
-    return '<div class="top-item">' +
-      '<span class="top-rank">' + (i+1) + '</span>' +
-      '<div class="top-info">' +
-      '<div class="top-track">' + s.track + '</div>' +
-      '<div class="top-artist">' + s.artist + '</div>' +
-      '</div></div>';
-  }).join('');
+
+async function renderTop() {
+  var list = document.getElementById('topList');
+  list.innerHTML = '<div style="color:rgba(255,255,255,0.25);font-size:11px;padding:8px 0;">불러오는 중...</div>';
+
+  // DB에서 실시간 집계 시도
+  var liveData = null;
+  if (db) {
+    try {
+      var fiveMinAgo = new Date(Date.now() - 30*60*1000).toISOString(); // 30분 기준
+      var result = await db.from('live_users')
+        .select('song_title, song_channel')
+        .eq('city', currentCity)
+        .gte('updated_at', fiveMinAgo)
+        .not('song_title', 'is', null);
+
+      if (result.data && result.data.length > 0) {
+        // 곡별 카운트 집계
+        var counts = {};
+        result.data.forEach(function(u) {
+          if (!u.song_title) return;
+          var key = u.song_title + '||' + (u.song_channel || '');
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        // 정렬
+        var sorted = Object.keys(counts).map(function(k) {
+          var parts = k.split('||');
+          return {track: parts[0], artist: parts[1], count: counts[k]};
+        }).sort(function(a, b) { return b.count - a.count; }).slice(0, 5);
+
+        if (sorted.length > 0) liveData = sorted;
+      }
+    } catch(e) {}
+  }
+
+  // 실시간 데이터 없으면 기본 데이터 사용
+  var data = liveData
+    ? liveData.map(function(s) { return {track:s.track, artist:s.artist, color:'#c77dff', count:s.count}; })
+    : (TOP5[currentCity] || TOP5.busan);
+
+  var isLive = !!liveData;
+
+  list.innerHTML = (isLive ? '<div style="color:rgba(199,125,255,0.5);font-size:9px;margin-bottom:8px;letter-spacing:0.05em;">🔴 LIVE 집계 · 최근 30분</div>' : '<div style="color:rgba(255,255,255,0.2);font-size:9px;margin-bottom:8px;">📊 기본 데이터</div>') +
+    data.map(function(s, i) {
+      var colors = ["#60a5fa","#c084fc","#f87171","#34d399","#fbbf24"];
+      var color = s.color || colors[i];
+      return '<div class="top-item">' +
+        '<span class="top-rank" style="color:' + color + '">' + (i+1) + '</span>' +
+        '<div class="top-info">' +
+        '<div class="top-track">' + s.track + '</div>' +
+        '<div class="top-artist">' + s.artist + (s.count ? ' · ' + s.count + '명' : '') + '</div>' +
+        '</div></div>';
+    }).join('');
 }
 
 // ── 부산 vs 서울 ──
@@ -1575,19 +1598,56 @@ function toggleVs() {
   document.getElementById('vsBtn').classList.toggle('active', vsVisible);
   if (vsVisible) renderVs();
 }
-function renderVs() {
+async function renderVs() {
   ['busan','seoul'].forEach(function(city) {
-    var data = TOP5[city];
     var el = document.getElementById('vsList' + (city === 'busan' ? 'Busan' : 'Seoul'));
-    el.innerHTML = data.map(function(s, i) {
-      return '<div class="vs-track">' +
-        '<span class="vs-rank" style="color:' + (city==='busan'?'#60a5fa':'#c084fc') + '">' + (i+1) + '</span>' +
-        '<div class="vs-info">' +
-        '<div class="vs-name">' + s.track + '</div>' +
-        '<div class="vs-artist">' + s.artist + '</div>' +
-        '</div></div>';
-    }).join('');
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
   });
+
+  for (var ci = 0; ci < 2; ci++) {
+    var city = ['busan','seoul'][ci];
+    var color = city === 'busan' ? '#60a5fa' : '#c084fc';
+    var el = document.getElementById('vsList' + (city === 'busan' ? 'Busan' : 'Seoul'));
+    var liveData = null;
+
+    if (db) {
+      try {
+        var fiveMinAgo = new Date(Date.now() - 60*60*1000).toISOString(); // 1시간
+        var result = await db.from('live_users')
+          .select('song_title, song_channel')
+          .eq('city', city)
+          .gte('updated_at', fiveMinAgo)
+          .not('song_title', 'is', null);
+
+        if (result.data && result.data.length > 0) {
+          var counts = {};
+          result.data.forEach(function(u) {
+            if (!u.song_title) return;
+            var key = u.song_title + '||' + (u.song_channel || '');
+            counts[key] = (counts[key] || 0) + 1;
+          });
+          liveData = Object.keys(counts).map(function(k) {
+            var p = k.split('||');
+            return {track:p[0], artist:p[1], count:counts[k]};
+          }).sort(function(a,b){ return b.count-a.count; }).slice(0,5);
+        }
+      } catch(e) {}
+    }
+
+    var data = liveData || TOP5[city];
+    var isLive = !!liveData;
+
+    el.innerHTML = (isLive ? '<div style="color:' + color + ';font-size:9px;opacity:0.6;margin-bottom:4px;">🔴 LIVE</div>' : '') +
+      data.map(function(s, i) {
+        return '<div class="vs-track">' +
+          '<span class="vs-rank" style="color:' + color + '">' + (i+1) + '</span>' +
+          '<div class="vs-info">' +
+          '<div class="vs-name">' + s.track + '</div>' +
+          '<div class="vs-artist">' + s.artist + (s.count ? ' · ' + s.count + '명' : '') + '</div>' +
+          '</div></div>';
+      }).join('');
+  }
+
   setTimeout(function() {
     document.getElementById('vsBar1').style.width = '72%';
     document.getElementById('vsBar2').style.width = '55%';
@@ -1910,39 +1970,7 @@ window.addEventListener('beforeunload', function() {
   if (myUserId && db) db.from('live_users').delete().eq('id', myUserId);
 });
 
-// ═══════════════════════════════════════
-// 볼륨 조절
-// ═══════════════════════════════════════
-var isMuted = false;
-var lastVol = 80;
 
-function setVolume(val) {
-  if (ytReady && ytPlayer) {
-    ytPlayer.setVolume(parseInt(val));
-  }
-  document.getElementById('volNum').textContent = val;
-  lastVol = parseInt(val);
-  var icon = parseInt(val) === 0 ? '🔇' : parseInt(val) < 40 ? '🔉' : '🔊';
-  document.querySelector('.vol-icon').textContent = icon;
-}
-
-function toggleMute() {
-  if (!ytReady || !ytPlayer) return;
-  if (isMuted) {
-    ytPlayer.unMute();
-    ytPlayer.setVolume(lastVol);
-    document.getElementById('volumeSlider').value = lastVol;
-    document.getElementById('volNum').textContent = lastVol;
-    document.querySelector('.vol-icon').textContent = '🔊';
-    isMuted = false;
-  } else {
-    ytPlayer.mute();
-    document.getElementById('volumeSlider').value = 0;
-    document.getElementById('volNum').textContent = 0;
-    document.querySelector('.vol-icon').textContent = '🔇';
-    isMuted = true;
-  }
-}
 
 // ═══════════════════════════════════════
 // 마커 호버 미리보기
@@ -2088,13 +2116,71 @@ var DAILY_TEMPLATES = {
   ],
 };
 
-function showDailyCard() {
-  var templates = DAILY_TEMPLATES[currentCity] || DAILY_TEMPLATES.busan;
-  var t = templates[Math.floor(Math.random() * templates.length)];
-  document.getElementById('dailyEmoji').textContent = t.emoji;
-  document.getElementById('dailyText').textContent = t.text;
+async function showDailyCard() {
   document.getElementById('dailyCard').classList.add('visible');
   document.getElementById('dailyBtn').classList.add('active');
+  document.getElementById('dailyText').textContent = '생성 중...';
+  document.getElementById('dailyEmoji').textContent = '🎵';
+
+  var cityName = CITIES[currentCity].name;
+  var topTrack = null;
+  var topArtist = null;
+  var totalUsers = 0;
+
+  // DB에서 오늘 가장 많이 들은 곡 집계
+  if (db) {
+    try {
+      var todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      var result = await db.from('live_users')
+        .select('song_title, song_channel')
+        .eq('city', currentCity)
+        .gte('updated_at', todayStart.toISOString())
+        .not('song_title', 'is', null);
+
+      if (result.data && result.data.length > 0) {
+        totalUsers = result.data.length;
+        var counts = {};
+        result.data.forEach(function(u) {
+          if (!u.song_title) return;
+          var key = u.song_title + '||' + (u.song_channel || '');
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; })[0];
+        if (top) {
+          var parts = top.split('||');
+          topTrack = parts[0];
+          topArtist = parts[1];
+        }
+      }
+    } catch(e) {}
+  }
+
+  var h = new Date().getHours();
+  var timeWord = h >= 0 && h < 5 ? '새벽' : h < 12 ? '오전' : h < 18 ? '오후' : '밤';
+  var emojis = ['🌙','🎵','🌊','🏙️','✨','🎸','💜','⚡'];
+  var emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+  var text;
+  if (topTrack && totalUsers >= 3) {
+    // 실제 데이터 기반
+    text = '오늘 ' + cityName + ' ' + timeWord + '
+' + topArtist + '의 ' + topTrack + '
+' + totalUsers + '명이 함께 들었다';
+  } else if (topTrack) {
+    text = '오늘 ' + cityName + '
+' + topTrack + '
+' + (topArtist || '') + '의 감성';
+  } else {
+    // 기본 템플릿
+    var templates = DAILY_TEMPLATES[currentCity] || DAILY_TEMPLATES.busan;
+    var t = templates[Math.floor(Math.random() * templates.length)];
+    emoji = t.emoji;
+    text = t.text;
+  }
+
+  document.getElementById('dailyEmoji').textContent = emoji;
+  document.getElementById('dailyText').textContent = text;
 }
 
 function closeDailyCard() {
@@ -2180,6 +2266,11 @@ setInterval(function() {
   document.getElementById('livenum').textContent =
     CITIES[currentCity].count + Math.floor((Math.random()-0.5)*8);
 }, 13000);
+
+// TOP5 30초마다 자동 갱신
+setInterval(function() {
+  if (topVisible) renderTop();
+}, 30000);
 
 // CSS 애니메이션 (인라인 마커용)
 var style = document.createElement('style');
