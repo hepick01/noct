@@ -65,6 +65,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .together-count{color:#c77dff;font-weight:700;}
 
 #livebadge{position:fixed;bottom:100px;left:16px;z-index:100;
+  opacity:0;transition:opacity 0.8s ease;
   background:rgba(3,3,10,0.82);backdrop-filter:blur(20px);
   border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;
   display:flex;flex-direction:column;gap:4px;}
@@ -81,7 +82,8 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:14px;
   padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:8px;
   font-size:13px;font-weight:700;color:white;font-family:inherit;
-  box-shadow:0 6px 24px #c77dff44;transition:transform 0.15s;}
+  box-shadow:0 6px 24px #c77dff44;
+  opacity:0;transition:transform 0.15s,opacity 0.8s ease;}
 #mainBtn:active{transform:scale(0.96);}
 
 #myLocBtn{position:fixed;bottom:100px;right:16px;z-index:100;
@@ -93,7 +95,17 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 @keyframes myBtnPulse{0%,100%{box-shadow:0 4px 20px rgba(199,125,255,0.35)}50%{box-shadow:0 4px 28px rgba(199,125,255,0.6)}}
 
 /* 우측 상단 버튼들 */
-.top-right-btns{position:fixed;top:68px;right:16px;z-index:101;display:flex;flex-direction:column;gap:6px;}
+.top-right-btns{
+  position:fixed;top:68px;right:16px;z-index:101;
+  display:flex;flex-direction:column;gap:6px;
+  opacity:0;transform:translateX(20px);
+  transition:opacity 0.6s ease,transform 0.6s ease;
+  pointer-events:none;
+}
+.top-right-btns.visible{
+  opacity:1;transform:translateX(0);
+  pointer-events:all;
+}
 .icon-btn{background:rgba(6,4,16,0.88);backdrop-filter:blur(16px);
   border:1px solid rgba(255,255,255,0.08);border-radius:12px;
   padding:7px 12px;cursor:pointer;color:rgba(255,255,255,0.6);
@@ -556,6 +568,24 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 </style>
 </head>
 <body>
+<!-- 인트로 화면 -->
+<div id="introScreen">
+  <div class="intro-logo">noct</div>
+  <div class="intro-sub">지금 이 도시의 음악</div>
+  <div class="intro-count" id="introCount">
+    지금 <span id="introCityName">전국</span>에서<br>
+    <span id="introNum">0</span>명이 음악을 듣고 있어요
+  </div>
+  <div class="intro-dots">
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+    <div class="intro-dot"></div>
+  </div>
+  <div class="intro-hint">글로우 점을 클릭하면 음악이 보여요</div>
+</div>
+
 <div id="dawnOverlay"></div>
 <div id="vibestrip"></div>
 <div id="map"></div>
@@ -1407,6 +1437,13 @@ async function doSearch() {
 
 // ── 곡 선택 ──
 function selectSong(videoId, title, channel, thumb) {
+  // 닉네임 없으면 먼저 입력 요청
+  if (!myNick) {
+    pendingSong = {videoId:videoId, title:title, channel:channel, thumb:thumb};
+    closeSearch();
+    document.getElementById('nickOverlay').classList.add('open');
+    return;
+  }
   closeSearch();
   currentSong = {videoId:videoId, title:title, channel:channel, thumb:thumb};
 
@@ -1903,6 +1940,8 @@ async function submitApply() {
 function initNick() {
   if (!myNick) document.getElementById('nickOverlay').classList.add('open');
 }
+var pendingSong = null;
+
 function saveNick() {
   var v = document.getElementById('nickInput').value.trim();
   if (!v) { document.getElementById('nickInput').focus(); return; }
@@ -1910,8 +1949,14 @@ function saveNick() {
   localStorage.setItem('noct_nick', v);
   document.getElementById('nickOverlay').classList.remove('open');
   showToast('👋 안녕하세요, ' + v + '님!');
+  // 대기 중인 곡 선택 처리
+  if (pendingSong) {
+    var s = pendingSong;
+    pendingSong = null;
+    selectSong(s.videoId, s.title, s.channel, s.thumb);
+  }
 }
-setTimeout(initNick, 1500);
+// 닉네임은 곡 선택할 때 요청 (자동 팝업 제거)
 
 // ── 토스트 ──
 var toastTimer = null;
@@ -2419,6 +2464,39 @@ setInterval(function() {
 setInterval(function() {
   if (topVisible) renderTop();
 }, 30000);
+
+// ═══════════════════════════════════════
+// 인트로 화면
+// ═══════════════════════════════════════
+function runIntro() {
+  // 카운터 애니메이션
+  var target = 183 + Math.floor(Math.random() * 50);
+  var current = 0;
+  var step = Math.ceil(target / 40);
+  var counter = setInterval(function() {
+    current = Math.min(current + step, target);
+    document.getElementById('introNum').textContent = current;
+    if (current >= target) clearInterval(counter);
+  }, 40);
+
+  // 3.5초 후 페이드아웃
+  setTimeout(function() {
+    var intro = document.getElementById('introScreen');
+    intro.classList.add('fade-out');
+    // UI 요소들 순차 표시
+    document.querySelector('.top-right-btns').classList.add('visible');
+    document.getElementById('livebadge').style.opacity = '1';
+    document.getElementById('mainBtn').style.opacity = '1';
+    setTimeout(function() {
+      intro.style.display = 'none';
+    }, 1200);
+  }, 3500);
+}
+
+// 맵 로드 완료 후 인트로 시작
+map.on('load', function() {
+  setTimeout(runIntro, 500);
+});
 
 // CSS 애니메이션 (인라인 마커용)
 var style = document.createElement('style');
