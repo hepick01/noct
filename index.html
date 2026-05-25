@@ -347,7 +347,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   </div>
 </div>
 <div id="miniPlayer"><div class="pi"><img class="pt" id="playerThumb" src="" alt=""><div class="pinfo"><div class="ptitle" id="playerTitle">곡을 선택해주세요</div><div class="pch" id="playerChannel">지도에 내 위치가 표시됩니다</div></div><div class="pctrl"><button id="playBtn" onclick="togglePlay()">▶</button><button class="cb" onclick="stopAndClear()">✕</button></div><button class="sbtn" onclick="generateShareCard()">공유 📤</button></div></div>
-<div id="songcard"><div class="cbg"></div><div class="cglow" id="cardGlow"></div><button class="cclose" onclick="closeCard()">×</button><div class="cinner"><div class="car"><img class="ca" id="cardcover" src="" alt=""><div class="ct"><div class="ctrack" id="cardtrack"></div><div class="cartist" id="cardartist"></div></div></div><div class="cmr" id="cardmoods"></div><div class="cf"><div class="floc"><div class="fdot" id="footerdot"></div><span class="ftxt" id="cardfooter"></span></div><span class="fago">방금 전</span></div></div></div>
+<div id="songcard"><div class="cbg"></div><div class="cglow" id="cardGlow"></div><button class="cclose" onclick="closeCard()">×</button><div class="cinner"><div class="car"><img class="ca" id="cardcover" src="" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div id="cardcoverFallback" style="display:none;width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#c77dff33,#c77dff11);flex-shrink:0;align-items:center;justify-content:center;font-size:22px;">🎵</div><div class="ct"><div class="ctrack" id="cardtrack"></div><div class="cartist" id="cardartist"></div></div></div><div class="cmr" id="cardmoods"></div><div class="cf"><div class="floc"><div class="fdot" id="footerdot"></div><span class="ftxt" id="cardfooter"></span></div><span class="fago">방금 전</span></div></div></div>
 <div id="adcard"><button class="adcl" onclick="closeAdCard()">×</button><div class="adh" id="adhero"></div><div class="adb"><div class="adsp">✦ SPONSORED</div><div class="adt" id="adtitle"></div><div class="add" id="adsub"></div><button class="adcta" id="adcta"></button><div class="adstats"><div class="si"><div class="sn" id="s1n"></div><div class="sl2" id="s1l"></div></div><div class="si"><div class="sn" id="s2n"></div><div class="sl2" id="s2l"></div></div><div class="si"><div class="sn" id="s3n"></div><div class="sl2" id="s3l"></div></div></div></div></div>
 <div id="toast"><span class="tp">noct</span><span id="toastMsg" style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span></div>
 <div id="neighborAlert"><div style="width:7px;height:7px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;"></div><span style="color:rgba(255,255,255,.8);font-size:12px;font-weight:500;"><span id="neighborCount" style="color:#c77dff;font-weight:700;">0</span>명이 근처에서 같이 듣는 중</span></div>
@@ -962,7 +962,7 @@ setTimeout(runIntro,300);
 // ── GeoJSON 더미 ──
 function spawnDummy(k){
   var features=[],shuffled=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),idx=0;
-  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://img.youtube.com/vi/'+s.vid+'/mqdefault.jpg':''}});}}
+  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg':''}});}}
   CITIES[k].spots.forEach(function(s){mf(s,Math.floor(2+Math.random()*4));});
   var ns=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),ni=0;
   NATIONAL_SPOTS.forEach(function(s){var f=ns[ni%ns.length];ni++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',color:f.color,district:s.name}});});
@@ -1074,7 +1074,9 @@ function setGlow(color){document.getElementById('cardGlow').style.background='ra
 function showCardData(title,channel,district,color,thumb,mood){
   document.getElementById('cardtrack').textContent=title;document.getElementById('cardartist').textContent=channel;
   document.getElementById('cardfooter').textContent=district;document.getElementById('footerdot').style.background=color;
-  if(thumb){document.getElementById('cardcover').src=thumb;}else{document.getElementById('cardcover').src='';document.getElementById('cardcover').style.background=color+'22';}
+  var ce=document.getElementById('cardcover'),fe=document.getElementById('cardcoverFallback');
+  if(thumb){ce.style.display='block';ce.src=thumb;if(fe)fe.style.display='none';}
+  else{ce.style.display='none';if(fe){fe.style.display='flex';fe.style.background='linear-gradient(135deg,'+color+'33,'+color+'11)';}}
   document.getElementById('cardmoods').innerHTML='<span class="mt" style="background:'+color+'18;border:1px solid '+color+'35;color:'+color+'">'+mood+'</span>';
   setGlow(color);document.getElementById('songcard').classList.add('visible');
 }
@@ -1082,13 +1084,17 @@ function showFakeCard(s,district){
   document.getElementById('cardtrack').textContent=s.title;document.getElementById('cardartist').textContent=s.channel;
   document.getElementById('cardfooter').textContent=district;document.getElementById('footerdot').style.background=s.color;
   // 썸네일 있으면 이미지, 없으면 컬러 그라데이션
-  var thumb = s.thumb || (s.vid ? 'https://img.youtube.com/vi/'+s.vid+'/mqdefault.jpg' : '');
+  var thumb = s.thumb || (s.vid ? 'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg' : '');
+  var coverEl = document.getElementById('cardcover');
+  var fallbackEl = document.getElementById('cardcoverFallback');
   if(thumb){
-    document.getElementById('cardcover').src=thumb;
-    document.getElementById('cardcover').style.background='';
+    coverEl.style.display = 'block';
+    coverEl.src = thumb;
+    coverEl.style.background = '';
+    if(fallbackEl) fallbackEl.style.display = 'none';
   } else {
-    document.getElementById('cardcover').src='';
-    document.getElementById('cardcover').style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';
+    coverEl.style.display = 'none';
+    if(fallbackEl){fallbackEl.style.display='flex';fallbackEl.style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';}
   }
   document.getElementById('cardmoods').innerHTML=(s.mood||[]).map(function(m){return'<span class="mt" style="background:'+s.color+'18;border:1px solid '+s.color+'35;color:'+s.color+'">'+m+'</span>';}).join('');
   setGlow(s.color);document.getElementById('songcard').classList.add('visible');
