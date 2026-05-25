@@ -2415,14 +2415,59 @@ document.querySelector('.share-btn').onclick = function() {
 // ═══════════════════════════════════════
 // 마커에 호버 툴팁 적용 (spawnMarkers 재정의)
 // ═══════════════════════════════════════
+// 전국 마커 데이터 (좌표만 미리 생성, DOM은 줌인 시에만)
+var nationalMarkerData = [];
+var nationalMarkersSpawned = false;
+
+function prepareNationalData() {
+  nationalMarkerData = [];
+  var shuffled = FAKE_SONGS.slice().sort(function() { return Math.random() - 0.5; });
+  var ni = 0;
+  NATIONAL_SPOTS.forEach(function(spot) {
+    var s = shuffled[ni % shuffled.length];
+    ni++;
+    nationalMarkerData.push({
+      s: s,
+      name: spot.name,
+      lng: spot.lng + (Math.random()-0.5) * 0.015,
+      lat: spot.lat + (Math.random()-0.5) * 0.012,
+    });
+  });
+}
+
+function spawnNationalMarkers() {
+  if (nationalMarkersSpawned) return;
+  nationalMarkersSpawned = true;
+  nationalMarkerData.forEach(function(d) {
+    addFakeMarker(d.s, d.name, d.lng, d.lat);
+  });
+}
+
+function removeNationalMarkers() {
+  if (!nationalMarkersSpawned) return;
+  nationalMarkersSpawned = false;
+  // 도시 마커(앞쪽)는 유지하고 전국 마커만 제거
+  var cityCount = 0;
+  Object.keys(CITIES).forEach(function(k) {
+    cityCount += CITIES[k].spots.length * 5;
+  });
+  while (markers.length > cityMarkerCount) {
+    markers.pop().remove();
+  }
+}
+
+var cityMarkerCount = 0;
+
 var _origSpawnMarkers = spawnMarkers;
 spawnMarkers = function(k) {
   markers.forEach(function(m) { m.remove(); });
   markers.length = 0;
+  nationalMarkersSpawned = false;
+
   var songIndex = 0;
   var shuffled = FAKE_SONGS.slice().sort(function() { return Math.random() - 0.5; });
 
-  // 해당 도시 spots
+  // 도시 spots 마커 (항상 표시)
   CITIES[k].spots.forEach(function(spot) {
     var n = Math.floor(3 + Math.random() * 4);
     for (var i = 0; i < n; i++) {
@@ -2434,21 +2479,12 @@ spawnMarkers = function(k) {
     }
   });
 
-  // 전국 더미 마커
-  var nationalShuffled = FAKE_SONGS.slice().sort(function() { return Math.random() - 0.5; });
-  var ni = 0;
-  NATIONAL_SPOTS.forEach(function(spot) {
-    var count = Math.floor(1 + Math.random() * 3); // 1~3개씩
-    for (var ni2 = 0; ni2 < count; ni2++) {
-      var s = nationalShuffled[ni % nationalShuffled.length];
-      ni++;
-      var lng = spot.lng + (Math.random()-0.5) * 0.015;
-      var lat = spot.lat + (Math.random()-0.5) * 0.012;
-      addFakeMarker(s, spot.name, lng, lat);
-    }
-  });
+  cityMarkerCount = markers.length;
 
-  // 현재 줌에 맞게 마커 표시 여부 업데이트
+  // 전국 데이터 준비 (DOM 생성 안 함)
+  prepareNationalData();
+
+  // 줌 레벨에 따라 전국 마커 표시 결정
   updateMarkersVisibility();
 };
 
@@ -2465,21 +2501,31 @@ function addFakeMarker(s, spotName, lng, lat) {
   markers.push(m);
 }
 
-// 줌 레벨에 따라 마커 표시/숨김
+// 줌 레벨에 따라 마커 표시/숨김 + 전국 마커 on/off
 function updateMarkersVisibility() {
   var z = map.getZoom();
+
+  // 줌 8 이상이면 전국 마커 DOM에 추가
+  if (z >= 8 && !nationalMarkersSpawned && nationalMarkerData.length > 0) {
+    spawnNationalMarkers();
+  }
+
   markers.forEach(function(m) {
     var el = m.getElement();
-    if (z < 9) {
+    if (z < 7) {
       el.style.display = 'none';
+    } else if (z < 9) {
+      el.style.display = 'block';
+      el.style.transform = 'scale(0.3)';
+      el.style.opacity = '0.4';
     } else if (z < 11) {
       el.style.display = 'block';
-      el.style.transform = 'scale(0.4)';
-      el.style.opacity = '0.5';
+      el.style.transform = 'scale(0.5)';
+      el.style.opacity = '0.6';
     } else if (z < 13) {
       el.style.display = 'block';
-      el.style.transform = 'scale(0.7)';
-      el.style.opacity = '0.8';
+      el.style.transform = 'scale(0.75)';
+      el.style.opacity = '0.85';
     } else {
       el.style.display = 'block';
       el.style.transform = 'scale(1)';
