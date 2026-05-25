@@ -399,56 +399,55 @@ var db = null;
 
 // ── 데이터 ──
 var FAKE_SONGS = [
-{title:"밤편지",channel:"IU",mood:["그리움","새벽 3시"],color:"#60a5fa"},
-{title:"Slow Dancing in the Dark",channel:"Joji",mood:["몽환","감정 잠수"],color:"#c084fc"},
-{title:"Die For You",channel:"The Weeknd",mood:["열망","야간"],color:"#f87171"},
-{title:"오래된 노래",channel:"혁오",mood:["감성","혼자인 밤"],color:"#34d399"},
-{title:"BLINDING LIGHTS",channel:"The Weeknd",mood:["도심 질주","네온"],color:"#f472b6"},
-{title:"고마워",channel:"10CM",mood:["따뜻함","안도"],color:"#fb923c"},
-{title:"Attention",channel:"NewJeans",mood:["트렌디","힙함"],color:"#67e8f9"},
-{title:"봄날",channel:"BTS",mood:["그리움","따뜻한 슬픔"],color:"#38bdf8"},
-{title:"낙화",channel:"Epik High",mood:["먹먹함","깊은 밤"],color:"#818cf8"},
-{title:"LOVE DIVE",channel:"IVE",mood:["설레는 썸","달달"],color:"#e879f9"},
-{title:"Celebrity",channel:"IU",mood:["자존감","당당함"],color:"#f9a8d4"},
-{title:"Golden Hour",channel:"JVKE",mood:["설렘","따뜻한 새벽"],color:"#fbbf24"},
-{title:"Ivy",channel:"Frank Ocean",mood:["새벽 감성","그리움"],color:"#a78bfa"},
-{title:"drivers license",channel:"Olivia Rodrigo",mood:["이별 후","눈물"],color:"#7c3aed"},
-{title:"주저하는 연인들을 위해",channel:"혁오",mood:["설렘","불안"],color:"#fb7185"},
-{title:"After Hours",channel:"The Weeknd",mood:["적막","새벽 4시"],color:"#ef4444"},
-{title:"Dynamite",channel:"BTS",mood:["신남","에너지"],color:"#facc15"},
-{title:"Starboy",channel:"The Weeknd",mood:["쿨함","자신감"],color:"#8b5cf6"},
-{title:"좋아좋아",channel:"적재",mood:["설렘","두근거림"],color:"#34d399"},
-{title:"strawberry",channel:"ephemeralfeel",mood:["몽환","여름"],color:"#f472b6"},
-{title:"우리의 밤",channel:"폴킴",mood:["따뜻함","위로"],color:"#60a5fa"},
-{title:"Levitating",channel:"Dua Lipa",mood:["업템포","반짝임"],color:"#e879f9"},
-{title:"As It Was",channel:"Harry Styles",mood:["쓸쓸함","이별"],color:"#f87171"},
-{title:"너의 의미",channel:"아이유",mood:["그리움","잔잔함"],color:"#93c5fd"},
-{title:"Peaches",channel:"Justin Bieber",mood:["여름","달달"],color:"#fb923c"},
-{title:"사랑인가봐",channel:"멜로망스",mood:["설렘","고백"],color:"#f9a8d4"},
-{title:"흰눈",channel:"DEAN",mood:["겨울","감성"],color:"#e0e7ff"},
-{title:"Savage Love",channel:"Jawsh 685",mood:["신남","중독성"],color:"#34d399"},
-{title:"New Face",channel:"PSY",mood:["흥겨움","파티"],color:"#fbbf24"},
-{title:"Love scenario",channel:"iKON",mood:["이별","그리움"],color:"#818cf8"},
-{title:"Through the Night",channel:"IU",mood:["새벽","위로"],color:"#7dd3fc"},
-{title:"사랑을 했다",channel:"iKON",mood:["열정","사랑"],color:"#f87171"},
-{title:"Photograph",channel:"Ed Sheeran",mood:["추억","그리움"],color:"#4ade80"},
-{title:"Perfect",channel:"Ed Sheeran",mood:["로맨틱","행복"],color:"#fde68a"},
-{title:"춤을 춰",channel:"Epik High",mood:["감성","힙합"],color:"#a78bfa"},
-{title:"Feel So Good",channel:"Crush",mood:["여름","설렘"],color:"#67e8f9"},
-{title:"Butter",channel:"BTS",mood:["신남","팝"],color:"#fbbf24"},
-{title:"Bad Guy",channel:"Billie Eilish",mood:["시크","반항"],color:"#22d3ee"},
-{title:"Happier",channel:"Marshmello",mood:["아련함","이별"],color:"#60a5fa"},
-{title:"Shape of You",channel:"Ed Sheeran",mood:["신남","댄스"],color:"#34d399"},
-{title:"봄봄봄",channel:"로이킴",mood:["봄","설렘"],color:"#86efac"},
-{title:"Blueming",channel:"IU",mood:["설렘","사랑"],color:"#93c5fd"},
-{title:"소나기",channel:"폴킴",mood:["여름","감성"],color:"#7dd3fc"},
-{title:"한 페이지가 될 수 있게",channel:"DAY6",mood:["청춘","아련"],color:"#fb923c"},
-{title:"She",channel:"DEAN",mood:["몽환","R&B"],color:"#c084fc"},
-{title:"나는 나비",channel:"자우림",mood:["자유","감성"],color:"#a78bfa"},
-{title:"Rollin",channel:"Brave Girls",mood:["신남","여름"],color:"#f472b6"},
-{title:"ELEVEN",channel:"IVE",mood:["설렘","첫사랑"],color:"#e879f9"},
-{title:"Stay",channel:"The Kid LAROI",mood:["아쉬움","이별"],color:"#818cf8"},
-{title:"Dynamite",channel:"BTS",mood:["활기","신남"],color:"#facc15"},
+{title:"밤편지",channel:"IU",mood:["그리움","새벽 3시"],color:"#60a5fa",vid:"BzYnNdJhZQw"},
+{title:"Slow Dancing in the Dark",channel:"Joji",mood:["몽환","감정 잠수"],color:"#c084fc",vid:"nky4me4NP70"},
+{title:"Die For You",channel:"The Weeknd",mood:["열망","야간"],color:"#f87171",vid:"lROxDaIDTgw"},
+{title:"오래된 노래",channel:"혁오",mood:["감성","혼자인 밤"],color:"#34d399",vid:"5ZA0qWmEwBg"},
+{title:"BLINDING LIGHTS",channel:"The Weeknd",mood:["도심 질주","네온"],color:"#f472b6",vid:"4NRXx6U8ABQ"},
+{title:"고마워",channel:"10CM",mood:["따뜻함","안도"],color:"#fb923c",vid:"4hq8J-nRqLI"},
+{title:"Attention",channel:"NewJeans",mood:["트렌디","힙함"],color:"#67e8f9",vid:"ql_SsRf7dCs"},
+{title:"봄날",channel:"BTS",mood:["그리움","따뜻한 슬픔"],color:"#38bdf8",vid:"xEeFrLSkMm8"},
+{title:"낙화",channel:"Epik High",mood:["먹먹함","깊은 밤"],color:"#818cf8",vid:"TfuJ9RDDNnE"},
+{title:"LOVE DIVE",channel:"IVE",mood:["설레는 썸","달달"],color:"#e879f9",vid:"Y8JFovVnAHg"},
+{title:"Celebrity",channel:"IU",mood:["자존감","당당함"],color:"#f9a8d4",vid:"Qn9aU_Q3joc"},
+{title:"Golden Hour",channel:"JVKE",mood:["설렘","따뜻한 새벽"],color:"#fbbf24",vid:"PEM0kQnQAIo"},
+{title:"Ivy",channel:"Frank Ocean",mood:["새벽 감성","그리움"],color:"#a78bfa",vid:"X0Kx1N6_MtI"},
+{title:"drivers license",channel:"Olivia Rodrigo",mood:["이별 후","눈물"],color:"#7c3aed",vid:"ZmDBbnmKpqQ"},
+{title:"주저하는 연인들을 위해",channel:"혁오",mood:["설렘","불안"],color:"#fb7185",vid:"O9UkCfCQ4qc"},
+{title:"After Hours",channel:"The Weeknd",mood:["적막","새벽 4시"],color:"#ef4444",vid:"ygTZZpVkmKg"},
+{title:"Dynamite",channel:"BTS",mood:["신남","에너지"],color:"#facc15",vid:"gdZLi9oWNZg"},
+{title:"Starboy",channel:"The Weeknd",mood:["쿨함","자신감"],color:"#8b5cf6",vid:"34Na4j8AVgA"},
+{title:"좋아좋아",channel:"적재",mood:["설렘","두근거림"],color:"#34d399",vid:"rFkYNOHt43k"},
+{title:"우리의 밤",channel:"폴킴",mood:["따뜻함","위로"],color:"#60a5fa",vid:"8YFGp_1fMvs"},
+{title:"Levitating",channel:"Dua Lipa",mood:["업템포","반짝임"],color:"#e879f9",vid:"TUVcZfQe-Kw"},
+{title:"As It Was",channel:"Harry Styles",mood:["쓸쓸함","이별"],color:"#f87171",vid:"H5v3kku4y6Q"},
+{title:"너의 의미",channel:"아이유",mood:["그리움","잔잔함"],color:"#93c5fd",vid:"AQlBNqdIB8s"},
+{title:"Peaches",channel:"Justin Bieber",mood:["여름","달달"],color:"#fb923c",vid:"tQ0yjYUFBas"},
+{title:"사랑인가봐",channel:"멜로망스",mood:["설렘","고백"],color:"#f9a8d4",vid:"IIDmiLLQxsY"},
+{title:"흰눈",channel:"DEAN",mood:["겨울","감성"],color:"#e0e7ff",vid:"U3MJlqVwkj4"},
+{title:"New Face",channel:"PSY",mood:["흥겨움","파티"],color:"#fbbf24",vid:"RBumgq5yVrA"},
+{title:"Love scenario",channel:"iKON",mood:["이별","그리움"],color:"#818cf8",vid:"xkOwZyNdOTQ"},
+{title:"Through the Night",channel:"IU",mood:["새벽","위로"],color:"#7dd3fc",vid:"vmKFXMPbhWI"},
+{title:"사랑을 했다",channel:"iKON",mood:["열정","사랑"],color:"#f87171",vid:"J0gFi--E9-g"},
+{title:"Photograph",channel:"Ed Sheeran",mood:["추억","그리움"],color:"#4ade80",vid:"nSDgHBa_Mlw"},
+{title:"Perfect",channel:"Ed Sheeran",mood:["로맨틱","행복"],color:"#fde68a",vid:"2Vv-BfVoq4g"},
+{title:"춤을 춰",channel:"Epik High",mood:["감성","힙합"],color:"#a78bfa",vid:"lRy8LdMeSuI"},
+{title:"Feel So Good",channel:"Crush",mood:["여름","설렘"],color:"#67e8f9",vid:"nGSMUMUQydY"},
+{title:"Butter",channel:"BTS",mood:["신남","팝"],color:"#fbbf24",vid:"WMweEpGlu_U"},
+{title:"Bad Guy",channel:"Billie Eilish",mood:["시크","반항"],color:"#22d3ee",vid:"DyDfgMOUjCI"},
+{title:"봄봄봄",channel:"로이킴",mood:["봄","설렘"],color:"#86efac",vid:"I5-GOxJENsY"},
+{title:"Blueming",channel:"IU",mood:["설렘","사랑"],color:"#93c5fd",vid:"m2hDmSJbNE8"},
+{title:"소나기",channel:"폴킴",mood:["여름","감성"],color:"#7dd3fc",vid:"YVCeB_sPH-c"},
+{title:"한 페이지가 될 수 있게",channel:"DAY6",mood:["청춘","아련"],color:"#fb923c",vid:"lrnIk4jv3dI"},
+{title:"She",channel:"DEAN",mood:["몽환","R&B"],color:"#c084fc",vid:"5TlBpQTZznQ"},
+{title:"Rollin",channel:"Brave Girls",mood:["신남","여름"],color:"#f472b6",vid:"jFMGDCuSECo"},
+{title:"ELEVEN",channel:"IVE",mood:["설렘","첫사랑"],color:"#e879f9",vid:"IA1XsuGqBnk"},
+{title:"Stay",channel:"The Kid LAROI",mood:["아쉬움","이별"],color:"#818cf8",vid:"UceaB4D0jpo"},
+{title:"나는 나비",channel:"자우림",mood:["자유","감성"],color:"#a78bfa",vid:"Yf6A9DP-sSI"},
+{title:"Savage Love",channel:"Jawsh 685",mood:["신남","중독성"],color:"#34d399",vid:"8Qb-zcidLRo"},
+{title:"Happier",channel:"Marshmello",mood:["아련함","이별"],color:"#60a5fa",vid:"m7Bc3pLyij0"},
+{title:"Shape of You",channel:"Ed Sheeran",mood:["신남","댄스"],color:"#34d399",vid:"JGwWNGJdvx8"},
+{title:"밤이 되니까",channel:"검정치마",mood:["새벽","감성"],color:"#818cf8",vid:"9pcGAHRlIlQ"},
 ];
 var NATIONAL_SPOTS = [
 {lng:127.054,lat:37.739,name:"의정부"},{lng:127.065,lat:37.760,name:"의정부 민락"},
@@ -963,7 +962,7 @@ setTimeout(runIntro,300);
 // ── GeoJSON 더미 ──
 function spawnDummy(k){
   var features=[],shuffled=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),idx=0;
-  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name}});}}
+  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://img.youtube.com/vi/'+s.vid+'/mqdefault.jpg':''}});}}
   CITIES[k].spots.forEach(function(s){mf(s,Math.floor(2+Math.random()*4));});
   var ns=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),ni=0;
   NATIONAL_SPOTS.forEach(function(s){var f=ns[ni%ns.length];ni++;features.push({type:'Feature',geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',color:f.color,district:s.name}});});
@@ -1082,7 +1081,15 @@ function showCardData(title,channel,district,color,thumb,mood){
 function showFakeCard(s,district){
   document.getElementById('cardtrack').textContent=s.title;document.getElementById('cardartist').textContent=s.channel;
   document.getElementById('cardfooter').textContent=district;document.getElementById('footerdot').style.background=s.color;
-  document.getElementById('cardcover').src='';document.getElementById('cardcover').style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';
+  // 썸네일 있으면 이미지, 없으면 컬러 그라데이션
+  var thumb = s.thumb || (s.vid ? 'https://img.youtube.com/vi/'+s.vid+'/mqdefault.jpg' : '');
+  if(thumb){
+    document.getElementById('cardcover').src=thumb;
+    document.getElementById('cardcover').style.background='';
+  } else {
+    document.getElementById('cardcover').src='';
+    document.getElementById('cardcover').style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';
+  }
   document.getElementById('cardmoods').innerHTML=(s.mood||[]).map(function(m){return'<span class="mt" style="background:'+s.color+'18;border:1px solid '+s.color+'35;color:'+s.color+'">'+m+'</span>';}).join('');
   setGlow(s.color);document.getElementById('songcard').classList.add('visible');
 }
