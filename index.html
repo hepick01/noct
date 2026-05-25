@@ -828,8 +828,9 @@ async function doSearch() {
 }
 
 // ── GPS 위치 가져오기 ──
-// watchPosition ID (정지 시 해제용)
+// GPS 상태
 var gpsWatchId = null;
+var gpsReady = false; // 첫 위치 수신 여부
 
 function getMyLocation(callback) {
   if (!navigator.geolocation) {
@@ -839,41 +840,50 @@ function getMyLocation(callback) {
   }
 
   // 기존 감시 중지
-  if (gpsWatchId !== null) {
-    navigator.geolocation.clearWatch(gpsWatchId);
-    gpsWatchId = null;
-  }
+  stopGPS();
+  gpsReady = false;
 
-  // watchPosition: 위치가 바뀔 때마다 자동 업데이트
   gpsWatchId = navigator.geolocation.watchPosition(
     function(pos) {
       var lng = pos.coords.longitude;
       var lat = pos.coords.latitude;
-      var accuracy = pos.coords.accuracy; // 정확도 (미터)
+      var accuracy = Math.round(pos.coords.accuracy);
 
-      // 마커 실시간 이동
-      if (myMarker && myLng !== null) {
-        myMarker.setLngLat([lng, lat]);
-        myLng = lng;
-        myLat = lat;
-        // DB도 업데이트
-        if (currentSong) upsertUser(lng, lat);
-      } else {
-        // 첫 위치 확정
-        callback(lng, lat);
+      // 정확도 텍스트
+      var accText = accuracy < 15  ? '🟢 GPS 정확 (' + accuracy + 'm)' :
+                    accuracy < 50  ? '🟡 GPS 양호 (' + accuracy + 'm)' :
+                    accuracy < 150 ? '🟠 GPS 보통 (' + accuracy + 'm)' :
+                                     '🔴 GPS 잡는 중... (' + accuracy + 'm)';
+
+      if (currentSong) {
+        document.getElementById('playerChannel').textContent = currentSong.channel + ' · ' + accText;
       }
 
-      // 정확도 표시
-      var accText = accuracy < 10 ? '📍 GPS 정확' :
-                    accuracy < 30 ? '📍 GPS 양호' :
-                    accuracy < 100 ? '📍 GPS 보통' : '📍 GPS 잡는 중...';
-      document.getElementById('playerChannel').textContent =
-        currentSong ? currentSong.channel + ' · ' + accText : accText;
+      if (!gpsReady) {
+        // 첫 위치 수신 → 마커 생성
+        gpsReady = true;
+        myLng = lng;
+        myLat = lat;
+        callback(lng, lat);
+      } else {
+        // 이후 업데이트 → 마커 이동
+        myLng = lng;
+        myLat = lat;
+        if (myMarker) {
+          myMarker.setLngLat([lng, lat]);
+        }
+        if (currentSong) {
+          upsertUser(lng, lat);
+        }
+      }
     },
     function(err) {
-      var city = CITIES[currentCity];
-      callback(city.center[0], city.center[1]);
-      showToast('📍 위치 허용이 필요해요!');
+      if (!gpsReady) {
+        // GPS 실패 시 도시 중심으로 fallback
+        var city = CITIES[currentCity];
+        callback(city.center[0], city.center[1]);
+        showToast('위치 허용이 필요해요! 설정에서 위치를 허용해주세요.');
+      }
     },
     {
       enableHighAccuracy: true,
@@ -888,6 +898,7 @@ function stopGPS() {
     navigator.geolocation.clearWatch(gpsWatchId);
     gpsWatchId = null;
   }
+  gpsReady = false;
 }
 
 // ── 곡 선택 ──
