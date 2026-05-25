@@ -162,6 +162,36 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);
   font-size:12px;font-family:inherit;margin-top:12px;}
 
+/* 커스텀 도시 선택 드롭다운 */
+.vs-select-wrap{position:relative;}
+.vs-select-btn{
+  width:100%;background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);border-radius:10px;
+  padding:8px 12px;color:#fff;font-size:12px;font-family:inherit;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;
+  transition:border-color 0.2s;
+}
+.vs-select-btn:hover{border-color:rgba(199,125,255,0.4);}
+.vs-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:1000;
+  background:#0d0b1e;border:1px solid rgba(199,125,255,0.25);
+  border-radius:12px;overflow:hidden;overflow-y:auto;
+  max-height:240px;display:none;
+  box-shadow:0 8px 32px rgba(0,0,0,0.8);
+}
+.vs-dropdown.open{display:block;}
+.vs-dropdown::-webkit-scrollbar{width:3px;}
+.vs-dropdown::-webkit-scrollbar-thumb{background:rgba(199,125,255,0.3);border-radius:2px;}
+.vs-drop-group{color:rgba(199,125,255,0.5);font-size:10px;font-weight:500;
+  padding:8px 12px 4px;letter-spacing:0.05em;background:#0d0b1e;}
+.vs-drop-item{
+  padding:9px 14px;color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer;
+  transition:background 0.1s;background:#0d0b1e;
+  display:flex;align-items:center;gap:8px;
+}
+.vs-drop-item:hover{background:rgba(199,125,255,0.12);color:#fff;}
+.vs-drop-item.selected{color:#c77dff;background:rgba(199,125,255,0.08);}
+
 /* 감성 리포트 패널 */
 #reportPanel{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
   z-index:600;width:calc(100vw - 32px);max-width:340px;
@@ -735,30 +765,33 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 <!-- 도시 대결 -->
 <div id="vsPanel">
-  <div class="vs-title">⚔️ 도시 음악 취향 대결</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="vs-title" style="margin-bottom:0;">⚔️ 도시 음악 취향 대결</div>
+    <button onclick="toggleVs()" style="background:rgba(255,255,255,0.06);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;font-family:inherit;">×</button>
+  </div>
 
   <!-- 도시 선택 -->
-  <div style="display:flex;gap:6px;margin-bottom:14px;">
-    <div style="flex:1;">
-      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;">왼쪽 도시</div>
-      <select id="vsCity1" onchange="renderVs()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:7px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;">
-        <option value="busan">부산</option>
-        <option value="seoul">서울</option>
-        <option value="daegu">대구</option>
-        <option value="incheon">인천</option>
-        <option value="gwangju">광주</option>
-      </select>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:16px;">
+    <div>
+      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;text-align:center;">왼쪽</div>
+      <div class="vs-select-wrap" id="vsWrap1">
+        <button class="vs-select-btn" id="vsBtn1" onclick="toggleVsDropdown(1)">
+          <span id="vsBtnText1">부산</span>
+          <span style="font-size:10px;opacity:0.5;">▼</span>
+        </button>
+        <div class="vs-dropdown" id="vsDrop1"></div>
+      </div>
     </div>
-    <div style="display:flex;align-items:flex-end;padding-bottom:7px;color:rgba(255,255,255,0.3);font-size:16px;font-weight:700;">VS</div>
-    <div style="flex:1;">
-      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;">오른쪽 도시</div>
-      <select id="vsCity2" onchange="renderVs()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:7px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;">
-        <option value="busan">부산</option>
-        <option value="seoul" selected>서울</option>
-        <option value="daegu">대구</option>
-        <option value="incheon">인천</option>
-        <option value="gwangju">광주</option>
-      </select>
+    <div style="color:rgba(255,255,255,0.25);font-size:18px;font-weight:700;text-align:center;">VS</div>
+    <div>
+      <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:5px;text-align:center;">오른쪽</div>
+      <div class="vs-select-wrap" id="vsWrap2">
+        <button class="vs-select-btn" id="vsBtn2" onclick="toggleVsDropdown(2)">
+          <span id="vsBtnText2">서울</span>
+          <span style="font-size:10px;opacity:0.5;">▼</span>
+        </button>
+        <div class="vs-dropdown" id="vsDrop2"></div>
+      </div>
     </div>
   </div>
 
@@ -776,7 +809,6 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
   <div class="vs-bar-wrap" id="vsBarWrap"></div>
   <div id="vsLiveTag" style="text-align:center;color:rgba(199,125,255,0.5);font-size:10px;margin-top:8px;"></div>
-  <button class="vs-close" onclick="toggleVs()">닫기</button>
 </div>
 
 <!-- 감성 리포트 -->
@@ -1899,6 +1931,123 @@ async function renderTop() {
 }
 
 // ── 부산 vs 서울 ──
+// 전국 도시 목록 (그룹별)
+var VS_CITIES = [
+  {group:'수도권', cities:[
+    {key:'seoul',name:'서울',emoji:'🏙️'},
+    {key:'incheon',name:'인천',emoji:'✈️'},
+    {key:'suwon',name:'수원',emoji:'🏯'},
+    {key:'seongnam',name:'성남/분당',emoji:'🌆'},
+    {key:'goyang',name:'고양/일산',emoji:'🌸'},
+    {key:'yongin',name:'용인',emoji:'🍃'},
+    {key:'bucheon',name:'부천',emoji:'🎭'},
+    {key:'anyang',name:'안양',emoji:'🌿'},
+    {key:'hwaseong',name:'화성/동탄',emoji:'🚀'},
+    {key:'gimpo',name:'김포',emoji:'🛬'},
+  ]},
+  {group:'부산/경남', cities:[
+    {key:'busan',name:'부산',emoji:'🌊'},
+    {key:'ulsan',name:'울산',emoji:'🏭'},
+    {key:'changwon',name:'창원',emoji:'⚙️'},
+    {key:'jinju',name:'진주',emoji:'🏮'},
+    {key:'geoje',name:'거제',emoji:'🚢'},
+    {key:'yangsan',name:'양산',emoji:'🌄'},
+  ]},
+  {group:'대구/경북', cities:[
+    {key:'daegu',name:'대구',emoji:'🍑'},
+    {key:'pohang',name:'포항',emoji:'⚓'},
+    {key:'gyeongju',name:'경주',emoji:'🏛️'},
+    {key:'gumi',name:'구미',emoji:'💡'},
+    {key:'andong',name:'안동',emoji:'🎋'},
+  ]},
+  {group:'광주/전라', cities:[
+    {key:'gwangju',name:'광주',emoji:'🌿'},
+    {key:'jeonju',name:'전주',emoji:'🏯'},
+    {key:'gunsan',name:'군산',emoji:'⚓'},
+    {key:'yeosu',name:'여수',emoji:'🌅'},
+    {key:'suncheon',name:'순천',emoji:'🌾'},
+    {key:'mokpo',name:'목포',emoji:'🐟'},
+  ]},
+  {group:'대전/충청', cities:[
+    {key:'daejeon',name:'대전',emoji:'🔬'},
+    {key:'sejong',name:'세종',emoji:'🏛️'},
+    {key:'cheonan',name:'천안',emoji:'🚄'},
+    {key:'cheongju',name:'청주',emoji:'📚'},
+    {key:'asan',name:'아산',emoji:'🌻'},
+  ]},
+  {group:'강원', cities:[
+    {key:'chuncheon',name:'춘천',emoji:'🦢'},
+    {key:'wonju',name:'원주',emoji:'🎨'},
+    {key:'gangneung',name:'강릉',emoji:'🌊'},
+    {key:'sokcho',name:'속초',emoji:'🏔️'},
+  ]},
+  {group:'제주', cities:[
+    {key:'jeju',name:'제주',emoji:'🍊'},
+    {key:'seogwipo',name:'서귀포',emoji:'🌺'},
+  ]},
+];
+
+// DB 키 매핑 (live_users.city 값)
+var VS_CITY_DB_KEYS = {
+  seoul:'seoul', busan:'busan', daegu:'daegu', incheon:'incheon', gwangju:'gwangju',
+  suwon:'seoul', seongnam:'seoul', goyang:'seoul', yongin:'seoul', bucheon:'seoul',
+  anyang:'seoul', hwaseong:'seoul', gimpo:'seoul',
+  ulsan:'busan', changwon:'busan', jinju:'busan', geoje:'busan', yangsan:'busan',
+  pohang:'daegu', gyeongju:'daegu', gumi:'daegu', andong:'daegu',
+  jeonju:'gwangju', gunsan:'gwangju', yeosu:'gwangju', suncheon:'gwangju', mokpo:'gwangju',
+  daejeon:'daejeon', sejong:'daejeon', cheonan:'daejeon', cheongju:'daejeon', asan:'daejeon',
+  chuncheon:'chuncheon', wonju:'chuncheon', gangneung:'chuncheon', sokcho:'chuncheon',
+  jeju:'jeju', seogwipo:'jeju',
+};
+
+// 선택된 도시
+var vsSel1 = 'busan', vsSel2 = 'seoul';
+
+function buildVsDropdown(num) {
+  var sel = num === 1 ? vsSel1 : vsSel2;
+  var el = document.getElementById('vsDrop' + num);
+  var html = '';
+  VS_CITIES.forEach(function(group) {
+    html += '<div class="vs-drop-group">' + group.group + '</div>';
+    group.cities.forEach(function(city) {
+      html += '<div class="vs-drop-item' + (city.key === sel ? ' selected' : '') + '" onclick="selectVsCity(' + num + ','' + city.key + '','' + city.name + '')">'
+        + '<span>' + city.emoji + '</span>'
+        + '<span>' + city.name + '</span>'
+        + '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function toggleVsDropdown(num) {
+  var drop1 = document.getElementById('vsDrop1');
+  var drop2 = document.getElementById('vsDrop2');
+  if (num === 1) {
+    drop1.classList.toggle('open');
+    drop2.classList.remove('open');
+  } else {
+    drop2.classList.toggle('open');
+    drop1.classList.remove('open');
+  }
+  if (document.getElementById('vsDrop' + num).classList.contains('open')) {
+    buildVsDropdown(num);
+  }
+}
+
+function selectVsCity(num, key, name) {
+  if (num === 1) { vsSel1 = key; document.getElementById('vsBtnText1').textContent = name; }
+  else { vsSel2 = key; document.getElementById('vsBtnText2').textContent = name; }
+  document.getElementById('vsDrop' + num).classList.remove('open');
+  renderVs();
+}
+
+// 드롭다운 외부 클릭 닫기
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.vs-select-wrap')) {
+    document.querySelectorAll('.vs-dropdown').forEach(function(d) { d.classList.remove('open'); });
+  }
+});
+
 function toggleVs() {
   vsVisible = !vsVisible;
   document.getElementById('vsPanel').classList.toggle('visible', vsVisible);
@@ -1906,13 +2055,23 @@ function toggleVs() {
   if (vsVisible) renderVs();
 }
 async function renderVs() {
-  var c1 = document.getElementById('vsCity1').value;
-  var c2 = document.getElementById('vsCity2').value;
-  var cityEmojis = {busan:'🌊',seoul:'🏙️',daegu:'🍑',incheon:'✈️',gwangju:'🌿'};
+  var c1 = vsSel1 || 'busan';
+  var c2 = vsSel2 || 'seoul';
+  var dbC1 = VS_CITY_DB_KEYS[c1] || c1;
+  var dbC2 = VS_CITY_DB_KEYS[c2] || c2;
   var colors1 = '#60a5fa', colors2 = '#c084fc';
 
-  document.getElementById('vsName1').textContent = (cityEmojis[c1]||'') + ' ' + (CITIES[c1]||{name:c1}).name;
-  document.getElementById('vsName2').textContent = (CITIES[c2]||{name:c2}).name + ' ' + (cityEmojis[c2]||'');
+  function getVsCityName(key) {
+    for (var i=0;i<VS_CITIES.length;i++) {
+      for (var j=0;j<VS_CITIES[i].cities.length;j++) {
+        if (VS_CITIES[i].cities[j].key === key) return VS_CITIES[i].cities[j].emoji + ' ' + VS_CITIES[i].cities[j].name;
+      }
+    }
+    return key;
+  }
+
+  document.getElementById('vsName1').textContent = getVsCityName(c1);
+  document.getElementById('vsName2').textContent = getVsCityName(c2);
   document.getElementById('vsList1').innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
   document.getElementById('vsList2').innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:10px;padding:4px 0;">불러오는 중...</div>';
 
@@ -1924,10 +2083,11 @@ async function renderVs() {
     var el = document.getElementById(elId);
     var liveData = null;
 
+    var dbKey = city === c1 ? dbC1 : dbC2;
     if (db) {
       try {
         var r = await db.from('live_users').select('song_title,song_channel')
-          .eq('city', city).gte('updated_at', new Date(Date.now()-3600000).toISOString())
+          .eq('city', dbKey).gte('updated_at', new Date(Date.now()-3600000).toISOString())
           .not('song_title','is',null);
         if (r.data && r.data.length > 0) {
           var counts = {};
@@ -1939,7 +2099,8 @@ async function renderVs() {
       } catch(e){}
     }
 
-    var data = liveData || (TOP5[city] || TOP5.busan);
+    var top5Key = city === c1 ? c1 : c2;
+    var data = liveData || (TOP5[top5Key] || TOP5[dbKey] || TOP5.busan);
     el.innerHTML = data.map(function(s,i){
       return '<div class="vs-track">'
         +'<span class="vs-rank" style="color:'+color+'">'+(i+1)+'</span>'
@@ -1951,8 +2112,8 @@ async function renderVs() {
   document.getElementById('vsLiveTag').textContent = isLive ? '🔴 LIVE 데이터 반영 중' : '📊 기본 데이터';
 
   // 무드 바 업데이트
-  var m1 = MOODS[c1]||MOODS.busan;
-  var m2 = MOODS[c2]||MOODS.busan;
+  var m1 = MOODS[dbC1]||MOODS[c1]||MOODS.busan;
+  var m2 = MOODS[dbC2]||MOODS[c2]||MOODS.busan;
   var barHtml = '<div class="vs-bar-label"><span class="vs-bar-text">' + (CITIES[c1]||{name:c1}).name + ' 주요 감성</span></div>';
   m1.slice(0,3).forEach(function(m){
     barHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
