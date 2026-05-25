@@ -19,17 +19,21 @@
 body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;overflow:hidden;height:100dvh;}
 #map{position:fixed;inset:0;width:100%;height:100%;}
 
-/* 상단 무지개 라인 */
+/* 새벽모드 오버레이 */
+#dawnOverlay{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(30,0,60,0.3),transparent,rgba(0,10,40,0.4));
+  opacity:0;transition:opacity 2s;}
+#dawnOverlay.active{opacity:1;}
+
 #vibestrip{position:fixed;top:0;left:0;right:0;z-index:200;height:2px;
   background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
   background-size:200% 100%;animation:rainbowSlide 6s linear infinite;}
 @keyframes rainbowSlide{0%{background-position:0%}100%{background-position:200%}}
 
-/* 상단바 */
 #topbar{position:fixed;top:2px;left:0;right:0;z-index:100;
   padding:12px 16px 16px;display:flex;align-items:center;justify-content:space-between;
   background:linear-gradient(to bottom,rgba(3,3,10,0.96) 60%,transparent);}
-.logo{display:flex;align-items:center;gap:8px;}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
 .logo-icon{width:28px;height:28px;border-radius:8px;
   background:linear-gradient(135deg,#c77dff,#7B68EE);
   display:flex;align-items:center;justify-content:center;
@@ -37,16 +41,25 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .logo-text{color:#fff;font-size:17px;font-weight:700;letter-spacing:-0.3px;}
 .logo-sub{color:rgba(255,255,255,0.35);font-size:10px;font-weight:300;margin-top:1px;}
 .city-tabs{display:flex;background:rgba(255,255,255,0.05);border-radius:20px;padding:3px;gap:2px;border:1px solid rgba(255,255,255,0.08);}
-.tab{border-radius:16px;padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all 0.25s;color:rgba(255,255,255,0.35);background:transparent;font-family:inherit;}
+.tab{border-radius:16px;padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer;border:none;
+  transition:all 0.25s;color:rgba(255,255,255,0.35);background:transparent;font-family:inherit;}
 .tab.active{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;box-shadow:0 2px 10px #c77dff44;}
 .tab.inactive:hover{color:rgba(255,255,255,0.7);}
 
-/* 감성 뱃지 */
 #vibebadge{position:fixed;top:68px;left:16px;z-index:100;display:flex;align-items:center;gap:7px;}
-.vibe-tag{background:rgba(199,125,255,0.12);border:1px solid rgba(199,125,255,0.28);border-radius:20px;padding:4px 11px;color:#c77dff;font-size:11px;font-weight:500;}
+.vibe-tag{background:rgba(199,125,255,0.12);border:1px solid rgba(199,125,255,0.28);
+  border-radius:20px;padding:4px 11px;color:#c77dff;font-size:11px;font-weight:500;}
 .vibe-time{color:rgba(255,255,255,0.25);font-size:11px;}
 
-/* 라이브 뱃지 */
+/* 같이 듣는 사람 뱃지 */
+#togetherBadge{position:fixed;top:95px;left:16px;z-index:100;
+  background:rgba(3,3,10,0.82);backdrop-filter:blur(16px);
+  border:1px solid rgba(199,125,255,0.2);border-radius:12px;padding:6px 12px;
+  display:none;align-items:center;gap:6px;}
+.together-dot{width:5px;height:5px;border-radius:50%;background:#c77dff;animation:dotPulse 2s infinite;}
+.together-text{color:rgba(255,255,255,0.7);font-size:11px;font-weight:500;}
+.together-count{color:#c77dff;font-weight:700;}
+
 #livebadge{position:fixed;bottom:100px;left:16px;z-index:100;
   background:rgba(3,3,10,0.82);backdrop-filter:blur(20px);
   border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;
@@ -59,52 +72,171 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .live-count{color:#c77dff;font-weight:700;}
 .live-sub{color:rgba(255,255,255,0.22);font-size:10px;padding-left:13px;}
 
-/* 버튼들 */
+/* 우측 버튼들 */
 #mainBtn{position:fixed;bottom:100px;right:16px;z-index:100;
-  background:linear-gradient(135deg,#c77dff,#7B68EE);
-  border:none;border-radius:14px;padding:12px 18px;cursor:pointer;
-  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:14px;
+  padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:8px;
   font-size:13px;font-weight:700;color:white;font-family:inherit;
   box-shadow:0 6px 24px #c77dff44;transition:transform 0.15s;}
 #mainBtn:active{transform:scale(0.96);}
 
-/* 내 위치로 이동 버튼 */
 #myLocBtn{position:fixed;bottom:100px;right:16px;z-index:100;
-  background:linear-gradient(135deg,rgba(199,125,255,0.2),rgba(123,104,238,0.2));
-  backdrop-filter:blur(16px);
+  background:rgba(6,4,16,0.9);backdrop-filter:blur(16px);
   border:1.5px solid rgba(199,125,255,0.6);border-radius:14px;padding:11px 16px;cursor:pointer;
-  display:none;align-items:center;gap:7px;
-  font-size:13px;font-weight:700;color:#fff;font-family:inherit;
-  box-shadow:0 4px 20px rgba(199,125,255,0.35);
-  transition:transform 0.15s;animation:myBtnPulse 2s ease-in-out infinite;}
-#myLocBtn:active{transform:scale(0.96);}
+  display:none;align-items:center;gap:7px;font-size:13px;font-weight:700;color:#fff;
+  font-family:inherit;box-shadow:0 4px 20px rgba(199,125,255,0.35);
+  animation:myBtnPulse 2s ease-in-out infinite;}
 @keyframes myBtnPulse{0%,100%{box-shadow:0 4px 20px rgba(199,125,255,0.35)}50%{box-shadow:0 4px 28px rgba(199,125,255,0.6)}}
 
-/* TOP5 버튼 */
-#topBtn{position:fixed;top:68px;right:16px;z-index:101;
-  background:rgba(6,4,16,0.88);backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,0.07);border-radius:12px;
+/* 우측 상단 버튼들 */
+.top-right-btns{position:fixed;top:68px;right:16px;z-index:101;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{background:rgba(6,4,16,0.88);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.08);border-radius:12px;
   padding:7px 12px;cursor:pointer;color:rgba(255,255,255,0.6);
   font-size:11px;font-weight:500;font-family:inherit;
-  display:flex;align-items:center;gap:5px;}
-#topBtn:active{background:rgba(199,125,255,0.1);}
+  display:flex;align-items:center;gap:5px;transition:all 0.2s;white-space:nowrap;}
+.icon-btn:active{background:rgba(199,125,255,0.1);}
+.icon-btn.active{background:rgba(199,125,255,0.15);border-color:rgba(199,125,255,0.3);color:#c77dff;}
 
 /* TOP5 패널 */
-#topPanel{position:fixed;top:105px;right:16px;z-index:100;width:210px;
+#topPanel{position:fixed;top:140px;right:16px;z-index:100;width:220px;
   background:rgba(6,4,16,0.95);backdrop-filter:blur(20px);
   border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;
-  opacity:0;transform:translateY(-8px);pointer-events:none;
+  opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;
   transition:opacity 0.25s,transform 0.25s;}
-#topPanel.visible{opacity:1;transform:translateY(0);pointer-events:all;}
-.top-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.top-title{color:rgba(255,255,255,0.4);font-size:10px;font-weight:500;letter-spacing:0.05em;}
-.top-close{background:none;border:none;color:rgba(255,255,255,0.25);cursor:pointer;font-size:16px;font-family:inherit;padding:0;}
-.top-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+#topPanel.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+.panel-title{color:rgba(255,255,255,0.4);font-size:10px;font-weight:500;
+  letter-spacing:0.05em;margin-bottom:10px;}
+.top-item{display:flex;align-items:center;gap:8px;padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);}
 .top-item:last-child{border-bottom:none;}
 .top-rank{color:#c77dff;font-size:11px;font-weight:700;width:14px;flex-shrink:0;}
 .top-info{flex:1;min-width:0;}
-.top-track{color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-track{color:#fff;font-size:11px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .top-artist{color:rgba(255,255,255,0.3);font-size:10px;}
+
+/* 부산 vs 서울 패널 */
+#vsPanel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);
+  z-index:600;width:calc(100vw - 32px);max-width:380px;
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:22px;
+  opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;}
+#vsPanel.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
+.vs-title{color:#fff;font-size:16px;font-weight:700;text-align:center;margin-bottom:18px;}
+.vs-cities{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:16px;}
+.vs-city{display:flex;flex-direction:column;gap:6px;}
+.vs-city-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.vs-track{display:flex;align-items:center;gap:6px;padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);}
+.vs-track:last-child{border-bottom:none;}
+.vs-rank{font-size:10px;font-weight:700;width:12px;flex-shrink:0;}
+.vs-info{flex:1;min-width:0;}
+.vs-name{color:#fff;font-size:10px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vs-artist{color:rgba(255,255,255,0.3);font-size:9px;}
+.vs-divider{display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:rgba(255,255,255,0.2);padding-top:20px;}
+.vs-bar-wrap{margin-top:12px;}
+.vs-bar-label{display:flex;justify-content:space-between;margin-bottom:6px;}
+.vs-bar-text{font-size:10px;color:rgba(255,255,255,0.4);}
+.vs-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;margin-bottom:6px;}
+.vs-bar-fill{height:100%;border-radius:2px;transition:width 0.8s;}
+.vs-close{display:block;width:100%;padding:11px;border-radius:12px;border:none;cursor:pointer;
+  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);
+  font-size:12px;font-family:inherit;margin-top:12px;}
+
+/* 감성 리포트 패널 */
+#reportPanel{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:600;width:calc(100vw - 32px);max-width:340px;
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;}
+#reportPanel.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
+.report-title{color:#fff;font-size:14px;font-weight:700;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;}
+.report-mood-bar{margin-bottom:10px;}
+.report-mood-name{display:flex;justify-content:space-between;margin-bottom:4px;}
+.report-mood-label{color:rgba(255,255,255,0.6);font-size:11px;}
+.report-mood-pct{color:#c77dff;font-size:11px;font-weight:600;}
+.report-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden;}
+.report-bar-fill{height:100%;border-radius:3px;transition:width 1s;}
+.report-summary{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.35);font-size:11px;line-height:1.7;}
+.report-close{background:none;border:none;color:rgba(255,255,255,0.25);
+  cursor:pointer;font-size:16px;font-family:inherit;float:right;margin-top:-2px;}
+
+/* 청취 기록 패널 */
+#historyPanel{position:fixed;top:0;left:0;bottom:0;z-index:700;width:300px;
+  background:rgba(6,4,16,0.98);backdrop-filter:blur(30px);
+  border-right:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
+#historyPanel.open{transform:translateX(0);}
+.history-header{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.history-title{color:#fff;font-size:15px;font-weight:700;}
+.history-close{background:rgba(255,255,255,0.06);border:none;border-radius:50%;
+  width:26px;height:26px;color:rgba(255,255,255,0.4);cursor:pointer;
+  font-size:14px;line-height:26px;text-align:center;font-family:inherit;}
+.history-list{flex:1;overflow-y:auto;padding:8px 0;}
+.history-list::-webkit-scrollbar{display:none;}
+.history-empty{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:200px;gap:10px;}
+.history-empty-icon{font-size:32px;opacity:0.3;}
+.history-empty-text{color:rgba(255,255,255,0.2);font-size:12px;}
+.history-item{display:flex;align-items:center;gap:11px;padding:10px 18px;
+  cursor:pointer;transition:background 0.15s;}
+.history-item:active{background:rgba(255,255,255,0.04);}
+.history-thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;
+  background:rgba(255,255,255,0.05);flex-shrink:0;}
+.history-info{flex:1;min-width:0;}
+.history-track{color:#fff;font-size:12px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.history-artist{color:rgba(255,255,255,0.35);font-size:11px;}
+.history-time{color:rgba(255,255,255,0.18);font-size:10px;flex-shrink:0;}
+.history-clear{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.05);flex-shrink:0;}
+.history-clear-btn{width:100%;padding:9px;border-radius:10px;border:none;cursor:pointer;
+  background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.15);
+  color:rgba(255,100,100,0.6);font-size:11px;font-family:inherit;}
+
+/* 광고주 신청 패널 */
+#adApplyPanel{position:fixed;top:0;right:0;bottom:0;z-index:700;width:320px;
+  background:rgba(6,4,16,0.98);backdrop-filter:blur(30px);
+  border-left:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
+#adApplyPanel.open{transform:translateX(0);}
+.apply-header{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.apply-title{color:#fff;font-size:15px;font-weight:700;}
+.apply-close{background:rgba(255,255,255,0.06);border:none;border-radius:50%;
+  width:26px;height:26px;color:rgba(255,255,255,0.4);cursor:pointer;
+  font-size:14px;line-height:26px;text-align:center;font-family:inherit;}
+.apply-body{flex:1;overflow-y:auto;padding:16px 18px;}
+.apply-body::-webkit-scrollbar{display:none;}
+.pkg-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
+.pkg-card:active{border-color:rgba(199,125,255,0.4);background:rgba(199,125,255,0.06);}
+.pkg-card.selected{border-color:rgba(199,125,255,0.5);background:rgba(199,125,255,0.08);}
+.pkg-name{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px;
+  display:flex;justify-content:space-between;}
+.pkg-price{color:#c77dff;font-weight:700;}
+.pkg-desc{color:rgba(255,255,255,0.35);font-size:11px;line-height:1.6;}
+.apply-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;
+  font-family:inherit;outline:none;margin-bottom:8px;transition:border-color 0.2s;}
+.apply-input:focus{border-color:rgba(199,125,255,0.4);}
+.apply-input::placeholder{color:rgba(255,255,255,0.2);}
+.apply-label{color:rgba(255,255,255,0.35);font-size:11px;margin-bottom:5px;display:block;}
+.apply-submit{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;
+  font-size:14px;font-weight:700;font-family:inherit;
+  box-shadow:0 6px 20px #c77dff33;margin-top:12px;}
+.apply-success{display:none;text-align:center;padding:20px 0;}
+.apply-success-icon{font-size:48px;margin-bottom:12px;}
+.apply-success-text{color:#fff;font-size:15px;font-weight:700;margin-bottom:6px;}
+.apply-success-sub{color:rgba(255,255,255,0.35);font-size:12px;line-height:1.6;}
 
 /* 검색 오버레이 */
 #searchOverlay{position:fixed;inset:0;z-index:1000;
@@ -112,64 +244,70 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   display:flex;align-items:flex-end;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity 0.25s;}
 #searchOverlay.open{opacity:1;pointer-events:all;}
-#searchSheet{width:100%;max-width:560px;
-  background:rgba(10,8,24,0.99);border-radius:20px 20px 0 0;
-  border:1px solid rgba(255,255,255,0.08);border-bottom:none;
-  padding:20px 16px 40px;
-  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+#searchSheet{width:100%;max-width:560px;background:rgba(10,8,24,0.99);
+  border-radius:20px 20px 0 0;border:1px solid rgba(255,255,255,0.08);border-bottom:none;
+  padding:20px 16px 40px;transform:translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
   max-height:85dvh;display:flex;flex-direction:column;}
 #searchOverlay.open #searchSheet{transform:translateY(0);}
-.sheet-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 18px;flex-shrink:0;}
+.sheet-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);
+  border-radius:2px;margin:0 auto 18px;flex-shrink:0;}
 .sheet-title{color:#fff;font-size:16px;font-weight:700;margin-bottom:14px;flex-shrink:0;}
 .search-input-wrap{display:flex;align-items:center;gap:10px;
   background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
   border-radius:12px;padding:11px 14px;margin-bottom:14px;flex-shrink:0;
   transition:border-color 0.2s;}
 .search-input-wrap:focus-within{border-color:rgba(199,125,255,0.5);}
-#searchInput{flex:1;background:none;border:none;outline:none;color:#fff;font-size:16px;font-family:inherit;}
+#searchInput{flex:1;background:none;border:none;outline:none;color:#fff;
+  font-size:16px;font-family:inherit;}
 #searchInput::placeholder{color:rgba(255,255,255,0.25);}
-#searchClear{background:none;border:none;color:rgba(255,255,255,0.25);cursor:pointer;font-size:18px;padding:0;display:none;font-family:inherit;}
+#searchClear{background:none;border:none;color:rgba(255,255,255,0.25);cursor:pointer;
+  font-size:18px;padding:0;display:none;font-family:inherit;}
 #searchResults{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
 #searchResults::-webkit-scrollbar{display:none;}
-.quick-title{color:rgba(255,255,255,0.3);font-size:11px;font-weight:500;margin-bottom:9px;letter-spacing:0.03em;}
+.quick-title{color:rgba(255,255,255,0.3);font-size:11px;font-weight:500;
+  margin-bottom:9px;letter-spacing:0.03em;}
 .quick-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
 .quick-tag{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
-  border-radius:20px;padding:6px 13px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;
-  transition:all 0.15s;font-family:inherit;}
-.quick-tag:active{background:rgba(199,125,255,0.15);border-color:rgba(199,125,255,0.3);color:#c77dff;}
-.result-item{display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;cursor:pointer;
-  transition:background 0.15s;min-height:56px;}
+  border-radius:20px;padding:6px 13px;color:rgba(255,255,255,0.5);
+  font-size:12px;cursor:pointer;font-family:inherit;}
+.quick-tag:active{background:rgba(199,125,255,0.15);color:#c77dff;}
+.result-item{display:flex;align-items:center;gap:11px;padding:10px;
+  border-radius:11px;cursor:pointer;min-height:56px;}
 .result-item:active{background:rgba(199,125,255,0.08);}
-.result-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,0.05);}
+.result-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;
+  flex-shrink:0;background:rgba(255,255,255,0.05);}
 .result-info{flex:1;min-width:0;}
-.result-title{color:#fff;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.result-channel{color:rgba(255,255,255,0.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.result-title{color:#fff;font-size:13px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.result-channel{color:rgba(255,255,255,0.35);font-size:11px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-loading{text-align:center;padding:30px 0;color:rgba(255,255,255,0.3);font-size:13px;}
 
 /* 미니 플레이어 */
 #miniPlayer{position:fixed;bottom:0;left:0;right:0;z-index:500;
   background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
-  border-top:1px solid rgba(255,255,255,0.07);
-  padding:12px 16px 28px;
+  border-top:1px solid rgba(255,255,255,0.07);padding:12px 16px 28px;
   transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
 #miniPlayer.open{transform:translateY(0);}
 .player-inner{display:flex;align-items:center;gap:12px;}
 .player-thumb{width:42px;height:42px;border-radius:9px;object-fit:cover;
   background:rgba(199,125,255,0.1);flex-shrink:0;border:1px solid rgba(199,125,255,0.2);}
 .player-info{flex:1;min-width:0;}
-.player-title{color:#fff;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.player-channel{color:rgba(255,255,255,0.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-title{color:#fff;font-size:13px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.player-channel{color:rgba(255,255,255,0.35);font-size:11px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .player-controls{display:flex;align-items:center;gap:4px;}
 .ctrl-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.6);
-  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:18px;transition:background 0.15s;font-family:inherit;}
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:18px;font-family:inherit;}
 .ctrl-btn:active{background:rgba(255,255,255,0.1);}
 .ctrl-btn.play-btn{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;
   width:40px;height:40px;font-size:15px;box-shadow:0 4px 14px #c77dff44;}
 .share-btn{background:rgba(199,125,255,0.12);border:1px solid rgba(199,125,255,0.25);
   border-radius:18px;padding:6px 12px;cursor:pointer;
   color:#c77dff;font-size:11px;font-weight:600;white-space:nowrap;font-family:inherit;}
-.share-btn:active{background:rgba(199,125,255,0.2);}
 
 /* 곡 카드 */
 #songcard{position:fixed;bottom:90px;left:16px;z-index:200;
@@ -180,12 +318,15 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   transition:opacity 0.22s,transform 0.22s;pointer-events:none;overflow:hidden;}
 #songcard.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
 .card-header{padding:14px 16px 11px;display:flex;align-items:flex-start;gap:11px;}
-.card-albumart{width:48px;height:48px;border-radius:9px;flex-shrink:0;object-fit:cover;background:rgba(255,255,255,0.05);}
-.card-track{color:#fff;font-size:13px;font-weight:700;line-height:1.35;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-albumart{width:48px;height:48px;border-radius:9px;flex-shrink:0;
+  object-fit:cover;background:rgba(255,255,255,0.05);}
+.card-track{color:#fff;font-size:13px;font-weight:700;line-height:1.35;
+  margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .card-artist{color:rgba(255,255,255,0.4);font-size:11px;font-weight:300;}
 .card-divider{height:1px;background:rgba(255,255,255,0.05);margin:0 16px;}
 .card-moodbox{padding:10px 16px;}
-.mood-label{color:rgba(255,255,255,0.25);font-size:10px;font-weight:500;letter-spacing:0.05em;margin-bottom:6px;}
+.mood-label{color:rgba(255,255,255,0.25);font-size:10px;font-weight:500;
+  letter-spacing:0.05em;margin-bottom:6px;}
 .card-moods{display:flex;flex-wrap:wrap;gap:4px;}
 .mood-tag{border-radius:20px;padding:3px 9px;font-size:10px;font-weight:500;}
 .card-footer{padding:9px 16px 13px;display:flex;align-items:center;justify-content:space-between;}
@@ -193,8 +334,8 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .footer-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .footer-text{color:rgba(255,255,255,0.22);font-size:11px;}
 .footer-ago{color:rgba(255,255,255,0.15);font-size:11px;}
-.card-close{position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.06);border:none;
-  border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,0.35);
+.card-close{position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.06);
+  border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,0.35);
   cursor:pointer;font-size:14px;line-height:24px;text-align:center;font-family:inherit;}
 
 /* 광고 빌보드 */
@@ -202,9 +343,8 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   filter:drop-shadow(0 8px 20px rgba(0,0,0,0.8));animation:bbFloat 3.5s ease-in-out infinite;}
 @keyframes bbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .bb-card{background:rgba(6,4,16,0.96);border-radius:12px;padding:8px 12px 8px 9px;
-  display:flex;align-items:center;gap:8px;border:1px solid;position:relative;overflow:hidden;
-  min-width:130px;white-space:nowrap;transition:transform 0.2s;}
-.bb-card:hover{transform:scale(1.05);}
+  display:flex;align-items:center;gap:8px;border:1px solid;position:relative;
+  overflow:hidden;min-width:130px;white-space:nowrap;}
 .bb-card::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
   animation:bbShine 3.5s ease-in-out infinite;}
@@ -212,7 +352,8 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .bb-adtag{position:absolute;top:-8px;right:8px;
   background:linear-gradient(135deg,#c77dff,#7B68EE);
   border-radius:7px;padding:2px 7px;color:#fff;font-size:9px;font-weight:700;}
-.bb-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.bb-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex-shrink:0;}
 .bb-name{color:#fff;font-size:11px;font-weight:700;margin-bottom:1px;}
 .bb-sub{color:rgba(255,255,255,0.35);font-size:9px;}
 .bb-line{width:2px;height:18px;}
@@ -225,7 +366,8 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   opacity:0;transform:translateY(10px) scale(0.97);
   transition:opacity 0.22s,transform 0.22s;pointer-events:none;overflow:hidden;}
 #adcard.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
-.adc-hero{height:90px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
+.adc-hero{height:90px;display:flex;align-items:center;justify-content:center;
+  font-size:44px;position:relative;}
 .adc-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:35px;
   background:linear-gradient(to bottom,transparent,rgba(8,6,18,0.96));}
 .adc-body{padding:10px 16px 16px;}
@@ -235,8 +377,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .adc-title{color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.4;}
 .adc-desc{color:rgba(255,255,255,0.38);font-size:11px;margin-bottom:12px;line-height:1.7;}
 .adc-cta{display:block;width:100%;padding:11px;border-radius:11px;border:none;cursor:pointer;
-  font-size:12px;font-weight:700;font-family:inherit;transition:transform 0.15s;}
-.adc-cta:active{transform:scale(0.98);}
+  font-size:12px;font-weight:700;font-family:inherit;}
 .adc-stats{display:flex;margin-top:10px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;}
 .stat-item{flex:1;text-align:center;}
 .stat-num{color:#fff;font-size:13px;font-weight:700;}
@@ -246,7 +387,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   cursor:pointer;font-size:15px;line-height:26px;text-align:center;font-family:inherit;}
 
 /* 토스트 */
-#toast{position:fixed;top:60px;left:50%;z-index:300;
+#toast{position:fixed;top:60px;left:50%;z-index:9000;
   transform:translateX(-50%) translateY(-10px);
   background:rgba(8,6,18,0.92);backdrop-filter:blur(16px);
   border:1px solid rgba(255,255,255,0.07);border-radius:30px;padding:8px 16px;
@@ -268,59 +409,50 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 .nick-title{color:#fff;font-size:20px;font-weight:700;margin-bottom:8px;}
 .nick-sub{color:rgba(255,255,255,0.35);font-size:13px;margin-bottom:24px;line-height:1.6;}
 #nickInput{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(199,125,255,0.3);
-  border-radius:12px;padding:13px 16px;color:#fff;font-size:16px;font-family:inherit;
-  outline:none;text-align:center;margin-bottom:12px;}
+  border-radius:12px;padding:13px 16px;color:#fff;font-size:16px;
+  font-family:inherit;outline:none;text-align:center;margin-bottom:12px;}
 #nickInput::placeholder{color:rgba(255,255,255,0.2);}
 .nick-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
   background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;
   font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 6px 20px #c77dff44;}
 
-/* 공유 카드 */
+/* 공유카드 */
 #shareCardOverlay{position:fixed;inset:0;z-index:3000;background:rgba(3,3,10,0.95);
   backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 #shareCardOverlay.open{opacity:1;pointer-events:all;}
-#shareCanvas{border-radius:16px;max-width:calc(100vw - 48px);box-shadow:0 20px 60px rgba(0,0,0,0.8);}
+#shareCanvas{border-radius:16px;max-width:calc(100vw - 48px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.8);}
 .share-card-btns{display:flex;gap:10px;}
-.sc-btn{padding:12px 22px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;}
+.sc-btn{padding:12px 22px;border-radius:12px;border:none;cursor:pointer;
+  font-size:13px;font-weight:700;font-family:inherit;}
 .sc-save{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;}
 .sc-close{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);}
 
-/* 마커 */
-.noct-marker{position:relative;width:18px;height:18px;cursor:pointer;}
-.noct-marker .m-ring{position:absolute;inset:-6px;border-radius:50%;border:1.5px solid;opacity:0;animation:ringOut 2.8s ease-out infinite;}
-.noct-marker .m-ring2{position:absolute;inset:-2px;border-radius:50%;opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite;}
-.noct-marker .m-core{position:absolute;inset:3px;border-radius:50%;transition:transform 0.18s;}
-.noct-marker .m-shine{position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,0.85);}
-.noct-marker:active .m-core{transform:scale(1.4);}
-@keyframes ringOut{0%{transform:scale(0.6);opacity:0.8}100%{transform:scale(2.6);opacity:0}}
-@keyframes glowBreath{0%,100%{opacity:0.15}50%{opacity:0.3}}
+/* 새벽모드 별 */
+.dawn-star{position:fixed;border-radius:50%;background:#fff;pointer-events:none;
+  animation:twinkle 3s ease-in-out infinite;z-index:2;}
+@keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
 
-/* 내 마커 */
-/* 내 마커 펄스 */
+/* GPS 펄스 */
 @keyframes myPulse{
   0%{box-shadow:0 0 0 0 rgba(199,125,255,0.9);}
   70%{box-shadow:0 0 0 20px rgba(199,125,255,0);}
   100%{box-shadow:0 0 0 0 rgba(199,125,255,0);}
 }
 
-/* 실시간 유저 닉네임 라벨 */
-.live-nick{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
-  background:rgba(6,4,16,0.85);border-radius:6px;padding:1px 5px;
-  font-size:9px;font-weight:600;white-space:nowrap;pointer-events:none;border:1px solid;}
-
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
 </style>
 </head>
 <body>
+<div id="dawnOverlay"></div>
 <div id="vibestrip"></div>
 <div id="map"></div>
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
 
-<!-- 상단바 -->
 <div id="topbar">
-  <div class="logo">
+  <div class="logo" onclick="toggleHistory()">
     <div class="logo-icon">N</div>
     <div>
       <div class="logo-text">noct</div>
@@ -338,12 +470,20 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   <span class="vibe-time" id="vibeTime"></span>
 </div>
 
-<button id="topBtn" onclick="toggleTop()">🔥 TOP 5</button>
+<div id="togetherBadge">
+  <div class="together-dot"></div>
+  <span class="together-text"><span class="together-count" id="togetherCount">0</span>명이 같은 곡 듣는 중</span>
+</div>
+
+<div class="top-right-btns">
+  <button class="icon-btn" id="topBtn" onclick="toggleTop()">🔥 TOP 5</button>
+  <button class="icon-btn" id="vsBtn" onclick="toggleVs()">⚔️ 도시 대결</button>
+  <button class="icon-btn" id="reportBtn" onclick="toggleReport()">📊 감성 리포트</button>
+  <button class="icon-btn" id="adBtn" onclick="toggleAdApply()">📢 광고 문의</button>
+</div>
+
 <div id="topPanel">
-  <div class="top-header">
-    <span class="top-title">🔥 지금 이 도시 TOP 5</span>
-    <button class="top-close" onclick="toggleTop()">×</button>
-  </div>
+  <div class="panel-title">🔥 지금 이 도시 TOP 5</div>
   <div id="topList"></div>
 </div>
 
@@ -355,18 +495,13 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   <div class="live-sub">실시간 음악 중</div>
 </div>
 
-<!-- 내 음악 올리기 버튼 -->
 <button id="mainBtn" onclick="openSearch()">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
   내 음악 올리기
 </button>
+<button id="myLocBtn" onclick="flyToMyMarker()">📍 내 위치로</button>
 
-<!-- 내 위치로 버튼 (재생 중일 때만 표시) -->
-<button id="myLocBtn" onclick="flyToMyMarker()">
-  📍 내 위치로
-</button>
-
-<!-- 검색 모달 -->
+<!-- 검색 -->
 <div id="searchOverlay" onclick="handleOverlayClick(event)">
   <div id="searchSheet">
     <div class="sheet-handle"></div>
@@ -452,13 +587,107 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   </div>
 </div>
 
+<!-- 부산 vs 서울 -->
+<div id="vsPanel">
+  <div class="vs-title">⚔️ 부산 vs 서울 음악 취향</div>
+  <div class="vs-cities">
+    <div class="vs-city">
+      <div class="vs-city-name" style="color:#60a5fa;">🌊 부산</div>
+      <div id="vsListBusan"></div>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="vs-city">
+      <div class="vs-city-name" style="color:#c084fc;text-align:right;">서울 🏙️</div>
+      <div id="vsListSeoul"></div>
+    </div>
+  </div>
+  <div class="vs-bar-wrap">
+    <div class="vs-bar-label">
+      <span class="vs-bar-text">새벽 감성</span>
+      <span class="vs-bar-text">댄스/팝</span>
+    </div>
+    <div class="vs-bar"><div class="vs-bar-fill" id="vsBar1" style="background:#60a5fa;"></div></div>
+    <div class="vs-bar-label">
+      <span class="vs-bar-text">인디/감성</span>
+      <span class="vs-bar-text">힙합/R&B</span>
+    </div>
+    <div class="vs-bar"><div class="vs-bar-fill" id="vsBar2" style="background:#c084fc;"></div></div>
+  </div>
+  <button class="vs-close" onclick="toggleVs()">닫기</button>
+</div>
+
+<!-- 감성 리포트 -->
+<div id="reportPanel">
+  <div class="report-title">
+    📊 오늘 <span id="reportCity">부산</span> 감성 리포트
+    <button class="report-close" onclick="toggleReport()">×</button>
+  </div>
+  <div id="reportBars"></div>
+  <div class="report-summary" id="reportSummary"></div>
+</div>
+
+<!-- 청취 기록 -->
+<div id="historyPanel">
+  <div class="history-header">
+    <span class="history-title">🎵 내 청취 기록</span>
+    <button class="history-close" onclick="toggleHistory()">×</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+  <div class="history-clear">
+    <button class="history-clear-btn" onclick="clearHistory()">기록 전체 삭제</button>
+  </div>
+</div>
+
+<!-- 광고주 신청 -->
+<div id="adApplyPanel">
+  <div class="apply-header">
+    <span class="apply-title">📢 광고 문의</span>
+    <button class="apply-close" onclick="toggleAdApply()">×</button>
+  </div>
+  <div class="apply-body" id="applyBody">
+    <div style="color:rgba(255,255,255,0.4);font-size:11px;margin-bottom:14px;line-height:1.7;">
+      noct 지도 위에 브랜드를 올려보세요.<br>
+      새벽에 음악 듣는 MZ세대에게 정확히 노출됩니다.
+    </div>
+
+    <div class="pkg-card" id="pkg1" onclick="selectPkg(1)">
+      <div class="pkg-name">Basic <span class="pkg-price">월 30만원</span></div>
+      <div class="pkg-desc">빌보드 마커 1개 · 구 단위 노출 · 기본 카드</div>
+    </div>
+    <div class="pkg-card" id="pkg2" onclick="selectPkg(2)">
+      <div class="pkg-name">Premium <span class="pkg-price">월 100만원</span></div>
+      <div class="pkg-desc">빌보드 + 상세 카드 + CTA 버튼 · 주간 리포트</div>
+    </div>
+    <div class="pkg-card" id="pkg3" onclick="selectPkg(3)">
+      <div class="pkg-name">Exclusive <span class="pkg-price">월 300만원</span></div>
+      <div class="pkg-desc">지역 독점 + 토스트 노출 + 클릭 데이터 리포트</div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <span class="apply-label">브랜드명</span>
+      <input class="apply-input" id="applyBrand" placeholder="예: 메가커피">
+      <span class="apply-label">연락처 (이메일 또는 전화)</span>
+      <input class="apply-input" id="applyContact" placeholder="contact@brand.com">
+      <span class="apply-label">노출 희망 지역</span>
+      <input class="apply-input" id="applyArea" placeholder="예: 부산 해운대, 서울 홍대">
+    </div>
+    <button class="apply-submit" onclick="submitApply()">신청하기 🚀</button>
+
+    <div class="apply-success" id="applySuccess">
+      <div class="apply-success-icon">🎉</div>
+      <div class="apply-success-text">신청이 완료됐어요!</div>
+      <div class="apply-success-sub">빠른 시일 내에 연락드리겠습니다.<br>noct와 함께해주셔서 감사해요.</div>
+    </div>
+  </div>
+</div>
+
 <!-- 토스트 -->
 <div id="toast">
-  <span class="toast-pill">NEW</span>
+  <span class="toast-pill">noct</span>
   <span id="toastMsg" style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
 </div>
 
-<!-- 닉네임 모달 -->
+<!-- 닉네임 -->
 <div id="nickOverlay">
   <div id="nickBox">
     <div class="nick-emoji">🎵</div>
@@ -482,20 +711,13 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 <script>
 // ── API 키 ──
 mapboxgl.accessToken = 'pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
-const YT_KEY = 'AIzaSyDwV2-CKSCc3igQoO4gp2nPEtmH9IilS9E';
-const SB_URL = 'https://ivnwqfqhbooxsqerweah.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
-
-// Supabase 초기화 (CDN 로드 후)
-let db = null;
-function initSupabase() {
-  if (window.supabase) {
-    db = window.supabase.createClient(SB_URL, SB_KEY);
-  }
-}
+var YT_KEY = 'AIzaSyDwV2-CKSCc3igQoO4gp2nPEtmH9IilS9E';
+var SB_URL = 'https://ivnwqfqhbooxsqerweah.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
+var db = null;
 
 // ── 데이터 ──
-const FAKE_SONGS = [
+var FAKE_SONGS = [
   {title:"밤편지",channel:"IU",mood:["그리움","새벽 3시"],color:"#60a5fa"},
   {title:"Slow Dancing in the Dark",channel:"Joji",mood:["몽환","감정 잠수"],color:"#c084fc"},
   {title:"Die For You",channel:"The Weeknd",mood:["열망","야간"],color:"#f87171"},
@@ -510,47 +732,47 @@ const FAKE_SONGS = [
   {title:"Golden Hour",channel:"JVKE",mood:["설렘","따뜻한 새벽"],color:"#fbbf24"},
 ];
 
-const ADS = {
-  busan: [
+var ADS = {
+  busan:[
     {lng:129.059,lat:35.156,icon:"🎵",brand:"Melon",color:"#00CD3C",tagline:"서면 음악 스폰서",title:"Melon이 이 건물을 후원합니다",desc:"국내 1위 음악 스트리밍 서비스",cta:"Melon 3개월 무료 체험",stats:[{n:"2,400만",l:"월간 사용자"},{n:"#1",l:"국내 스트리밍"},{n:"7천만",l:"곡 보유"}]},
     {lng:129.160,lat:35.158,icon:"☕",brand:"메가커피",color:"#FFCC00",tagline:"해운대 카페 스폰서",title:"새벽 감성엔 메가커피",desc:"음악 듣다 지쳤을 때 가장 가까운 메가커피",cta:"아메리카노 500원 할인 쿠폰",stats:[{n:"2,800개",l:"전국 매장"},{n:"24시간",l:"해운대점"},{n:"500원",l:"할인 쿠폰"}]},
     {lng:129.118,lat:35.153,icon:"🛵",brand:"배달의민족",color:"#2AC1BC",tagline:"광안리 야식 스폰서",title:"새벽 음악엔 야식이 필요해",desc:"noct 유저 전용 배달비 무료",cta:"배달비 무료 쿠폰 받기",stats:[{n:"9만개",l:"입점 가게"},{n:"무료",l:"배달비"},{n:"30분",l:"평균 배달"}]},
     {lng:129.087,lat:35.204,icon:"🏋️",brand:"짐박스",color:"#FF4757",tagline:"동래 피트니스 스폰서",title:"운동할 때 음악이 필요해",desc:"noct 감성 그대로 짐박스에서",cta:"1개월 무료 이용권",stats:[{n:"50개",l:"부산 지점"},{n:"24시간",l:"연중무휴"},{n:"1개월",l:"무료 체험"}]},
   ],
-  seoul: [
+  seoul:[
     {lng:127.027,lat:37.497,icon:"💳",brand:"카카오페이",color:"#FFCD00",tagline:"강남 결제 스폰서",title:"음악 결제도 카카오페이로",desc:"noct 프리미엄 첫달 무료",cta:"카카오페이로 시작하기",stats:[{n:"3,800만",l:"가입자"},{n:"#1",l:"간편결제"},{n:"무료",l:"첫달"}]},
     {lng:126.987,lat:37.583,icon:"🛍️",brand:"무신사",color:"#FF6B2C",tagline:"성수 패션 스폰서",title:"감성 음악처럼 감성 패션",desc:"noct 유저 전용 15% 할인",cta:"할인 코드 · NOCT15",stats:[{n:"1,200만",l:"회원"},{n:"15%",l:"전용 할인"},{n:"성수",l:"플래그십"}]},
     {lng:126.923,lat:37.566,icon:"🍺",brand:"곰표맥주",color:"#FFA500",tagline:"홍대 야간 스폰서",title:"홍대 새벽 감성 곰표맥주",desc:"noct 음악 들으며 곰표 한 캔",cta:"주변 편의점 찾기",stats:[{n:"전국",l:"편의점"},{n:"4.8",l:"평균 별점"},{n:"새벽",l:"홍대 감성"}]},
   ],
 };
 
-const BUSAN_SPOTS = [
+var BUSAN_SPOTS = [
   {lng:129.059,lat:35.156,name:"서면"},{lng:129.160,lat:35.158,name:"해운대"},
   {lng:129.030,lat:35.097,name:"남포동"},{lng:129.118,lat:35.153,name:"광안리"},
   {lng:129.131,lat:35.168,name:"센텀시티"},{lng:129.075,lat:35.210,name:"연산동"},
   {lng:129.087,lat:35.204,name:"동래"},{lng:129.103,lat:35.158,name:"수영구"},
 ];
-const SEOUL_SPOTS = [
+var SEOUL_SPOTS = [
   {lng:127.027,lat:37.497,name:"강남"},{lng:126.923,lat:37.566,name:"홍대"},
   {lng:126.976,lat:37.570,name:"광화문"},{lng:127.049,lat:37.514,name:"잠실"},
   {lng:126.904,lat:37.513,name:"여의도"},{lng:127.000,lat:37.560,name:"명동"},
   {lng:127.056,lat:37.517,name:"삼성동"},{lng:126.987,lat:37.583,name:"성수동"},
 ];
 
-const CITIES = {
-  busan: {center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
-  seoul: {center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
+var CITIES = {
+  busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
+  seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
 };
 
-const TOP5 = {
-  busan: [
+var TOP5 = {
+  busan:[
     {track:"밤편지",artist:"IU",color:"#60a5fa"},
     {track:"Slow Dancing in the Dark",artist:"Joji",color:"#c084fc"},
     {track:"봄날",artist:"BTS",color:"#38bdf8"},
     {track:"오래된 노래",artist:"혁오",color:"#34d399"},
     {track:"Celebrity",artist:"IU",color:"#f9a8d4"},
   ],
-  seoul: [
+  seoul:[
     {track:"Attention",artist:"NewJeans",color:"#67e8f9"},
     {track:"LOVE DIVE",artist:"IVE",color:"#c084fc"},
     {track:"BLINDING LIGHTS",artist:"The Weeknd",color:"#f472b6"},
@@ -559,26 +781,48 @@ const TOP5 = {
   ],
 };
 
-// ── 상태 ──
-let currentCity = 'busan';
-let ytPlayer = null, ytReady = false, isPlaying = false;
-let currentSong = null, myMarker = null;
-let myLng = null, myLat = null;
-let myNick = localStorage.getItem('noct_nick') || '';
-let myUserId = localStorage.getItem('noct_uid') || null;
-const markers = [], adMarkers = [], liveMarkers = {};
-let searchTimer = null, topVisible = false;
+var MOODS = {
+  busan:[
+    {name:"새벽 감성",pct:62,color:"#a78bfa"},
+    {name:"그리움/감성",pct:48,color:"#60a5fa"},
+    {name:"야간 드라이브",pct:35,color:"#f87171"},
+    {name:"힐링/잔잔함",pct:28,color:"#34d399"},
+    {name:"업템포/신남",pct:18,color:"#fbbf24"},
+  ],
+  seoul:[
+    {name:"트렌디/팝",pct:70,color:"#c084fc"},
+    {name:"힙합/R&B",pct:55,color:"#f472b6"},
+    {name:"새벽 감성",pct:42,color:"#a78bfa"},
+    {name:"인디/감성",pct:33,color:"#34d399"},
+    {name:"댄스/EDM",pct:25,color:"#67e8f9"},
+  ],
+};
 
-// ── 유튜브 ──
-const ytScript = document.createElement('script');
+// ── 상태 ──
+var currentCity = 'busan';
+var ytPlayer = null, ytReady = false, isPlaying = false;
+var currentSong = null, myMarker = null;
+var myLng = null, myLat = null;
+var myNick = localStorage.getItem('noct_nick') || '';
+var myUserId = localStorage.getItem('noct_uid') || null;
+var markers = [], adMarkers = [], liveMarkers = {};
+var searchTimer = null;
+var topVisible = false, vsVisible = false, reportVisible = false;
+var selectedPkg = 0;
+var listenHistory = JSON.parse(localStorage.getItem('noct_history') || '[]');
+var gpsWatchId = null, gpsReady = false;
+var dawnMode = false, dawnStars = [];
+
+// ── YouTube ──
+var ytScript = document.createElement('script');
 ytScript.src = 'https://www.youtube.com/iframe_api';
 document.head.appendChild(ytScript);
 
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('ytPlayer', {
-    height: '1', width: '1',
-    playerVars: {autoplay: 0, controls: 0},
-    events: {
+    height:'1', width:'1',
+    playerVars:{autoplay:0, controls:0},
+    events:{
       onReady: function() { ytReady = true; },
       onStateChange: function(e) {
         if (e.data === YT.PlayerState.PLAYING) {
@@ -591,6 +835,50 @@ function onYouTubeIframeAPIReady() {
       }
     }
   });
+}
+
+// ── Supabase ──
+function initSupabase() {
+  if (window.supabase) {
+    db = window.supabase.createClient(SB_URL, SB_KEY);
+  }
+}
+
+// ── 새벽 모드 ──
+function checkDawnMode() {
+  var h = new Date().getHours();
+  var isDawn = (h >= 0 && h < 5);
+  if (isDawn && !dawnMode) {
+    dawnMode = true;
+    document.getElementById('dawnOverlay').classList.add('active');
+    addDawnStars();
+    showToast('🌙 새벽 모드 활성화 — 특별한 감성이 펼쳐져요');
+  } else if (!isDawn && dawnMode) {
+    dawnMode = false;
+    document.getElementById('dawnOverlay').classList.remove('active');
+    removeDawnStars();
+  }
+}
+
+function addDawnStars() {
+  for (var i = 0; i < 40; i++) {
+    var star = document.createElement('div');
+    star.className = 'dawn-star';
+    var size = Math.random() * 2 + 1;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * 50 + 'vh';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (2 + Math.random() * 3) + 's';
+    document.body.appendChild(star);
+    dawnStars.push(star);
+  }
+}
+
+function removeDawnStars() {
+  dawnStars.forEach(function(s) { s.remove(); });
+  dawnStars = [];
 }
 
 // ── 감성 태그 ──
@@ -615,9 +903,10 @@ function updateVibe() {
   var now = new Date();
   document.getElementById('vibeTime').textContent =
     String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  checkDawnMode();
 }
 updateVibe();
-setInterval(updateVibe, 30000);
+setInterval(updateVibe, 60000);
 
 // ── 맵 ──
 var map = new mapboxgl.Map({
@@ -635,54 +924,45 @@ map.on('load', function() {
   var labelId = null;
   for (var i = 0; i < layers.length; i++) {
     if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-      labelId = layers[i].id;
-      break;
+      labelId = layers[i].id; break;
     }
   }
-
-  // 3D 건물
   map.addLayer({
-    id: 'bld-normal', source: 'composite', 'source-layer': 'building',
-    filter: ['==', 'extrude', 'true'], type: 'fill-extrusion', minzoom: 12,
-    paint: {
-      'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'height'],
-        0, '#0a0814', 15, '#0e0f20', 40, '#111228', 80, '#131430', 150, '#161640', 250, '#1a1850'],
-      'fill-extrusion-height': ['get', 'height'],
-      'fill-extrusion-base': ['get', 'min_height'],
-      'fill-extrusion-opacity': 0.95,
+    id:'bld-normal', source:'composite', 'source-layer':'building',
+    filter:['==','extrude','true'], type:'fill-extrusion', minzoom:12,
+    paint:{
+      'fill-extrusion-color':['interpolate',['linear'],['get','height'],
+        0,'#0a0814',15,'#0e0f20',40,'#111228',80,'#131430',150,'#161640',250,'#1a1850'],
+      'fill-extrusion-height':['get','height'],
+      'fill-extrusion-base':['get','min_height'],
+      'fill-extrusion-opacity':0.95,
     }
   }, labelId);
-
   map.addLayer({
-    id: 'bld-top', source: 'composite', 'source-layer': 'building',
-    filter: ['all', ['==', 'extrude', 'true'], ['>=', 'height', 20]],
-    type: 'fill-extrusion', minzoom: 14,
-    paint: {
-      'fill-extrusion-color': '#2d1b69',
-      'fill-extrusion-height': ['+', ['get', 'height'], 0.5],
-      'fill-extrusion-base': ['get', 'height'],
-      'fill-extrusion-opacity': 0.45,
+    id:'bld-top', source:'composite', 'source-layer':'building',
+    filter:['all',['==','extrude','true'],['>=','height',20]],
+    type:'fill-extrusion', minzoom:14,
+    paint:{
+      'fill-extrusion-color':'#2d1b69',
+      'fill-extrusion-height':['+',['get','height'],0.5],
+      'fill-extrusion-base':['get','height'],
+      'fill-extrusion-opacity':0.45,
     }
   });
-
-  // 광고 글로우
-  map.addSource('ad-spots', {type: 'geojson', data: {type: 'FeatureCollection', features: []}});
-  map.addLayer({id: 'ad-glow', source: 'ad-spots', type: 'circle',
-    paint: {'circle-radius': 28, 'circle-color': ['get', 'color'], 'circle-opacity': 0.1, 'circle-blur': 1}});
-  map.addLayer({id: 'ad-ring', source: 'ad-spots', type: 'circle',
-    paint: {'circle-radius': 18, 'circle-color': 'rgba(0,0,0,0)',
-      'circle-stroke-width': 2, 'circle-stroke-color': ['get', 'color'], 'circle-stroke-opacity': 0.6}});
-
-  map.setFog({
-    color: 'rgb(3,3,10)', 'high-color': 'rgb(8,6,20)',
-    'horizon-blend': 0.04, 'space-color': 'rgb(3,3,10)', 'star-intensity': 0.5,
-  });
+  map.addSource('ad-spots', {type:'geojson', data:{type:'FeatureCollection', features:[]}});
+  map.addLayer({id:'ad-glow', source:'ad-spots', type:'circle',
+    paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1,'circle-blur':1}});
+  map.addLayer({id:'ad-ring', source:'ad-spots', type:'circle',
+    paint:{'circle-radius':18,'circle-color':'rgba(0,0,0,0)',
+      'circle-stroke-width':2,'circle-stroke-color':['get','color'],'circle-stroke-opacity':0.6}});
+  map.setFog({color:'rgb(3,3,10)','high-color':'rgb(8,6,20)',
+    'horizon-blend':0.04,'space-color':'rgb(3,3,10)','star-intensity':0.5});
 
   spawnMarkers('busan');
   spawnAdLayer('busan');
   spawnAdMarkers('busan');
+  renderTop();
 
-  // 줌에 따라 마커 표시/숨김
   map.on('zoom', function() {
     var z = map.getZoom();
     var opacity = z < 10 ? '0' : '1';
@@ -691,7 +971,6 @@ map.on('load', function() {
     });
   });
 
-  // Supabase 초기화 후 실시간 시작
   initSupabase();
   if (db) {
     loadLiveUsers();
@@ -700,14 +979,14 @@ map.on('load', function() {
   }
 });
 
+map.on('click', function() { closeCard(); closeAdCard(); });
+
 // ── 마커 생성 ──
 function spawnAdLayer(k) {
   var features = (ADS[k] || []).map(function(ad) {
-    return {type: 'Feature', geometry: {type: 'Point', coordinates: [ad.lng, ad.lat]}, properties: {color: ad.color}};
+    return {type:'Feature', geometry:{type:'Point', coordinates:[ad.lng,ad.lat]}, properties:{color:ad.color}};
   });
-  if (map.getSource('ad-spots')) {
-    map.getSource('ad-spots').setData({type: 'FeatureCollection', features: features});
-  }
+  if (map.getSource('ad-spots')) map.getSource('ad-spots').setData({type:'FeatureCollection', features:features});
 }
 
 function spawnMarkers(k) {
@@ -717,14 +996,16 @@ function spawnMarkers(k) {
     var n = Math.floor(4 + Math.random() * 7);
     for (var i = 0; i < n; i++) {
       var s = FAKE_SONGS[Math.floor(Math.random() * FAKE_SONGS.length)];
-      var lng = spot.lng + (Math.random() - 0.5) * 0.02;
-      var lat = spot.lat + (Math.random() - 0.5) * 0.015;
+      var lng = spot.lng + (Math.random()-0.5) * 0.02;
+      var lat = spot.lat + (Math.random()-0.5) * 0.015;
       var el = document.createElement('div');
       el.className = 'noct-marker';
-      el.innerHTML = '<div class="m-ring" style="border-color:' + s.color + ';animation-delay:' + (Math.random()*2) + 's"></div>'
-        + '<div class="m-ring2" style="background:' + s.color + '"></div>'
-        + '<div class="m-core" style="background:' + s.color + ';box-shadow:0 0 10px ' + s.color + '88"></div>'
-        + '<div class="m-shine"></div>';
+      el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;';
+      el.innerHTML =
+        '<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ' + s.color + ';opacity:0;animation:ringOut 2.8s ease-out infinite;animation-delay:' + (Math.random()*2) + 's"></div>' +
+        '<div style="position:absolute;inset:-2px;border-radius:50%;background:' + s.color + ';opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite"></div>' +
+        '<div style="position:absolute;inset:3px;border-radius:50%;background:' + s.color + ';box-shadow:0 0 10px ' + s.color + '88"></div>' +
+        '<div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,0.85)"></div>';
       (function(song, spotName) {
         el.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -732,7 +1013,7 @@ function spawnMarkers(k) {
           showFakeCard(song, spotName);
         });
       })(s, spot.name);
-      markers.push(new mapboxgl.Marker({element: el, anchor: 'center'}).setLngLat([lng, lat]).addTo(map));
+      markers.push(new mapboxgl.Marker({element:el, anchor:'center'}).setLngLat([lng,lat]).addTo(map));
     }
   });
 }
@@ -743,13 +1024,14 @@ function spawnAdMarkers(k) {
   (ADS[k] || []).forEach(function(ad) {
     var el = document.createElement('div');
     el.className = 'ad-wrap';
-    el.innerHTML = '<div class="bb-card" style="border-color:' + ad.color + '55;box-shadow:0 0 24px ' + ad.color + '33">'
-      + '<div class="bb-adtag">AD</div>'
-      + '<div class="bb-ico" style="background:' + ad.color + '22;border:1px solid ' + ad.color + '44">' + ad.icon + '</div>'
-      + '<div><div class="bb-name">' + ad.brand + '</div><div class="bb-sub">' + ad.tagline + '</div></div>'
-      + '</div>'
-      + '<div class="bb-line" style="background:linear-gradient(to bottom,' + ad.color + '99,transparent)"></div>'
-      + '<div class="bb-anchor" style="background:' + ad.color + ';box-shadow:0 0 10px ' + ad.color + '"></div>';
+    el.innerHTML =
+      '<div class="bb-card" style="border-color:' + ad.color + '55;box-shadow:0 0 24px ' + ad.color + '33">' +
+      '<div class="bb-adtag">AD</div>' +
+      '<div class="bb-ico" style="background:' + ad.color + '22;border:1px solid ' + ad.color + '44">' + ad.icon + '</div>' +
+      '<div><div class="bb-name">' + ad.brand + '</div><div class="bb-sub">' + ad.tagline + '</div></div>' +
+      '</div>' +
+      '<div class="bb-line" style="background:linear-gradient(to bottom,' + ad.color + '99,transparent)"></div>' +
+      '<div class="bb-anchor" style="background:' + ad.color + ';box-shadow:0 0 10px ' + ad.color + '"></div>';
     (function(adData) {
       el.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -757,7 +1039,7 @@ function spawnAdMarkers(k) {
         showAdCard(adData);
       });
     })(ad);
-    adMarkers.push(new mapboxgl.Marker({element: el, anchor: 'bottom', offset: [0, -4]}).setLngLat([ad.lng, ad.lat]).addTo(map));
+    adMarkers.push(new mapboxgl.Marker({element:el, anchor:'bottom', offset:[0,-4]}).setLngLat([ad.lng,ad.lat]).addTo(map));
   });
 }
 
@@ -768,11 +1050,7 @@ function openSearch() {
 }
 function closeSearch() { document.getElementById('searchOverlay').classList.remove('open'); }
 function handleOverlayClick(e) { if (e.target === document.getElementById('searchOverlay')) closeSearch(); }
-function setSearch(q) {
-  document.getElementById('searchInput').value = q;
-  handleSearchInput();
-  doSearch();
-}
+function setSearch(q) { document.getElementById('searchInput').value = q; handleSearchInput(); doSearch(); }
 function clearSearch() {
   document.getElementById('searchInput').value = '';
   document.getElementById('searchClear').style.display = 'none';
@@ -795,9 +1073,9 @@ async function doSearch() {
   var res = document.getElementById('searchResults');
   res.innerHTML = '<div class="search-loading">🔍 검색 중...</div>';
   try {
-    var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&q='
-      + encodeURIComponent(q + ' official audio')
-      + '&type=video&videoCategoryId=10&maxResults=8&key=' + YT_KEY;
+    var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&q=' +
+      encodeURIComponent(q + ' official audio') +
+      '&type=video&videoCategoryId=10&maxResults=8&key=' + YT_KEY;
     var data = await fetch(url).then(function(r) { return r.json(); });
     if (!data.items || data.items.length === 0) {
       res.innerHTML = '<div class="search-loading">검색 결과가 없어요 😢</div>';
@@ -808,11 +1086,12 @@ async function doSearch() {
       var el = document.createElement('div');
       el.className = 'result-item';
       var thumb = item.snippet.thumbnails.default.url;
-      el.innerHTML = '<img class="result-thumb" src="' + thumb + '" alt="">'
-        + '<div class="result-info">'
-        + '<div class="result-title">' + item.snippet.title + '</div>'
-        + '<div class="result-channel">' + item.snippet.channelTitle + '</div>'
-        + '</div>';
+      el.innerHTML =
+        '<img class="result-thumb" src="' + thumb + '" alt="">' +
+        '<div class="result-info">' +
+        '<div class="result-title">' + item.snippet.title + '</div>' +
+        '<div class="result-channel">' + item.snippet.channelTitle + '</div>' +
+        '</div>';
       el.addEventListener('click', function() {
         selectSong(item.id.videoId, item.snippet.title, item.snippet.channelTitle, thumb);
       });
@@ -823,62 +1102,13 @@ async function doSearch() {
   }
 }
 
-// ── GPS 위치 가져오기 ──
-// GPS 추적
-var gpsWatchId = null;
-var gpsReady = false;
-
-function startGPSTracking() {
-  if (!navigator.geolocation) return;
-  stopGPS();
-  gpsReady = false;
-
-  gpsWatchId = navigator.geolocation.watchPosition(
-    function(pos) {
-      var lng = pos.coords.longitude;
-      var lat = pos.coords.latitude;
-      var acc = Math.round(pos.coords.accuracy);
-
-      myLng = lng;
-      myLat = lat;
-
-      // 마커 위치 이동
-      if (myMarker) {
-        myMarker.setLngLat([lng, lat]);
-        if (!gpsReady) {
-          // 첫 GPS 수신 시 지도 이동
-          gpsReady = true;
-          map.flyTo({center:[lng,lat], zoom:16, pitch:50, duration:1200});
-        }
-      }
-
-      // 정확도 표시
-      var accText = acc < 20 ? '🟢 GPS 정확' : acc < 100 ? '🟡 GPS 양호' : '🔴 GPS 잡는 중';
-      if (currentSong) {
-        document.getElementById('playerChannel').textContent = currentSong.channel + ' · ' + accText;
-        upsertUser(lng, lat);
-      }
-    },
-    function() { /* GPS 실패 무시 - 이미 마커 있음 */ },
-    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
-  );
-}
-
-function stopGPS() {
-  if (gpsWatchId !== null) {
-    navigator.geolocation.clearWatch(gpsWatchId);
-    gpsWatchId = null;
-  }
-  gpsReady = false;
-}
-
 // ── 곡 선택 ──
 function selectSong(videoId, title, channel, thumb) {
   closeSearch();
-  currentSong = {videoId: videoId, title: title, channel: channel, thumb: thumb};
+  currentSong = {videoId:videoId, title:title, channel:channel, thumb:thumb};
 
   document.getElementById('playerTitle').textContent = title;
-  document.getElementById('playerChannel').textContent = channel + ' · 지도에 표시 중 📍';
+  document.getElementById('playerChannel').textContent = channel + ' · 📍 위치 표시 중';
   if (thumb) document.getElementById('playerThumb').src = thumb;
   document.getElementById('miniPlayer').classList.add('open');
   document.getElementById('livebadge').style.bottom = '88px';
@@ -893,34 +1123,36 @@ function selectSong(videoId, title, channel, thumb) {
     document.getElementById('playBtn').textContent = '⏸';
   }
 
-  // 1단계: GPS 기다리지 않고 즉시 마커 생성 (도시 중심)
+  // 청취 기록 저장
+  addToHistory(title, channel, thumb);
+
+  // 즉시 마커 생성 (도시 중심)
   var city = CITIES[currentCity];
   myLng = city.center[0];
   myLat = city.center[1];
-  placeMyMarker(title, thumb, myLng, myLat);
+  placeMyMarker(myLng, myLat);
   upsertUser(myLng, myLat);
-  showToast('📍 내 음악이 지도에 표시됐어요!');
+  showToast('📍 ' + (myNick || '내') + ' 마커가 지도에 생성됐어요!');
 
-  // 2단계: GPS 위치 오면 마커 이동 (백그라운드)
-  startGPSTracking();
+  // GPS 백그라운드 추적
+  startGPS();
+
+  // 같은 곡 듣는 사람 확인
+  checkSameSong(title);
 }
 
-// ── 내 마커 ──
-function placeMyMarker(title, thumb, lng, lat) {
-  // 기존 마커 제거
+// ── 내 마커 생성 ──
+function placeMyMarker(lng, lat) {
   if (myMarker) { myMarker.remove(); myMarker = null; }
 
   var label = myNick || '나';
 
-  // ── 외부 컨테이너 (인라인 스타일만 사용)
   var container = document.createElement('div');
-  container.style.position = 'relative';
   container.style.display = 'flex';
   container.style.flexDirection = 'column';
   container.style.alignItems = 'center';
   container.style.cursor = 'pointer';
 
-  // 닉네임 라벨
   var nick = document.createElement('div');
   nick.textContent = label;
   nick.style.background = 'linear-gradient(135deg,#c77dff,#7B68EE)';
@@ -932,25 +1164,20 @@ function placeMyMarker(title, thumb, lng, lat) {
   nick.style.borderRadius = '8px';
   nick.style.marginBottom = '5px';
   nick.style.whiteSpace = 'nowrap';
-  nick.style.boxShadow = '0 2px 10px rgba(199,125,255,0.5)';
-  nick.style.maxWidth = '100px';
-  nick.style.overflow = 'hidden';
-  nick.style.textOverflow = 'ellipsis';
+  nick.style.boxShadow = '0 2px 10px rgba(199,125,255,0.6)';
 
-  // 메인 점
   var dot = document.createElement('div');
   dot.style.width = '22px';
   dot.style.height = '22px';
   dot.style.borderRadius = '50%';
   dot.style.background = 'linear-gradient(135deg,#c77dff,#7B68EE)';
-  dot.style.border = '3px solid rgba(255,255,255,0.9)';
-  dot.style.boxShadow = '0 0 16px rgba(199,125,255,0.8)';
+  dot.style.border = '3px solid rgba(255,255,255,0.95)';
+  dot.style.boxShadow = '0 0 0 0 rgba(199,125,255,0.9)';
   dot.style.animation = 'myPulse 1.8s ease-out infinite';
 
   container.appendChild(nick);
   container.appendChild(dot);
 
-  // ── 클릭 이벤트
   container.addEventListener('click', function(e) {
     e.stopPropagation();
     if (!currentSong) return;
@@ -964,29 +1191,65 @@ function placeMyMarker(title, thumb, lng, lat) {
     document.getElementById('songcard').classList.add('visible');
   });
 
-  // ── Mapbox 마커 등록
-  myMarker = new mapboxgl.Marker({
-    element: container,
-    anchor: 'bottom',
-  })
-  .setLngLat([lng, lat])
-  .addTo(map);
+  myMarker = new mapboxgl.Marker({element:container, anchor:'bottom'})
+    .setLngLat([lng, lat])
+    .addTo(map);
 
-  // ── 내 위치로 지도 이동
-  map.flyTo({
-    center: [lng, lat],
-    zoom: 16,
-    pitch: 50,
-    duration: 1500,
-  });
-
-  showToast('📍 ' + label + ' 마커가 지도에 생성됐어요!');
+  map.flyTo({center:[lng,lat], zoom:15, pitch:50, duration:1200});
 }
 
-// ── 내 위치로 이동 버튼 ──
-function flyToMyMarker() {
-  if (myLng && myLat) {
-    map.flyTo({center: [myLng, myLat], zoom: 15, duration: 1000});
+// ── GPS 추적 ──
+function startGPS() {
+  if (!navigator.geolocation) return;
+  stopGPS();
+  gpsReady = false;
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      var lng = pos.coords.longitude;
+      var lat = pos.coords.latitude;
+      var acc = Math.round(pos.coords.accuracy);
+      myLng = lng; myLat = lat;
+
+      if (myMarker) myMarker.setLngLat([lng, lat]);
+
+      if (!gpsReady) {
+        gpsReady = true;
+        map.flyTo({center:[lng,lat], zoom:16, pitch:50, duration:1200});
+      }
+
+      var accText = acc < 20 ? '🟢 정확' : acc < 100 ? '🟡 양호' : '🔴 잡는 중';
+      if (currentSong) {
+        document.getElementById('playerChannel').textContent = currentSong.channel + ' · GPS ' + accText;
+        upsertUser(lng, lat);
+      }
+    },
+    function() {},
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
+function stopGPS() {
+  if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  gpsReady = false;
+}
+
+// ── 같은 곡 듣는 사람 ──
+async function checkSameSong(title) {
+  if (!db) return;
+  var fiveMinAgo = new Date(Date.now()-5*60*1000).toISOString();
+  var result = await db.from('live_users').select('*')
+    .eq('song_title', title).gte('updated_at', fiveMinAgo);
+  if (result.data) {
+    var count = result.data.filter(function(u) { return u.id !== myUserId; }).length;
+    var badge = document.getElementById('togetherBadge');
+    if (count > 0) {
+      document.getElementById('togetherCount').textContent = count;
+      badge.style.display = 'flex';
+      showToast('🎵 지금 ' + count + '명이 같은 곡 듣고 있어요!');
+    } else {
+      badge.style.display = 'none';
+    }
   }
 }
 
@@ -998,21 +1261,23 @@ function togglePlay() {
 
 function stopAndClear() {
   if (ytPlayer) ytPlayer.stopVideo();
-  isPlaying = false;
-  currentSong = null;
-  myLng = null; myLat = null;
+  isPlaying = false; currentSong = null; myLng = null; myLat = null;
   stopGPS();
   if (myMarker) { myMarker.remove(); myMarker = null; }
   document.getElementById('miniPlayer').classList.remove('open');
   document.getElementById('livebadge').style.bottom = '100px';
   document.getElementById('mainBtn').style.display = 'flex';
   document.getElementById('myLocBtn').style.display = 'none';
+  document.getElementById('togetherBadge').style.display = 'none';
   if (myUserId && db) {
     db.from('live_users').delete().eq('id', myUserId).then(function() {
-      myUserId = null;
-      localStorage.removeItem('noct_uid');
+      myUserId = null; localStorage.removeItem('noct_uid');
     });
   }
+}
+
+function flyToMyMarker() {
+  if (myLng && myLat) map.flyTo({center:[myLng,myLat], zoom:16, duration:1000});
 }
 
 // ── 카드들 ──
@@ -1040,7 +1305,7 @@ function showAdCard(ad) {
   var cta = document.getElementById('adcta');
   cta.textContent = ad.cta;
   cta.style.background = 'linear-gradient(135deg,' + ad.color + ',' + ad.color + 'cc)';
-  cta.style.color = ['#FFCC00','#FFCD00','#FFA500'].includes(ad.color) ? '#111' : '#fff';
+  cta.style.color = ['#FFCC00','#FFCD00','#FFA500'].indexOf(ad.color) >= 0 ? '#111' : '#fff';
   cta.style.boxShadow = '0 4px 16px ' + ad.color + '44';
   ad.stats.forEach(function(s, i) {
     document.getElementById('s' + (i+1) + 'n').textContent = s.n;
@@ -1049,8 +1314,6 @@ function showAdCard(ad) {
   document.getElementById('adcard').classList.add('visible');
 }
 function closeAdCard() { document.getElementById('adcard').classList.remove('visible'); }
-
-map.on('click', function() { closeCard(); closeAdCard(); });
 
 // ── 도시 전환 ──
 function flyToCity(k, el) {
@@ -1061,44 +1324,169 @@ function flyToCity(k, el) {
   var city = CITIES[k];
   document.getElementById('cityname').textContent = city.name;
   document.getElementById('livenum').textContent = city.count;
-  map.flyTo({center: city.center, zoom: city.zoom, pitch: city.pitch, bearing: city.bearing, duration: 2400, essential: true});
+  map.flyTo({center:city.center, zoom:city.zoom, pitch:city.pitch, bearing:city.bearing, duration:2400, essential:true});
   setTimeout(function() {
-    spawnMarkers(k);
-    spawnAdLayer(k);
-    spawnAdMarkers(k);
-    renderTop();
+    spawnMarkers(k); spawnAdLayer(k); spawnAdMarkers(k); renderTop();
+    document.getElementById('reportCity').textContent = city.name;
   }, 1500);
 }
 
-// ── TOP 5 ──
+// ── TOP5 ──
 function toggleTop() {
   topVisible = !topVisible;
-  if (topVisible) { renderTop(); }
   document.getElementById('topPanel').classList.toggle('visible', topVisible);
+  document.getElementById('topBtn').classList.toggle('active', topVisible);
+  if (topVisible) renderTop();
 }
 function renderTop() {
   var data = TOP5[currentCity] || TOP5.busan;
   document.getElementById('topList').innerHTML = data.map(function(s, i) {
-    return '<div class="top-item">'
-      + '<span class="top-rank">' + (i+1) + '</span>'
-      + '<div class="top-info">'
-      + '<div class="top-track">' + s.track + '</div>'
-      + '<div class="top-artist">' + s.artist + '</div>'
-      + '</div></div>';
+    return '<div class="top-item">' +
+      '<span class="top-rank">' + (i+1) + '</span>' +
+      '<div class="top-info">' +
+      '<div class="top-track">' + s.track + '</div>' +
+      '<div class="top-artist">' + s.artist + '</div>' +
+      '</div></div>';
   }).join('');
 }
-document.addEventListener('click', function(e) {
-  var panel = document.getElementById('topPanel');
-  var btn = document.getElementById('topBtn');
-  if (topVisible && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-    topVisible = false;
-    panel.classList.remove('visible');
+
+// ── 부산 vs 서울 ──
+function toggleVs() {
+  vsVisible = !vsVisible;
+  document.getElementById('vsPanel').classList.toggle('visible', vsVisible);
+  document.getElementById('vsBtn').classList.toggle('active', vsVisible);
+  if (vsVisible) renderVs();
+}
+function renderVs() {
+  ['busan','seoul'].forEach(function(city) {
+    var data = TOP5[city];
+    var el = document.getElementById('vsList' + (city === 'busan' ? 'Busan' : 'Seoul'));
+    el.innerHTML = data.map(function(s, i) {
+      return '<div class="vs-track">' +
+        '<span class="vs-rank" style="color:' + (city==='busan'?'#60a5fa':'#c084fc') + '">' + (i+1) + '</span>' +
+        '<div class="vs-info">' +
+        '<div class="vs-name">' + s.track + '</div>' +
+        '<div class="vs-artist">' + s.artist + '</div>' +
+        '</div></div>';
+    }).join('');
+  });
+  setTimeout(function() {
+    document.getElementById('vsBar1').style.width = '72%';
+    document.getElementById('vsBar2').style.width = '55%';
+  }, 200);
+}
+
+// ── 감성 리포트 ──
+function toggleReport() {
+  reportVisible = !reportVisible;
+  document.getElementById('reportPanel').classList.toggle('visible', reportVisible);
+  document.getElementById('reportBtn').classList.toggle('active', reportVisible);
+  if (reportVisible) renderReport();
+}
+function renderReport() {
+  var data = MOODS[currentCity] || MOODS.busan;
+  var bars = data.map(function(m) {
+    return '<div class="report-mood-bar">' +
+      '<div class="report-mood-name">' +
+      '<span class="report-mood-label">' + m.name + '</span>' +
+      '<span class="report-mood-pct">' + m.pct + '%</span>' +
+      '</div>' +
+      '<div class="report-bar"><div class="report-bar-fill" style="width:0%;background:' + m.color + '" data-pct="' + m.pct + '"></div></div>' +
+      '</div>';
+  }).join('');
+  document.getElementById('reportBars').innerHTML = bars;
+
+  var summaries = {
+    busan: '오늘 부산은 새벽 감성이 지배적이에요.\n그리움과 감성적인 곡들이 많이 흘러요.\n야간 드라이브 감성도 강하게 느껴집니다.',
+    seoul: '오늘 서울은 트렌디한 팝이 주류예요.\n힙합과 R&B 비중이 높아요.\n새벽엔 인디 감성으로 바뀌는 경향이 있어요.',
+  };
+  document.getElementById('reportSummary').textContent = summaries[currentCity] || summaries.busan;
+
+  setTimeout(function() {
+    document.querySelectorAll('.report-bar-fill').forEach(function(el) {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 100);
+}
+
+// ── 청취 기록 ──
+function addToHistory(title, channel, thumb) {
+  var item = {title:title, channel:channel, thumb:thumb||'', time:Date.now()};
+  listenHistory.unshift(item);
+  if (listenHistory.length > 50) listenHistory.pop();
+  localStorage.setItem('noct_history', JSON.stringify(listenHistory));
+}
+
+function toggleHistory() {
+  document.getElementById('historyPanel').classList.toggle('open');
+  renderHistory();
+}
+
+function renderHistory() {
+  var list = document.getElementById('historyList');
+  if (listenHistory.length === 0) {
+    list.innerHTML = '<div class="history-empty"><div class="history-empty-icon">🎵</div><div class="history-empty-text">아직 들은 곡이 없어요</div></div>';
+    return;
   }
-});
+  list.innerHTML = listenHistory.map(function(item) {
+    var ago = getTimeAgo(item.time);
+    return '<div class="history-item">' +
+      (item.thumb ? '<img class="history-thumb" src="' + item.thumb + '" alt="">' :
+        '<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🎵</div>') +
+      '<div class="history-info">' +
+      '<div class="history-track">' + item.title + '</div>' +
+      '<div class="history-artist">' + item.channel + '</div>' +
+      '</div>' +
+      '<span class="history-time">' + ago + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function getTimeAgo(ts) {
+  var diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return '방금';
+  if (diff < 3600) return Math.floor(diff/60) + '분 전';
+  if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+  return Math.floor(diff/86400) + '일 전';
+}
+
+function clearHistory() {
+  listenHistory = [];
+  localStorage.removeItem('noct_history');
+  renderHistory();
+  showToast('🗑️ 청취 기록이 삭제됐어요');
+}
+
+// ── 광고 신청 ──
+function toggleAdApply() {
+  document.getElementById('adApplyPanel').classList.toggle('open');
+  document.getElementById('adBtn').classList.toggle('active');
+}
+
+function selectPkg(n) {
+  selectedPkg = n;
+  document.querySelectorAll('.pkg-card').forEach(function(el, i) {
+    el.classList.toggle('selected', i+1 === n);
+  });
+}
+
+function submitApply() {
+  var brand = document.getElementById('applyBrand').value.trim();
+  var contact = document.getElementById('applyContact').value.trim();
+  if (!brand || !contact || selectedPkg === 0) {
+    showToast('브랜드명, 연락처, 패키지를 모두 선택해주세요');
+    return;
+  }
+  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(1)').style.display = 'none';
+  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(2)').style.display = 'none';
+  document.getElementById('applyBody').querySelector('.pkg-card:nth-child(3)').style.display = 'none';
+  document.getElementById('applySuccess').style.display = 'block';
+  showToast('🎉 광고 신청이 완료됐어요!');
+}
 
 // ── 닉네임 ──
 function initNick() {
-  if (!myNick) { document.getElementById('nickOverlay').classList.add('open'); }
+  if (!myNick) document.getElementById('nickOverlay').classList.add('open');
 }
 function saveNick() {
   var v = document.getElementById('nickInput').value.trim();
@@ -1127,145 +1515,96 @@ function generateShareCard() {
   var ctx = canvas.getContext('2d');
   var W = 360, H = 560;
   canvas.width = W; canvas.height = H;
-
-  var bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#03030a');
-  bg.addColorStop(0.5, '#0a0520');
-  bg.addColorStop(1, '#03030a');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.strokeStyle = 'rgba(100,80,200,0.06)';
-  ctx.lineWidth = 0.5;
+  var bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#03030a'); bg.addColorStop(0.5,'#0a0520'); bg.addColorStop(1,'#03030a');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(100,80,200,0.06)'; ctx.lineWidth = 0.5;
   for (var i = 0; i < 18; i++) {
-    ctx.beginPath(); ctx.moveTo(0, i*H/18); ctx.lineTo(W, i*H/18); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(i*W/18, 0); ctx.lineTo(i*W/18, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i*H/18); ctx.lineTo(W,i*H/18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i*W/18,0); ctx.lineTo(i*W/18,H); ctx.stroke();
   }
-
   ctx.fillStyle = 'rgba(199,125,255,0.12)';
-  roundRectFill(ctx, 20, 28, 70, 26, 8);
-  ctx.fillStyle = '#c77dff';
-  ctx.font = 'bold 13px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('noct', 55, 46);
-
-  var artSize = 180, artX = (W-artSize)/2, artY = 80;
-  var grd = ctx.createRadialGradient(W/2, artY+artSize/2, 10, W/2, artY+artSize/2, artSize);
-  grd.addColorStop(0, 'rgba(199,125,255,0.25)');
-  grd.addColorStop(1, 'rgba(199,125,255,0)');
-  ctx.fillStyle = grd;
-  ctx.fillRect(artX-40, artY-40, artSize+80, artSize+80);
-
-  ctx.fillStyle = 'rgba(199,125,255,0.15)';
-  roundRectFill(ctx, artX, artY, artSize, artSize, 18);
-  ctx.strokeStyle = 'rgba(199,125,255,0.3)';
-  ctx.lineWidth = 1;
-  roundRectStroke(ctx, artX, artY, artSize, artSize, 18);
-
-  ctx.font = '56px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#c77dff';
-  ctx.fillText('🎵', W/2, artY + artSize/2 + 20);
-
-  finishShareCard(ctx, W, H, artY, artSize);
-}
-
-function finishShareCard(ctx, W, H, artY, artSize) {
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 20px sans-serif';
-  ctx.textAlign = 'center';
-  var t = currentSong.title.length > 22 ? currentSong.title.substring(0,22)+'...' : currentSong.title;
-  ctx.fillText(t, W/2, artY + artSize + 40);
-  ctx.fillStyle = 'rgba(255,255,255,0.42)';
-  ctx.font = '14px sans-serif';
-  ctx.fillText(currentSong.channel, W/2, artY + artSize + 62);
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(40, artY+artSize+82); ctx.lineTo(W-40, artY+artSize+82); ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,0.22)';
-  ctx.font = '12px sans-serif';
-  var nick = myNick || '익명';
-  var city = CITIES[currentCity].name;
-  ctx.fillText(nick + ' · ' + city + ' · 지금 듣는 중', W/2, artY+artSize+106);
-  ctx.fillStyle = 'rgba(199,125,255,0.1)';
-  roundRectFill(ctx, W/2-90, H-58, 180, 38, 10);
-  ctx.strokeStyle = 'rgba(199,125,255,0.22)';
-  ctx.lineWidth = 1;
-  roundRectStroke(ctx, W/2-90, H-58, 180, 38, 10);
-  ctx.fillStyle = '#c77dff';
-  ctx.font = 'bold 11px sans-serif';
-  ctx.fillText('hepick01.github.io/noct', W/2, H-34);
+  rrFill(ctx,20,28,70,26,8);
+  ctx.fillStyle = '#c77dff'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('noct',55,46);
+  var aS = 180, aX = (W-aS)/2, aY = 80;
+  var grd = ctx.createRadialGradient(W/2,aY+aS/2,10,W/2,aY+aS/2,aS);
+  grd.addColorStop(0,'rgba(199,125,255,0.25)'); grd.addColorStop(1,'rgba(199,125,255,0)');
+  ctx.fillStyle = grd; ctx.fillRect(aX-40,aY-40,aS+80,aS+80);
+  ctx.fillStyle = 'rgba(199,125,255,0.15)'; rrFill(ctx,aX,aY,aS,aS,18);
+  ctx.strokeStyle = 'rgba(199,125,255,0.3)'; ctx.lineWidth = 1; rrStroke(ctx,aX,aY,aS,aS,18);
+  ctx.font = '56px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#c77dff';
+  ctx.fillText('🎵',W/2,aY+aS/2+20);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
+  var t2 = currentSong.title.length > 22 ? currentSong.title.substring(0,22)+'...' : currentSong.title;
+  ctx.fillText(t2,W/2,aY+aS+40);
+  ctx.fillStyle = 'rgba(255,255,255,0.42)'; ctx.font = '14px sans-serif';
+  ctx.fillText(currentSong.channel,W/2,aY+aS+62);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,aY+aS+82); ctx.lineTo(W-40,aY+aS+82); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.font = '12px sans-serif';
+  ctx.fillText((myNick||'익명')+' · '+CITIES[currentCity].name+' · 지금 듣는 중',W/2,aY+aS+106);
+  ctx.fillStyle = 'rgba(199,125,255,0.1)'; rrFill(ctx,W/2-90,H-58,180,38,10);
+  ctx.strokeStyle = 'rgba(199,125,255,0.22)'; ctx.lineWidth = 1; rrStroke(ctx,W/2-90,H-58,180,38,10);
+  ctx.fillStyle = '#c77dff'; ctx.font = 'bold 11px sans-serif';
+  ctx.fillText('hepick01.github.io/noct',W/2,H-34);
   document.getElementById('shareCardOverlay').classList.add('open');
 }
 
-function roundRectFill(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
-  ctx.closePath(); ctx.fill();
+function rrFill(ctx,x,y,w,h,r) {
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath(); ctx.fill();
 }
-function roundRectStroke(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
-  ctx.closePath(); ctx.stroke();
+function rrStroke(ctx,x,y,w,h,r) {
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath(); ctx.stroke();
 }
 
 function downloadCard() {
   var canvas = document.getElementById('shareCanvas');
   var link = document.createElement('a');
   link.download = 'noct-' + (currentSong ? currentSong.title.substring(0,10) : 'share') + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  link.href = canvas.toDataURL('image/png'); link.click();
   showToast('📥 이미지 저장됐어요!');
 }
 function closeShareCard() { document.getElementById('shareCardOverlay').classList.remove('open'); }
 
 // ── Supabase 실시간 ──
 var LIVE_COLORS = ["#a78bfa","#f87171","#34d399","#60a5fa","#fbbf24","#f472b6","#67e8f9","#fb923c"];
-
-function getUserColor(nick) {
-  return LIVE_COLORS[(nick.charCodeAt(0) || 0) % LIVE_COLORS.length];
-}
+function getUserColor(nick) { return LIVE_COLORS[(nick.charCodeAt(0)||0) % LIVE_COLORS.length]; }
 
 function renderLiveUser(user) {
   if (user.id === myUserId) return;
   if (liveMarkers[user.id]) { liveMarkers[user.id].remove(); delete liveMarkers[user.id]; }
-  var color = getUserColor(user.nick || '?');
+  var color = getUserColor(user.nick||'?');
   var el = document.createElement('div');
-  el.className = 'noct-marker';
-  el.innerHTML = '<div class="m-ring" style="border-color:' + color + ';animation-delay:' + (Math.random()*2) + 's"></div>'
-    + '<div class="m-ring2" style="background:' + color + '"></div>'
-    + '<div class="m-core" style="background:' + color + ';box-shadow:0 0 10px ' + color + '88"></div>'
-    + '<div class="m-shine"></div>'
-    + '<div class="live-nick" style="color:' + color + ';border-color:' + color + '44">' + (user.nick || '?') + '</div>';
+  el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;';
+  el.innerHTML =
+    '<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ' + color + ';opacity:0;animation:ringOut 2.8s ease-out infinite;"></div>' +
+    '<div style="position:absolute;inset:-2px;border-radius:50%;background:' + color + ';opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite;"></div>' +
+    '<div style="position:absolute;inset:3px;border-radius:50%;background:' + color + ';box-shadow:0 0 10px ' + color + '88;"></div>' +
+    '<div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,0.85);"></div>' +
+    '<div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:rgba(6,4,16,0.88);border:1px solid ' + color + '44;border-radius:6px;padding:1px 5px;color:' + color + ';font-size:9px;font-weight:600;white-space:nowrap;font-family:sans-serif;">' + (user.nick||'?') + '</div>';
   el.addEventListener('click', function(e) {
     e.stopPropagation();
     closeAdCard();
-    document.getElementById('cardtrack').textContent = user.song_title || '음악 없음';
-    document.getElementById('cardartist').textContent = user.song_channel || '';
-    document.getElementById('cardfooter').textContent = (user.nick || '익명') + ' · ' + (user.city === 'busan' ? '부산' : '서울');
+    document.getElementById('cardtrack').textContent = user.song_title||'음악 없음';
+    document.getElementById('cardartist').textContent = user.song_channel||'';
+    document.getElementById('cardfooter').textContent = (user.nick||'익명') + ' · ' + (user.city==='busan'?'부산':'서울');
     document.getElementById('footerdot').style.background = color;
     if (user.song_thumb) { document.getElementById('cardcover').src = user.song_thumb; }
-    else { document.getElementById('cardcover').src = ''; document.getElementById('cardcover').style.background = color + '22'; }
+    else { document.getElementById('cardcover').src = ''; document.getElementById('cardcover').style.background = color+'22'; }
     document.getElementById('cardmoods').innerHTML =
-      '<span class="mood-tag" style="background:' + color + '14;border:1px solid ' + color + '30;color:' + color + '">지금 듣는 중 🎵</span>';
+      '<span style="background:' + color + '14;border:1px solid ' + color + '30;color:' + color + ';border-radius:20px;padding:3px 9px;font-size:10px;font-weight:500;">지금 듣는 중 🎵</span>';
     document.getElementById('songcard').classList.add('visible');
   });
-  var marker = new mapboxgl.Marker({element: el, anchor: 'center'}).setLngLat([user.lng, user.lat]).addTo(map);
-  liveMarkers[user.id] = marker;
+  liveMarkers[user.id] = new mapboxgl.Marker({element:el, anchor:'center'}).setLngLat([user.lng, user.lat]).addTo(map);
 }
 
 function removeLiveUser(id) {
@@ -1274,27 +1613,26 @@ function removeLiveUser(id) {
 
 async function loadLiveUsers() {
   if (!db) return;
-  var fiveMinAgo = new Date(Date.now() - 5*60*1000).toISOString();
+  var fiveMinAgo = new Date(Date.now()-5*60*1000).toISOString();
   var result = await db.from('live_users').select('*').gte('updated_at', fiveMinAgo);
   if (result.data) {
     Object.keys(liveMarkers).forEach(function(id) { liveMarkers[id].remove(); delete liveMarkers[id]; });
-    result.data.forEach(function(user) { renderLiveUser(user); });
-    var total = 183 + result.data.length;
-    document.getElementById('livenum').textContent = total;
+    result.data.forEach(function(u) { renderLiveUser(u); });
+    document.getElementById('livenum').textContent = 183 + result.data.length;
   }
 }
 
 function subscribeRealtime() {
   if (!db) return;
   db.channel('live-users')
-    .on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'live_users'}, function(p) {
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'live_users'}, function(p) {
       renderLiveUser(p.new);
       showToast('🎵 ' + p.new.nick + '님이 합류했어요!');
     })
-    .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'live_users'}, function(p) {
+    .on('postgres_changes', {event:'UPDATE', schema:'public', table:'live_users'}, function(p) {
       renderLiveUser(p.new);
     })
-    .on('postgres_changes', {event: 'DELETE', schema: 'public', table: 'live_users'}, function(p) {
+    .on('postgres_changes', {event:'DELETE', schema:'public', table:'live_users'}, function(p) {
       removeLiveUser(p.old.id);
     })
     .subscribe();
@@ -1304,46 +1642,40 @@ async function upsertUser(lng, lat) {
   if (!db || !myNick || !currentSong) return;
   if (!myUserId) {
     var ins = await db.from('live_users').insert({
-      nick: myNick,
-      song_title: currentSong.title,
-      song_channel: currentSong.channel,
-      song_thumb: currentSong.thumb || '',
-      video_id: currentSong.videoId,
-      lat: lat, lng: lng, city: currentCity,
+      nick:myNick, song_title:currentSong.title, song_channel:currentSong.channel,
+      song_thumb:currentSong.thumb||'', video_id:currentSong.videoId,
+      lat:lat, lng:lng, city:currentCity,
     }).select().single();
-    if (ins.data) {
-      myUserId = ins.data.id;
-      localStorage.setItem('noct_uid', myUserId);
-    }
+    if (ins.data) { myUserId = ins.data.id; localStorage.setItem('noct_uid', myUserId); }
   } else {
     await db.from('live_users').update({
-      nick: myNick,
-      song_title: currentSong.title,
-      song_channel: currentSong.channel,
-      song_thumb: currentSong.thumb || '',
-      video_id: currentSong.videoId,
-      lat: lat, lng: lng, city: currentCity,
-      updated_at: new Date().toISOString(),
+      nick:myNick, song_title:currentSong.title, song_channel:currentSong.channel,
+      song_thumb:currentSong.thumb||'', video_id:currentSong.videoId,
+      lat:lat, lng:lng, city:currentCity, updated_at:new Date().toISOString(),
     }).eq('id', myUserId);
   }
 }
 
-// 종료 시 삭제
 window.addEventListener('beforeunload', function() {
-  if (myUserId && db) {
-    db.from('live_users').delete().eq('id', myUserId);
-  }
+  if (myUserId && db) db.from('live_users').delete().eq('id', myUserId);
 });
 
-// 주기적 토스트
+// ── 주기적 업데이트 ──
 setInterval(function() {
-  var s = FAKE_SONGS[Math.floor(Math.random() * FAKE_SONGS.length)];
+  var s = FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];
   showToast('🎵 ' + s.title + ' — ' + s.channel);
-}, 9000);
+}, 11000);
 setInterval(function() {
-  var b = CITIES[currentCity].count;
-  document.getElementById('livenum').textContent = b + Math.floor((Math.random()-0.5)*8);
-}, 12000);
+  document.getElementById('livenum').textContent =
+    CITIES[currentCity].count + Math.floor((Math.random()-0.5)*8);
+}, 13000);
+
+// CSS 애니메이션 (인라인 마커용)
+var style = document.createElement('style');
+style.textContent =
+  '@keyframes ringOut{0%{transform:scale(0.6);opacity:0.8}100%{transform:scale(2.6);opacity:0}}' +
+  '@keyframes glowBreath{0%,100%{opacity:0.15}50%{opacity:0.3}}';
+document.head.appendChild(style);
 </script>
 </body>
 </html>
