@@ -297,16 +297,34 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 @keyframes glowBreath{0%,100%{opacity:0.15}50%{opacity:0.3}}
 
 /* 내 마커 */
-.my-marker{position:relative;width:32px;height:32px;cursor:pointer;z-index:10;}
-.my-marker .m-ring{position:absolute;inset:-10px;border-radius:50%;border:2.5px solid #c77dff;opacity:0;animation:ringOut 1.8s ease-out infinite;}
-.my-marker .m-ring2{position:absolute;inset:-18px;border-radius:50%;border:1.5px solid #c77dff;opacity:0;animation:ringOut 1.8s ease-out infinite;animation-delay:0.6s;}
-.my-marker .m-core{position:absolute;inset:2px;border-radius:50%;background:linear-gradient(135deg,#c77dff,#7B68EE);box-shadow:0 0 24px #c77dffcc,0 0 48px #c77dff66;}
-.my-marker .m-shine{position:absolute;inset:9px;border-radius:50%;background:rgba(255,255,255,0.95);}
-.my-nick-label{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:8px;padding:3px 10px;
-  color:#fff;font-size:11px;font-weight:700;white-space:nowrap;max-width:100px;
-  overflow:hidden;text-overflow:ellipsis;
-  box-shadow:0 2px 8px #c77dff44;}
+.my-marker-wrap{
+  cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+}
+.my-nick-label{
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  border-radius:8px;padding:3px 10px;margin-bottom:4px;
+  color:#fff;font-size:11px;font-weight:700;white-space:nowrap;
+  box-shadow:0 2px 12px #c77dff66;
+  max-width:100px;overflow:hidden;text-overflow:ellipsis;
+}
+.my-marker-dot{
+  width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,#c77dff,#7B68EE);
+  box-shadow:0 0 0 0 #c77dff;
+  animation:myPulse 1.8s ease-out infinite;
+  position:relative;
+}
+.my-marker-dot::after{
+  content:"";position:absolute;inset:5px;border-radius:50%;
+  background:rgba(255,255,255,0.95);
+}
+@keyframes myPulse{
+  0%{box-shadow:0 0 0 0 rgba(199,125,255,0.8);}
+  70%{box-shadow:0 0 0 18px rgba(199,125,255,0);}
+  100%{box-shadow:0 0 0 0 rgba(199,125,255,0);}
+}
 
 /* 실시간 유저 닉네임 라벨 */
 .live-nick{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
@@ -935,28 +953,51 @@ function selectSong(videoId, title, channel, thumb) {
 
 // ── 내 마커 ──
 function placeMyMarker(title, thumb, lng, lat) {
+  // 기존 마커 제거
   if (myMarker) { myMarker.remove(); myMarker = null; }
-  var el = document.createElement('div');
-  el.className = 'my-marker';
+
   var label = myNick || '나';
-  el.innerHTML = '<div class="my-nick-label">' + label + '</div>'
-    + '<div class="m-ring"></div>'
-    + '<div class="m-ring2"></div>'
-    + '<div class="m-core"></div>'
-    + '<div class="m-shine"></div>';
-  el.addEventListener('click', function(e) {
+
+  // 마커 엘리먼트 생성
+  var wrap = document.createElement('div');
+  wrap.className = 'my-marker-wrap';
+
+  var nickEl = document.createElement('div');
+  nickEl.className = 'my-nick-label';
+  nickEl.textContent = label;
+
+  var dotEl = document.createElement('div');
+  dotEl.className = 'my-marker-dot';
+
+  wrap.appendChild(nickEl);
+  wrap.appendChild(dotEl);
+
+  wrap.addEventListener('click', function(e) {
     e.stopPropagation();
+    if (!currentSong) return;
     document.getElementById('cardtrack').textContent = currentSong.title;
     document.getElementById('cardartist').textContent = currentSong.channel;
     document.getElementById('cardfooter').textContent = '내 위치';
     document.getElementById('footerdot').style.background = '#c77dff';
-    if (currentSong.thumb) document.getElementById('cardcover').src = currentSong.thumb;
+    if (currentSong.thumb) {
+      document.getElementById('cardcover').src = currentSong.thumb;
+    }
     document.getElementById('cardmoods').innerHTML =
       '<span class="mood-tag" style="background:#c77dff18;border:1px solid #c77dff30;color:#c77dff">지금 듣는 중 🎵</span>';
     document.getElementById('songcard').classList.add('visible');
   });
-  myMarker = new mapboxgl.Marker({element: el, anchor: 'center'}).setLngLat([lng, lat]).addTo(map);
-  map.flyTo({center: [lng, lat], zoom: 15, duration: 1200});
+
+  // Mapbox 마커 생성 — anchor:'bottom' 으로 dot 위치 정확히 맞춤
+  myMarker = new mapboxgl.Marker({
+    element: wrap,
+    anchor: 'bottom',
+    offset: [0, 0]
+  })
+  .setLngLat([lng, lat])
+  .addTo(map);
+
+  // 내 위치로 지도 이동
+  map.flyTo({center: [lng, lat], zoom: 16, duration: 1500, pitch: 45});
 }
 
 // ── 내 위치로 이동 버튼 ──
