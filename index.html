@@ -66,7 +66,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 #livebadge{position:fixed;bottom:100px;left:16px;z-index:100;
   opacity:0;transition:opacity 0.8s ease;
-  background:rgba(3,3,10,0.82);backdrop-filter:blur(20px);
+  background:rgba(3,3,10,0.82);backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;
   display:flex;flex-direction:column;gap:4px;}
 .live-row{display:flex;align-items:center;gap:7px;}
@@ -116,7 +116,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* TOP5 패널 */
 #topPanel{position:fixed;top:140px;right:16px;z-index:100;width:220px;
-  background:rgba(6,4,16,0.95);backdrop-filter:blur(20px);
+  background:rgba(6,4,16,0.95);backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;
   opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;
   transition:opacity 0.25s,transform 0.25s;}
@@ -135,7 +135,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 /* 부산 vs 서울 패널 */
 #vsPanel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);
   z-index:600;width:calc(100vw - 32px);max-width:380px;
-  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);
   border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:22px;
   opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;}
 #vsPanel.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
@@ -165,7 +165,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 /* 감성 리포트 패널 */
 #reportPanel{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
   z-index:600;width:calc(100vw - 32px);max-width:340px;
-  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);
   border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px;
   opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;}
 #reportPanel.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
@@ -184,7 +184,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 청취 기록 패널 */
 #historyPanel{position:fixed;top:0;left:0;bottom:0;z-index:700;width:300px;
-  background:rgba(6,4,16,0.98);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.98);backdrop-filter:blur(16px);
   border-right:1px solid rgba(255,255,255,0.07);
   display:flex;flex-direction:column;
   transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
@@ -218,7 +218,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 광고주 신청 패널 */
 #adApplyPanel{position:fixed;top:0;right:0;bottom:0;z-index:700;width:320px;
-  background:rgba(6,4,16,0.98);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.98);backdrop-filter:blur(16px);
   border-left:1px solid rgba(255,255,255,0.07);
   display:flex;flex-direction:column;
   transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
@@ -256,7 +256,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 검색 오버레이 */
 #searchOverlay{position:fixed;inset:0;z-index:1000;
-  background:rgba(3,3,10,0.85);backdrop-filter:blur(20px);
+  background:rgba(3,3,10,0.85);backdrop-filter:blur(10px);
   display:flex;align-items:flex-end;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity 0.25s;}
 #searchOverlay.open{opacity:1;pointer-events:all;}
@@ -302,7 +302,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 미니 플레이어 */
 #miniPlayer{position:fixed;bottom:0;left:0;right:0;z-index:500;
-  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);
   border-top:1px solid rgba(255,255,255,0.07);padding:12px 16px 28px;
   transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
 #miniPlayer.open{transform:translateY(0);}
@@ -327,7 +327,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 곡 카드 */
 #songcard{position:fixed;bottom:90px;left:16px;z-index:200;
-  background:rgba(8,6,18,0.94);backdrop-filter:blur(30px);
+  background:rgba(8,6,18,0.94);backdrop-filter:blur(16px);
   border:1px solid rgba(255,255,255,0.08);border-radius:18px;
   width:calc(100vw - 32px);max-width:290px;
   opacity:0;transform:translateY(10px) scale(0.97);
@@ -377,7 +377,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 광고 카드 */
 #adcard{position:fixed;bottom:90px;right:16px;z-index:200;
-  background:rgba(8,6,18,0.96);backdrop-filter:blur(30px);border-radius:18px;
+  background:rgba(8,6,18,0.96);backdrop-filter:blur(16px);border-radius:18px;
   width:calc(100vw - 32px);max-width:280px;
   opacity:0;transform:translateY(10px) scale(0.97);
   transition:opacity 0.22s,transform 0.22s;pointer-events:none;overflow:hidden;}
@@ -416,7 +416,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 닉네임 모달 */
 #nickOverlay{position:fixed;inset:0;z-index:2000;background:rgba(3,3,10,0.92);
-  backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity 0.3s;}
 #nickOverlay.open{opacity:1;pointer-events:all;}
 #nickBox{background:rgba(10,8,24,0.99);border:1px solid rgba(199,125,255,0.2);
@@ -434,7 +434,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 
 /* 공유카드 */
 #shareCardOverlay{position:fixed;inset:0;z-index:3000;background:rgba(3,3,10,0.95);
-  backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;
+  backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 #shareCardOverlay.open{opacity:1;pointer-events:all;}
 #shareCanvas{border-radius:16px;max-width:calc(100vw - 48px);
@@ -527,7 +527,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 #installBanner{
   position:fixed;bottom:0;left:0;right:0;z-index:4000;
   background:linear-gradient(135deg,rgba(199,125,255,0.15),rgba(123,104,238,0.15));
-  backdrop-filter:blur(20px);
+  backdrop-filter:blur(10px);
   border-top:1px solid rgba(199,125,255,0.25);
   padding:14px 16px max(16px,env(safe-area-inset-bottom));
   display:none;align-items:center;gap:12px;
@@ -549,7 +549,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   position:fixed;top:50%;left:50%;
   transform:translate(-50%,-50%) scale(0.95);
   z-index:600;width:calc(100vw - 32px);max-width:340px;
-  background:rgba(6,4,16,0.97);backdrop-filter:blur(30px);
+  background:rgba(6,4,16,0.97);backdrop-filter:blur(16px);
   border:1px solid rgba(199,125,255,0.2);border-radius:22px;padding:24px;
   opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;
   text-align:center;
@@ -623,6 +623,7 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
   <button class="icon-btn" id="vsBtn" onclick="toggleVs()">⚔️ 도시 대결</button>
   <button class="icon-btn" id="reportBtn" onclick="toggleReport()">📊 감성 리포트</button>
   <button class="icon-btn" id="dailyBtn" onclick="showDailyCard()">✨ 오늘의 noct</button>
+  <button class="icon-btn" id="moodBtn" onclick="showMoodAnalysis()">🎭 내 감성 분석</button>
   <button class="icon-btn" id="adBtn" onclick="toggleAdApply()">📢 광고 문의</button>
 </div>
 
@@ -850,6 +851,38 @@ body{background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;over
 </div>
 
 <!-- 볼륨 슬라이더 (미니플레이어 안에 추가) -->
+
+<!-- 지도 검색 -->
+<div id="mapSearch">
+  <span class="map-search-icon">🔍</span>
+  <input id="mapSearchInput" placeholder="동네, 도시 검색..." oninput="handleMapSearch()" onkeydown="if(event.key==='Escape')closeMapSearch()">
+  <button class="map-search-clear" onclick="clearMapSearch()">×</button>
+</div>
+<div id="mapSearchResults"></div>
+
+<!-- 핫한 곡 배너 -->
+<div id="hotBanner">
+  <div class="hot-banner-inner" id="hotBannerInner"></div>
+</div>
+
+<!-- 감성 분석 -->
+<div id="moodAnalysis">
+  <div class="ma-title">🎵 내 감성 분석</div>
+  <div class="ma-type" id="maType">🌙</div>
+  <div class="ma-name" id="maName">새벽 감성형</div>
+  <div class="ma-desc" id="maDesc"></div>
+  <div class="ma-tracks">
+    <div class="ma-tracks-title">최근 들은 곡</div>
+    <div id="maTracks"></div>
+  </div>
+  <button class="ma-close" onclick="closeMoodAnalysis()">닫기</button>
+</div>
+
+<!-- 같은 동네 알림 -->
+<div id="neighborAlert">
+  <div class="neighbor-dot"></div>
+  <span class="neighbor-text"><span class="neighbor-count" id="neighborCount">0</span>명이 근처에서 같이 듣는 중</span>
+</div>
 
 <!-- 토스트 -->
 <div id="toast">
@@ -1344,21 +1377,87 @@ map.on('load', function() {
   map.setFog({color:'rgb(3,3,10)','high-color':'rgb(8,6,20)',
     'horizon-blend':0.04,'space-color':'rgb(3,3,10)','star-intensity':0.5});
 
-  spawnMarkers('busan');
+  // ── 더미 마커 GeoJSON 소스 (GPU 렌더링)
+  map.addSource('dummy-users', {type:'geojson', data:{type:'FeatureCollection',features:[]}, cluster:true, clusterMaxZoom:12, clusterRadius:40});
+
+  // 클러스터 원
+  map.addLayer({id:'dummy-clusters', type:'circle', source:'dummy-users', filter:['has','point_count'],
+    paint:{
+      'circle-color':['step',['get','point_count'],'#7c3aed',5,'#c77dff',20,'#f472b6'],
+      'circle-radius':['step',['get','point_count'],14,5,18,20,22],
+      'circle-opacity':0.75,
+    }
+  });
+
+  // 클러스터 숫자
+  map.addLayer({id:'dummy-cluster-count', type:'symbol', source:'dummy-users', filter:['has','point_count'],
+    layout:{
+      'text-field':['get','point_count_abbreviated'],
+      'text-size':11, 'text-font':['DIN Offc Pro Medium','Arial Unicode MS Bold'],
+    },
+    paint:{'text-color':'#fff'}
+  });
+
+  // 개별 점
+  map.addLayer({id:'dummy-points', type:'circle', source:'dummy-users', filter:['!',['has','point_count']],
+    paint:{
+      'circle-color':['get','color'],
+      'circle-radius':6,
+      'circle-opacity':0.85,
+      'circle-stroke-width':2,
+      'circle-stroke-color':'rgba(255,255,255,0.7)',
+    }
+  });
+
+  // 개별 점 클릭
+  map.on('click','dummy-points', function(e) {
+    var props = e.features[0].properties;
+    var song = {title:props.title, channel:props.channel, mood:[props.mood1,props.mood2], color:props.color};
+    showFakeCard(song, props.district);
+  });
+
+  // 클러스터 클릭 시 줌인
+  map.on('click','dummy-clusters', function(e) {
+    var features = map.queryRenderedFeatures(e.point, {layers:['dummy-clusters']});
+    var clusterId = features[0].properties.cluster_id;
+    map.getSource('dummy-users').getClusterExpansionZoom(clusterId, function(err, zoom) {
+      if (err) return;
+      map.easeTo({center:features[0].geometry.coordinates, zoom:zoom});
+    });
+  });
+
+  map.on('mouseenter','dummy-points', function(){map.getCanvas().style.cursor='pointer';});
+  map.on('mouseleave','dummy-points', function(){map.getCanvas().style.cursor='';});
+  map.on('mouseenter','dummy-clusters', function(){map.getCanvas().style.cursor='pointer';});
+  map.on('mouseleave','dummy-clusters', function(){map.getCanvas().style.cursor='';});
+
+  spawnDummyGeoJSON('busan');
   spawnAdLayer('busan');
   spawnAdMarkers('busan');
   renderTop();
 
+  // 줌 이벤트 debounce (성능)
+  var zoomTimer = null;
   map.on('zoom', function() {
-    updateMarkersVisibility();
+    clearTimeout(zoomTimer);
+    zoomTimer = setTimeout(updateMarkersVisibility, 100);
   });
 
   initSupabase();
   if (db) {
     loadLiveUsers();
     subscribeRealtime();
-    setInterval(loadLiveUsers, 30000);
+    setInterval(loadLiveUsers, 45000);
   }
+
+  // 인트로 + 초기화
+  setTimeout(runIntro, 500);
+  setTimeout(updateHotBanner, 3500);
+  setInterval(updateHotBanner, 60000);
+  setTimeout(function() {
+    document.getElementById('mapSearch').classList.add('visible');
+    autoLocate();
+  }, 4500);
 });
 
 map.on('click', function() { closeCard(); closeAdCard(); });
@@ -1382,7 +1481,7 @@ function spawnMarkers(k) {
       var lat = spot.lat + (Math.random()-0.5) * 0.015;
       var el = document.createElement('div');
       el.className = 'noct-marker';
-      el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;';
+      el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;will-change:transform;';
       el.innerHTML =
         '<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ' + s.color + ';opacity:0;animation:ringOut 2.8s ease-out infinite;animation-delay:' + (Math.random()*2) + 's"></div>' +
         '<div style="position:absolute;inset:-2px;border-radius:50%;background:' + s.color + ';opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite"></div>' +
@@ -1715,7 +1814,7 @@ function flyToCity(k, el) {
   document.getElementById('livenum').textContent = city.count;
   map.flyTo({center:city.center, zoom:city.zoom, pitch:city.pitch, bearing:city.bearing, duration:2400, essential:true});
   setTimeout(function() {
-    spawnMarkers(k); spawnAdLayer(k); spawnAdMarkers(k); renderTop();
+    spawnDummyGeoJSON(k); spawnAdLayer(k); spawnAdMarkers(k); renderTop();
     document.getElementById('reportCity').textContent = city.name;
   }, 1500);
 }
@@ -2093,7 +2192,7 @@ function renderLiveUser(user) {
   if (liveMarkers[user.id]) { liveMarkers[user.id].remove(); delete liveMarkers[user.id]; }
   var color = getUserColor(user.nick||'?');
   var el = document.createElement('div');
-  el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;';
+  el.style.cssText = 'position:relative;width:18px;height:18px;cursor:pointer;will-change:transform;';
   el.innerHTML =
     '<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid ' + color + ';opacity:0;animation:ringOut 2.8s ease-out infinite;"></div>' +
     '<div style="position:absolute;inset:-2px;border-radius:50%;background:' + color + ';opacity:0.15;animation:glowBreath 2.8s ease-in-out infinite;"></div>' +
@@ -2168,6 +2267,13 @@ async function upsertUser(lng, lat) {
 window.addEventListener('beforeunload', function() {
   if (myUserId && db) db.from('live_users').delete().eq('id', myUserId);
 });
+
+// upsertUser 후 이웃 체크
+var _origUpsertUser2 = upsertUser;
+upsertUser = async function(lng, lat) {
+  await _origUpsertUser2(lng, lat);
+  setTimeout(function() { checkNeighbors(lng, lat); }, 2000);
+};
 
 
 
@@ -2458,79 +2564,59 @@ function removeNationalMarkers() {
 
 var cityMarkerCount = 0;
 
-var _origSpawnMarkers = spawnMarkers;
-spawnMarkers = function(k) {
-  markers.forEach(function(m) { m.remove(); });
-  markers.length = 0;
-  nationalMarkersSpawned = false;
+// GeoJSON 더미 데이터 생성 (HTML 마커 대신 Mapbox 레이어 사용)
+function spawnDummyGeoJSON(k) {
+  var features = [];
+  var shuffled = FAKE_SONGS.slice().sort(function(){return Math.random()-0.5;});
+  var idx = 0;
 
-  var songIndex = 0;
-  var shuffled = FAKE_SONGS.slice().sort(function() { return Math.random() - 0.5; });
-
-  // 도시 spots 마커 (항상 표시)
-  CITIES[k].spots.forEach(function(spot) {
-    var n = Math.floor(3 + Math.random() * 4);
-    for (var i = 0; i < n; i++) {
-      var s = shuffled[songIndex % shuffled.length];
-      songIndex++;
-      var lng = spot.lng + (Math.random()-0.5) * 0.022;
-      var lat = spot.lat + (Math.random()-0.5) * 0.016;
-      addFakeMarker(s, spot.name, lng, lat);
-    }
-  });
-
-  cityMarkerCount = markers.length;
-
-  // 전국 데이터 준비 (DOM 생성 안 함)
-  prepareNationalData();
-
-  // 줌 레벨에 따라 전국 마커 표시 결정
-  updateMarkersVisibility();
-};
-
-function addFakeMarker(s, spotName, lng, lat) {
-  var el = createMarkerWithTooltip(s, spotName, lng, lat);
-  (function(song, name) {
-    el.addEventListener('click', function(e) {
-      e.stopPropagation();
-      closeAdCard();
-      showFakeCard(song, name);
-    });
-  })(s, spotName);
-  var m = new mapboxgl.Marker({element:el, anchor:'center'}).setLngLat([lng,lat]).addTo(map);
-  markers.push(m);
-}
-
-// 줌 레벨에 따라 마커 표시/숨김 + 전국 마커 on/off
-function updateMarkersVisibility() {
-  var z = map.getZoom();
-
-  // 줌 8 이상이면 전국 마커 DOM에 추가
-  if (z >= 8 && !nationalMarkersSpawned && nationalMarkerData.length > 0) {
-    spawnNationalMarkers();
+  function makeFeature(spot, s) {
+    var lng = spot.lng + (Math.random()-0.5)*0.022;
+    var lat = spot.lat + (Math.random()-0.5)*0.016;
+    return {
+      type:'Feature',
+      geometry:{type:'Point', coordinates:[lng,lat]},
+      properties:{
+        title:s.title, channel:s.channel,
+        mood1:s.mood[0], mood2:s.mood[1]||'',
+        color:s.color, district:spot.name,
+      }
+    };
   }
 
-  markers.forEach(function(m) {
-    var el = m.getElement();
-    if (z < 7) {
-      el.style.display = 'none';
-    } else if (z < 9) {
-      el.style.display = 'block';
-      el.style.transform = 'scale(0.3)';
-      el.style.opacity = '0.4';
-    } else if (z < 11) {
-      el.style.display = 'block';
-      el.style.transform = 'scale(0.5)';
-      el.style.opacity = '0.6';
-    } else if (z < 13) {
-      el.style.display = 'block';
-      el.style.transform = 'scale(0.75)';
-      el.style.opacity = '0.85';
-    } else {
-      el.style.display = 'block';
-      el.style.transform = 'scale(1)';
-      el.style.opacity = '1';
-    }
+  // 도시 spots
+  CITIES[k].spots.forEach(function(spot) {
+    var n = Math.floor(3+Math.random()*4);
+    for (var i=0;i<n;i++) { features.push(makeFeature(spot, shuffled[idx%shuffled.length])); idx++; }
+  });
+
+  // 전국 spots
+  NATIONAL_SPOTS.forEach(function(spot) {
+    var n = Math.floor(1+Math.random()*2);
+    for (var i=0;i<n;i++) { features.push(makeFeature(spot, shuffled[idx%shuffled.length])); idx++; }
+  });
+
+  if (map.getSource('dummy-users')) {
+    map.getSource('dummy-users').setData({type:'FeatureCollection', features:features});
+  }
+}
+
+// flyToCity에서 spawnDummyGeoJSON 호출하도록 (spawnMarkers 호출 제거)
+var _origSpawnMarkers = spawnMarkers;
+spawnMarkers = function(k) {
+  // HTML 더미 마커 사용 안 함 - GeoJSON 레이어로 대체
+  spawnDummyGeoJSON(k);
+};
+
+// addFakeMarker - GeoJSON 레이어로 대체됨 (호환성 유지)
+function addFakeMarker(s, spotName, lng, lat) { /* no-op */ }
+
+// HTML 마커(광고, 실시간유저)만 줌에 따라 조절
+function updateMarkersVisibility() {
+  var z = map.getZoom();
+  // adMarkers는 줌 11 이상에서만 표시
+  adMarkers.forEach(function(m) {
+    m.getElement().style.display = z >= 11 ? 'block' : 'none';
   });
 }
 
@@ -2552,7 +2638,7 @@ function updateMarkersVisibility() {
 setInterval(function() {
   var s = FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];
   showToast('🎵 ' + s.title + ' — ' + s.channel);
-}, 11000);
+}, 20000);
 setInterval(function() {
   document.getElementById('livenum').textContent =
     CITIES[currentCity].count + Math.floor((Math.random()-0.5)*8);
@@ -2592,9 +2678,50 @@ function runIntro() {
 }
 
 // 맵 로드 완료 후 인트로 시작
-map.on('load', function() {
-  setTimeout(runIntro, 500);
-});
+
+
+// ═══ 첫 접속 내 위치 자동이동 ═══
+function autoLocate() {
+  if (!navigator.geolocation) return;
+  if (sessionStorage.getItem('noct_located')) return;
+  sessionStorage.setItem('noct_located', '1');
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lng = pos.coords.longitude, lat = pos.coords.latitude;
+    if (lng > 124 && lng < 132 && lat > 33 && lat < 39) {
+      map.flyTo({center:[lng,lat], zoom:13, pitch:55, duration:2000});
+      showToast('📍 내 동네로 이동했어요');
+    }
+  }, function(){}, {enableHighAccuracy:false, timeout:5000, maximumAge:300000});
+}
+setTimeout(autoLocate, 5000);
+
+// ═══ 핫한 곡 배너 ═══
+async function updateHotBanner() {
+  var songs = [];
+  if (db) {
+    try {
+      var r = await db.from('live_users').select('song_title,song_channel')
+        .gte('updated_at', new Date(Date.now()-3600000).toISOString()).not('song_title','is',null);
+      if (r.data && r.data.length > 0) {
+        var c = {};
+        r.data.forEach(function(u){ if(u.song_title){var k=u.song_title+'||'+(u.song_channel||''); c[k]=(c[k]||0)+1;} });
+        songs = Object.keys(c).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:c[k]};})
+          .sort(function(a,b){return b.count-a.count;}).slice(0,10);
+      }
+    } catch(e){}
+  }
+  if (!songs.length) songs = FAKE_SONGS.slice(0,10).map(function(s){return{track:s.title,artist:s.channel};});
+  var html = '';
+  for (var r2=0;r2<2;r2++) {
+    songs.forEach(function(s,i){
+      html += '<span class="hot-banner-item"><span class="hb-rank">'+(i+1)+'</span><span class="hb-track">'+s.track+'</span><span style="color:rgba(255,255,255,0.3);font-size:10px"> — '+s.artist+'</span></span><span class="hot-banner-sep">•</span>';
+    });
+  }
+  document.getElementById('hotBannerInner').innerHTML = html;
+  document.getElementById('hotBanner').classList.add('visible');
+}
+setTimeout(updateHotBanner, 3500);
+setInterval(updateHotBanner, 60000);
 
 // CSS 애니메이션 (인라인 마커용)
 var style = document.createElement('style');
