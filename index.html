@@ -828,21 +828,52 @@ async function doSearch() {
 }
 
 // ── GPS 위치 가져오기 ──
+// watchPosition ID (정지 시 해제용)
+var gpsWatchId = null;
+
 function getMyLocation(callback) {
   if (!navigator.geolocation) {
     var city = CITIES[currentCity];
     callback(city.center[0], city.center[1]);
     return;
   }
-  navigator.geolocation.getCurrentPosition(
+
+  // 기존 감시 중지
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+
+  // watchPosition: 위치가 바뀔 때마다 자동 업데이트
+  gpsWatchId = navigator.geolocation.watchPosition(
     function(pos) {
-      // 오프셋 없음 — 정확한 위치 그대로 사용
-      callback(pos.coords.longitude, pos.coords.latitude);
+      var lng = pos.coords.longitude;
+      var lat = pos.coords.latitude;
+      var accuracy = pos.coords.accuracy; // 정확도 (미터)
+
+      // 마커 실시간 이동
+      if (myMarker && myLng !== null) {
+        myMarker.setLngLat([lng, lat]);
+        myLng = lng;
+        myLat = lat;
+        // DB도 업데이트
+        if (currentSong) upsertUser(lng, lat);
+      } else {
+        // 첫 위치 확정
+        callback(lng, lat);
+      }
+
+      // 정확도 표시
+      var accText = accuracy < 10 ? '📍 GPS 정확' :
+                    accuracy < 30 ? '📍 GPS 양호' :
+                    accuracy < 100 ? '📍 GPS 보통' : '📍 GPS 잡는 중...';
+      document.getElementById('playerChannel').textContent =
+        currentSong ? currentSong.channel + ' · ' + accText : accText;
     },
     function(err) {
       var city = CITIES[currentCity];
       callback(city.center[0], city.center[1]);
-      showToast('📍 위치 허용이 필요해요! 브라우저 설정에서 위치를 허용해주세요.');
+      showToast('📍 위치 허용이 필요해요!');
     },
     {
       enableHighAccuracy: true,
@@ -850,6 +881,13 @@ function getMyLocation(callback) {
       maximumAge: 0
     }
   );
+}
+
+function stopGPS() {
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
 }
 
 // ── 곡 선택 ──
@@ -928,6 +966,7 @@ function stopAndClear() {
   isPlaying = false;
   currentSong = null;
   myLng = null; myLat = null;
+  stopGPS();
   if (myMarker) { myMarker.remove(); myMarker = null; }
   document.getElementById('miniPlayer').classList.remove('open');
   document.getElementById('livebadge').style.bottom = '100px';
