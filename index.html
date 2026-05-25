@@ -825,25 +825,28 @@ async function doSearch() {
 // ── GPS 위치 가져오기 ──
 function getMyLocation(callback) {
   if (!navigator.geolocation) {
-    // GPS 없으면 도시 중심에 오프셋
     var city = CITIES[currentCity];
-    callback(city.center[0] + (Math.random()-0.5)*0.008, city.center[1] + (Math.random()-0.5)*0.006);
+    callback(city.center[0], city.center[1]);
     return;
   }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
-      // 프라이버시 보호: 300m~800m 랜덤 오프셋
-      var offset = 0.004;
+      // 프라이버시 보호: 약 100m 오프셋 (너무 작으면 정확한 위치 노출)
+      var offset = 0.001;
       var lng = pos.coords.longitude + (Math.random()-0.5)*offset;
       var lat = pos.coords.latitude + (Math.random()-0.5)*offset;
       callback(lng, lat);
     },
-    function() {
+    function(err) {
       // 실패 시 도시 중심
       var city = CITIES[currentCity];
-      callback(city.center[0] + (Math.random()-0.5)*0.008, city.center[1] + (Math.random()-0.5)*0.006);
+      callback(city.center[0], city.center[1]);
     },
-    {timeout: 5000, maximumAge: 60000}
+    {
+      enableHighAccuracy: true,  // 고정밀 GPS
+      timeout: 10000,
+      maximumAge: 0              // 캐시 안 씀, 항상 최신 위치
+    }
   );
 }
 
