@@ -865,6 +865,17 @@ setTimeout(function() {
 document.getElementById('mapSearch').classList.add('visible');
 autoLocate();
 }, 4500);
+
+map.on('moveend', function() {
+clearTimeout(moveEndTimer);
+moveEndTimer = setTimeout(function() {
+var center = map.getCenter();
+var region = getNearestRegion(center.lat, center.lng);
+if (!region) return;
+document.getElementById('cityname').textContent = region.name;
+updateRegionLiveCount(region.name, center.lat, center.lng);
+}, 600);
+});
 });
 map.on('click', function() { closeCard(); closeAdCard(); });
 function spawnAdLayer(k) {
@@ -2139,31 +2150,21 @@ var REGION_MAP = [
 {name:'서귀포', lat:33.2541, lng:126.5600, r:0.2},
 ];
 function getNearestRegion(lat, lng) {
+if (lat < 33 || lat > 39 || lng < 124 || lng > 132) return null;
 var best = null;
 var bestDist = 999;
 REGION_MAP.forEach(function(region) {
 var dlat = lat - region.lat;
 var dlng = lng - region.lng;
 var dist = Math.sqrt(dlat*dlat + dlng*dlng);
-if (dist < bestDist && dist < region.r * 2) {
+if (dist < bestDist) {
 bestDist = dist;
 best = region;
 }
 });
-if (lat < 33 || lat > 39 || lng < 124 || lng > 132) return null;
 return best || {name:'이 지역'};
 }
 var moveEndTimer = null;
-map.on('moveend', function() {
-clearTimeout(moveEndTimer);
-moveEndTimer = setTimeout(function() {
-var center = map.getCenter();
-var region = getNearestRegion(center.lat, center.lng);
-if (!region) return;
-document.getElementById('cityname').textContent = region.name;
-updateRegionLiveCount(region.name, center.lat, center.lng);
-}, 600);
-});
 async function updateRegionLiveCount(regionName, lat, lng) {
 var seed = Math.abs(Math.floor(lat * 100 + lng * 100)) % 200;
 var baseCount = 30 + seed;
