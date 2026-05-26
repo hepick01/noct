@@ -288,11 +288,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 /* 새벽별 */
 .dstar{position:fixed;border-radius:50%;background:#fff;pointer-events:none;animation:tw 3s ease-in-out infinite;z-index:2;}
 @keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
-/* cinematic scan line effect */
 /* bottom gradient fade */
-#bottomFade{position:fixed;bottom:0;left:0;right:0;height:200px;z-index:4;pointer-events:none;background:linear-gradient(to top,rgba(2,1,14,0.3) 0%,transparent 100%);}
+
 /* top gradient */
-#topFade{position:fixed;top:0;left:0;right:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(to bottom,rgba(2,1,14,0.25) 0%,transparent 100%);}
+
 /* 마커 */
 .nm{cursor:pointer;overflow:visible;}
 @keyframes ro{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
@@ -319,12 +318,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 <div id="map"></div>
 <!-- Atmosphere layers -->
 <div id="atmBase" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:background 4s ease,opacity 2s;opacity:0;"></div>
-<div id="atmVignette" style="position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(2,1,12,0.35) 100%);"></div>
-<div id="atmBloom" style="position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 3s;mix-blend-mode:screen;"></div>
-<div id="dawnOverlay" style="position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s;"></div>
+
+
+
 <div id="vibe"></div>
-<div id="bottomFade"></div>
-<div id="topFade"></div>
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
 <div id="topbar">
   <div class="logo" onclick="toggleHistory()"><div class="logo-icon">N</div><div><div class="logo-text">noct</div><div class="logo-sub">지금 이 도시의 음악</div></div></div>
@@ -951,8 +948,7 @@ function getTimeAtm(){
 function applyAtmosphere(){
   var atm=getTimeAtm();
   var base=document.getElementById('atmBase');
-  var bloom=document.getElementById('atmBloom');
-  base.style.background=atm.base;
+    base.style.background=atm.base;
   base.style.opacity='0.08';
   bloom.style.background=atm.bloom;
   bloom.style.opacity='0.12';
@@ -1006,18 +1002,11 @@ var _lastMood='';
 function applyMood(moodKey){
   var m=TIME_MOODS[moodKey];if(!m)return;
   _lastMood=moodKey;
-  // CSS overlay만 변경 (Mapbox 재렌더링 없음)
   var base=document.getElementById('atmBase');
-  var bloom=document.getElementById('atmBloom');
-  if(base){base.style.transition='background 6s ease';base.style.background=m.overlay;base.style.opacity='1';}
-  if(bloom){bloom.style.transition='background 6s ease';bloom.style.background=m.bloom;bloom.style.opacity='1';}
-
+  if(base){base.style.background=m.overlay;base.style.opacity='1';}
 }
 
-function checkDawn(){
-  var mood=getTimeMood();
-  if(mood!==_lastMood)applyMood(mood);
-}
+function checkDawn(){var mood=getTimeMood();if(mood!==_lastMood)applyMood(mood);}
 
 // ── 지도 ──
 var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing});
