@@ -345,7 +345,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   <button class="ib" id="dailyBtn" onclick="showDailyCard()">✨ 오늘의 noct</button>
   <button class="ib" id="moodBtn" onclick="showMoodAnalysis()">🎭 내 감성 분석</button>
   <button class="ib" id="adBtn" onclick="toggleAdApply()">📢 광고 문의</button>
-  <button class="ib" id="atmBtn" onclick="toggleAtmPanel()">🕐 시간대 변경</button>
 </div>
 <div id="topPanel"><div class="ptitle">🔥 TOP 5</div><div id="topList"></div></div>
 <div id="livebadge"><div class="lr"><div class="ld"></div><span class="lm">지금 <span id="cityname">부산</span>에서 <span class="lc" id="livenum">183</span>명</span></div><div class="ls" id="livesub">실시간 음악 중</div></div>
@@ -407,30 +406,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
     <div class="apsuccess" id="applySuccess"><div class="apsi">🎉</div><div class="apst">신청이 완료됐어요!</div><div class="apss">빠른 시일 내에 연락드리겠습니다.</div></div>
   </div>
 </div>
-<!-- 시간대 분위기 패널 -->
-<div id="atmPanel">
-  <div class="atmp-header">
-    <div>
-      <div class="atmp-title">🌆 시간대별 분위기</div>
-      <div style="color:rgba(255,255,255,.3);font-size:11px;margin-top:3px;">시간대에 따라 도시의 분위기와 색감이 변환합니다</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="atmp-auto"><span>자동 전환</span><button class="atmp-toggle on" id="atmAutoToggle" onclick="toggleAtmAuto()"></button></div>
-      <button class="atmp-close" onclick="toggleAtmPanel()">×</button>
-    </div>
-  </div>
-  <div class="atmp-slots">
-    <div class="atmp-slot active" id="atmSlot0" onclick="selectAtmSlot(0)"><div class="atmp-slot-icon">🌙</div><div class="atmp-slot-name">심야</div><div class="atmp-slot-time">00:00 – 05:59</div></div>
-    <div class="atmp-slot" id="atmSlot1" onclick="selectAtmSlot(1)"><div class="atmp-slot-icon">🌅</div><div class="atmp-slot-name">새벽</div><div class="atmp-slot-time">06:00 – 08:59</div></div>
-    <div class="atmp-slot" id="atmSlot2" onclick="selectAtmSlot(2)"><div class="atmp-slot-icon">☀️</div><div class="atmp-slot-name">아침</div><div class="atmp-slot-time">09:00 – 11:59</div></div>
-    <div class="atmp-slot" id="atmSlot3" onclick="selectAtmSlot(3)"><div class="atmp-slot-icon">🌤️</div><div class="atmp-slot-name">낮</div><div class="atmp-slot-time">12:00 – 16:59</div></div>
-    <div class="atmp-slot" id="atmSlot4" onclick="selectAtmSlot(4)"><div class="atmp-slot-icon">🌇</div><div class="atmp-slot-name">저녁</div><div class="atmp-slot-time">17:00 – 19:59</div></div>
-    <div class="atmp-slot" id="atmSlot5" onclick="selectAtmSlot(5)"><div class="atmp-slot-icon">🌃</div><div class="atmp-slot-name">밤</div><div class="atmp-slot-time">20:00 – 23:59</div></div>
-  </div>
-</div>
-<div id="installBanner"><div style="font-size:28px;flex-shrink:0;">🎵</div><div style="flex:1;"><div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:2px;">noct 앱으로 설치하기</div><div style="color:rgba(255,255,255,.4);font-size:11px;">홈 화면에 추가하면 앱처럼 사용</div></div><button onclick="installPWA()" style="background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">설치</button><button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:20px;cursor:pointer;font-family:inherit;">×</button></div>
-<div id="shareCardOverlay"><canvas id="shareCanvas" width="360" height="560"></canvas><div class="scbtns"><button class="scbtn scsave" onclick="downloadCard()">📥 이미지 저장</button><button class="scbtn scclose" onclick="closeShareCard()">닫기</button></div></div>
-
 <script>
 // ── API 키 ──
 mapboxgl.accessToken = 'pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
@@ -973,7 +948,6 @@ function getTimeAtm(){
 }
 
 function applyAtmosphere(){
-  if(!atmAutoMode)return;
   var atm=getTimeAtm();
   var base=document.getElementById('atmBase');
   var bloom=document.getElementById('atmBloom');
@@ -982,9 +956,7 @@ function applyAtmosphere(){
   bloom.style.background=atm.bloom;
   bloom.style.opacity='0.12';
   if(map.isStyleLoaded())map.setFog(atm.fog);
-  // 슬롯 UI 동기화
-  var slot=getSlotFromHour();
-  if(typeof selectAtmSlot==='function')selectAtmSlot(slot);
+
   // 새벽/자정: 별 추가
   var isDawn=(atm.label==='midnight'||atm.label==='dawn');
   if(isDawn&&!dawnMode){
@@ -1603,53 +1575,15 @@ function rrFill(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-
 function downloadCard(){var c=document.getElementById('shareCanvas');var l=document.createElement('a');l.download='noct.png';l.href=c.toDataURL('image/png');l.click();showToast('📥 이미지 저장됐어요!');}
 function closeShareCard(){document.getElementById('shareCardOverlay').classList.remove('open');}
 
-// ── 시간대 분위기 패널 ──
-var atmPanelOpen=false;
-var atmAutoMode=true;
-var atmSlotIndex=0;
-var ATM_SLOTS=[
-  {key:'midnight',idx:0},{key:'dawn',idx:1},{key:'morning',idx:2},
-  {key:'morning',idx:3},{key:'sunset',idx:4},{key:'midnight',idx:5}
-];
-
+// ── 시간대 자동 분위기 (한국 시간 기반) ──
 function getSlotFromHour(){
   var h=new Date().getHours();
-  if(h<6)return 0;if(h<9)return 1;if(h<12)return 2;
-  if(h<17)return 3;if(h<20)return 4;return 5;
+  if(h<6)return 'midnight';
+  if(h<9)return 'dawn';
+  if(h<17)return 'morning';
+  if(h<20)return 'sunset';
+  return 'midnight';
 }
-
-function toggleAtmPanel(){
-  atmPanelOpen=!atmPanelOpen;
-  document.getElementById('atmPanel').classList.toggle('open',atmPanelOpen);
-  document.getElementById('atmBtn').classList.toggle('active',atmPanelOpen);
-}
-
-function toggleAtmAuto(){
-  atmAutoMode=!atmAutoMode;
-  document.getElementById('atmAutoToggle').classList.toggle('on',atmAutoMode);
-  if(atmAutoMode){selectAtmSlot(getSlotFromHour());}
-}
-
-function selectAtmSlot(idx){
-  atmSlotIndex=idx;
-  document.querySelectorAll('.atmp-slot').forEach(function(el,i){el.classList.toggle('active',i===idx);});
-  var slotAtmKeys=['midnight','dawn','morning','morning','sunset','midnight'];
-  var atmKey=slotAtmKeys[idx];
-  if(ATM&&ATM[atmKey]){
-    var atm=ATM[atmKey];
-    document.getElementById('atmBase').style.background=atm.base;
-    document.getElementById('atmBase').style.opacity='0.08';
-    document.getElementById('atmBloom').style.background=atm.bloom;
-    document.getElementById('atmBloom').style.opacity='0.12';
-    if(map.isStyleLoaded())map.setFog(atm.fog);
-  }
-}
-
-// 초기 슬롯 설정
-setTimeout(function(){
-  var initSlot=getSlotFromHour();
-  selectAtmSlot(initSlot);
-},500);
 
 // ── 주기 업데이트 ──
 setInterval(function(){var s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];showToast('🎵 '+s.title+' — '+s.channel);},20000);
