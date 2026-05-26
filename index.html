@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;}
+html,body{width:100%;height:100%;overflow:hidden;background:#02010e;font-family:"Noto Sans KR",-apple-system,sans-serif;}
 /* 지도: 최하단 레이어 */
 #map{position:fixed;inset:0;z-index:0;}
 /* UI: pointer-events:none 기본, 필요한 것만 활성 */
@@ -287,6 +287,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 /* 새벽별 */
 .dstar{position:fixed;border-radius:50%;background:#fff;pointer-events:none;animation:tw 3s ease-in-out infinite;z-index:2;}
 @keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
+/* cinematic scan line effect */
+#scanLines{position:fixed;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,20,0.03) 2px,rgba(0,0,20,0.03) 4px);opacity:0.4;}
+/* bottom gradient fade */
+#bottomFade{position:fixed;bottom:0;left:0;right:0;height:200px;z-index:4;pointer-events:none;background:linear-gradient(to top,rgba(2,1,14,0.6) 0%,transparent 100%);}
+/* top gradient */
+#topFade{position:fixed;top:0;left:0;right:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(to bottom,rgba(2,1,14,0.5) 0%,transparent 100%);}
 /* 마커 */
 .nm{cursor:pointer;overflow:visible;}
 @keyframes ro{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
@@ -311,8 +317,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   <div class="i-hint">글로우 점을 클릭하면 음악이 보여요</div>
 </div>
 <div id="map"></div>
-<div id="dawnOverlay" style="position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(30,0,60,.3),transparent,rgba(0,10,40,.4));opacity:0;transition:opacity 2s;"></div>
+<!-- Atmosphere layers -->
+<div id="atmBase" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:background 4s ease,opacity 2s;opacity:0;"></div>
+<div id="atmVignette" style="position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,1,12,0.7) 100%);"></div>
+<div id="atmBloom" style="position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 3s;mix-blend-mode:screen;"></div>
+<div id="dawnOverlay" style="position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s;"></div>
 <div id="vibe"></div>
+<div id="scanLines"></div>
+<div id="bottomFade"></div>
+<div id="topFade"></div>
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
 <div id="topbar">
   <div class="logo" onclick="toggleHistory()"><div class="logo-icon">N</div><div><div class="logo-text">noct</div><div class="logo-sub">지금 이 도시의 음악</div></div></div>
@@ -887,6 +900,8 @@ function updateVibe(){
   checkDawn();
 }
 updateVibe();setInterval(updateVibe,60000);
+applyAtmosphere();
+setInterval(applyAtmosphere,300000);
 
 // Ambient text 업데이트
 function updateAmbientText(){
@@ -903,12 +918,64 @@ function updateAmbientText(){
 setTimeout(updateAmbientText,5000);
 setInterval(updateAmbientText,15000);
 
-// ── 새벽 모드 ──
-function checkDawn(){
-  var h=new Date().getHours(),isDawn=(h<5);
-  if(isDawn&&!dawnMode){dawnMode=true;document.getElementById('dawnOverlay').style.opacity='1';for(var i=0;i<40;i++){var s=document.createElement('div');s.className='dstar';var sz=Math.random()*2+1;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'vw;top:'+Math.random()*50+'vh;animation-delay:'+Math.random()*3+'s;animation-duration:'+(2+Math.random()*3)+'s;';document.body.appendChild(s);dawnStars.push(s);}}
-  else if(!isDawn&&dawnMode){dawnMode=false;document.getElementById('dawnOverlay').style.opacity='0';dawnStars.forEach(function(s){s.remove();});dawnStars=[];}
+// ── 시간대별 분위기 시스템 ──
+var ATM = {
+  midnight: {
+    base:'linear-gradient(180deg,rgba(2,1,18,0.85) 0%,rgba(5,2,25,0.6) 40%,rgba(3,1,15,0.8) 100%)',
+    bloom:'radial-gradient(ellipse at 50% 30%,rgba(80,20,160,0.08) 0%,transparent 60%)',
+    fog:{color:'rgb(2,1,12)','high-color':'rgb(12,5,35)','horizon-blend':0.06,'space-color':'rgb(2,1,12)','star-intensity':0.9},
+    vignette:'rgba(2,1,12,0.75)',label:'midnight'
+  },
+  dawn: {
+    base:'linear-gradient(180deg,rgba(8,2,30,0.8) 0%,rgba(20,5,45,0.55) 40%,rgba(5,2,20,0.75) 100%)',
+    bloom:'radial-gradient(ellipse at 50% 60%,rgba(120,40,200,0.07) 0%,transparent 60%)',
+    fog:{color:'rgb(5,2,18)','high-color':'rgb(25,8,55)','horizon-blend':0.07,'space-color':'rgb(3,1,15)','star-intensity':0.7},
+    vignette:'rgba(4,1,18,0.72)',label:'dawn'
+  },
+  morning: {
+    base:'linear-gradient(180deg,rgba(10,5,30,0.7) 0%,rgba(15,8,35,0.45) 40%,rgba(8,3,22,0.65) 100%)',
+    bloom:'radial-gradient(ellipse at 60% 20%,rgba(80,60,180,0.06) 0%,transparent 60%)',
+    fog:{color:'rgb(8,6,22)','high-color':'rgb(30,20,55)','horizon-blend':0.05,'space-color':'rgb(5,3,18)','star-intensity':0.3},
+    vignette:'rgba(5,3,18,0.68)',label:'morning'
+  },
+  sunset: {
+    base:'linear-gradient(180deg,rgba(15,5,35,0.78) 0%,rgba(30,8,50,0.55) 40%,rgba(10,2,28,0.72) 100%)',
+    bloom:'radial-gradient(ellipse at 40% 10%,rgba(180,60,120,0.07) 0%,transparent 55%)',
+    fog:{color:'rgb(12,4,22)','high-color':'rgb(50,15,60)','horizon-blend':0.07,'space-color':'rgb(8,2,18)','star-intensity':0.45},
+    vignette:'rgba(8,2,20,0.72)',label:'sunset'
+  }
+};
+
+function getTimeAtm(){
+  var h=new Date().getHours();
+  if(h>=0&&h<5) return ATM.midnight;
+  if(h>=5&&h<10) return ATM.dawn;
+  if(h>=10&&h<18) return ATM.morning;
+  if(h>=18&&h<22) return ATM.sunset;
+  return ATM.midnight;
 }
+
+function applyAtmosphere(){
+  var atm=getTimeAtm();
+  var base=document.getElementById('atmBase');
+  var bloom=document.getElementById('atmBloom');
+  base.style.background=atm.base;
+  base.style.opacity='1';
+  bloom.style.background=atm.bloom;
+  bloom.style.opacity='1';
+  // fog 업데이트
+  if(map.isStyleLoaded())map.setFog(atm.fog);
+  // 새벽/자정: 별 추가
+  var isDawn=(atm.label==='midnight'||atm.label==='dawn');
+  if(isDawn&&!dawnMode){
+    dawnMode=true;
+    for(var i=0;i<40;i++){var s=document.createElement('div');s.className='dstar';var sz=Math.random()*2+1;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'vw;top:'+Math.random()*50+'vh;animation-delay:'+Math.random()*3+'s;animation-duration:'+(2+Math.random()*3)+'s;';document.body.appendChild(s);dawnStars.push(s);}
+  }else if(!isDawn&&dawnMode){
+    dawnMode=false;dawnStars.forEach(function(s){s.remove();});dawnStars=[];
+  }
+}
+
+function checkDawn(){applyAtmosphere();}
 
 // ── 지도 ──
 var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing,antialias:true});
@@ -919,7 +986,23 @@ map.on('load',function(){
   for(var i=0;i<layers.length;i++){if(layers[i].type==='symbol'&&layers[i].layout['text-field']){labelId=layers[i].id;break;}}
   map.addLayer({id:'bld',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:12,paint:{'fill-extrusion-color':['interpolate',['linear'],['get','height'],0,'#080520',40,'#0e0f24',150,'#161640'],'fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':0.95}},labelId);
   map.addLayer({id:'bld-top',source:'composite','source-layer':'building',filter:['all',['==','extrude','true'],['>=','height',20]],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#2d1b69','fill-extrusion-height':['+',['get','height'],0.5],'fill-extrusion-base':['get','height'],'fill-extrusion-opacity':0.4}});
-  map.setFog({color:'rgb(3,3,10)','high-color':'rgb(8,6,20)','horizon-blend':0.05,'space-color':'rgb(3,3,10)','star-intensity':0.6});
+  // 시간대별 fog 적용
+var _initAtm=getTimeAtm();
+map.setFog(_initAtm.fog);
+
+// 건물 색감: deep navy indigo
+if(map.getLayer('bld')){
+  map.setPaintProperty('bld','fill-extrusion-color',
+    ['interpolate',['linear'],['get','height'],
+      0,'#06041a', 8,'#0a0720', 20,'#0e0b2a',
+      50,'#120e35', 100,'#160f40', 200,'#1a1250'
+    ]);
+  map.setPaintProperty('bld','fill-extrusion-opacity',0.96);
+}
+if(map.getLayer('bld-top')){
+  map.setPaintProperty('bld-top','fill-extrusion-color','#2d1b69');
+  map.setPaintProperty('bld-top','fill-extrusion-opacity',0.45);
+}
 
   // 지도 텍스트 contrast 낮추기 (음악 불빛이 주인공)
   map.getStyle().layers.forEach(function(layer){
