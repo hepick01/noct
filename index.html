@@ -997,6 +997,15 @@ if(map.getLayer('bld-top')){
 }
 
   // 지도 텍스트 contrast 낮추기 (음악 불빛이 주인공)
+  // 지도 레이블 전체 한국어로
+  map.getStyle().layers.forEach(function(layer){
+    if(layer.type==='symbol'&&layer.layout&&layer.layout['text-field']){
+      try{
+        map.setLayoutProperty(layer.id,'text-field',['coalesce',['get','name_ko'],['get','name']]);
+      }catch(e){}
+    }
+  });
+
   map.getStyle().layers.forEach(function(layer){
     if(layer.type==='symbol'){
       try{
