@@ -1124,55 +1124,13 @@ if(map.getLayer('bld-top')){
 
   // 서울 ambient glow 소스 추가
   // 서울 ambient glow - 도시 자체가 빛나는 느낌
-  map.addSource('seoul-glow',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.9780,37.5665]},properties:{}}});
-  // 가장 넓은 외부 aura (거의 안 보일 정도)
-  map.addLayer({id:'seoul-aura-outer',source:'seoul-glow',type:'circle',paint:{
-    'circle-radius':['interpolate',['linear'],['zoom'],6,120,8,200,12,500,15,900],
-    'circle-color':'#4a1d96',
-    'circle-opacity':0.025,
-    'circle-blur':1,
-  }});
-  // 중간 haze
-  map.addLayer({id:'seoul-aura',source:'seoul-glow',type:'circle',paint:{
-    'circle-radius':['interpolate',['linear'],['zoom'],6,60,8,100,12,280,15,500],
-    'circle-color':'#7B68EE',
-    'circle-opacity':0.04,
-    'circle-blur':1,
-  }});
-  // 중심부 glow
-  map.addLayer({id:'seoul-haze',source:'seoul-glow',type:'circle',paint:{
-    'circle-radius':['interpolate',['linear'],['zoom'],8,30,12,80,15,160],
-    'circle-color':'#c77dff',
-    'circle-opacity':0.05,
-    'circle-blur':0.8,
-  }});
-  // 부산도 동일하게
-  map.addSource('busan-glow',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[129.0756,35.1796]},properties:{}}});
-  map.addLayer({id:'busan-aura',source:'busan-glow',type:'circle',paint:{
-    'circle-radius':['interpolate',['linear'],['zoom'],6,60,8,100,12,260,15,450],
-    'circle-color':'#1e40af',
-    'circle-opacity':0.035,
-    'circle-blur':1,
-  }});
-
   // 더미 마커 소스 (GPU 렌더링)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
-    'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],
-    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],
-    'circle-blur':1.4}});
-  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{
-    'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],
-    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],
-    'circle-blur':0.6}});
-  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
-    'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],1.2],12,['*',['get','size'],3],15,['*',['get','size'],4.5]],
-    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.9,15,1]}});
+  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],'circle-blur':1.4}});
+  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],'circle-blur':0.6}});
+  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],1.2],12,['*',['get','size'],3],15,['*',['get','size'],4.5]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.9,15,1]}});
   map.addLayer({id:'dummy-label',source:'dummy',type:'symbol',minzoom:13,layout:{'text-field':['get','title'],'text-size':10,'text-anchor':'top','text-offset':[0,0.8],'text-font':['DIN Offc Pro Regular','Arial Unicode MS Regular']},paint:{'text-color':['get','color'],'text-opacity':0.7,'text-halo-color':'rgba(0,0,0,0.8)','text-halo-width':1}});
-  map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color},p.district);});
+  map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
   map.on('mouseenter','dummy-core',function(){map.getCanvas().style.cursor='pointer';});
   map.on('mouseleave','dummy-core',function(){map.getCanvas().style.cursor='';});
 
@@ -1707,7 +1665,7 @@ function getSlotFromHour(){
 // ── 주기 업데이트 ──
 setInterval(function(){var s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];showToast('🎵 '+s.title+' — '+s.channel);},20000);
 setInterval(renderTop,30000);
-setInterval(loadLiveUsers,45000);
+;
 
 </script>
 </body>
