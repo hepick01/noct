@@ -1180,6 +1180,24 @@ if(map.getLayer('bld-top')){
   map.addSource('ad-spots',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1,'circle-blur':1}});
 
+  // 서울 purple/pink glow
+  map.addSource('sg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.978,37.566]},properties:{}}});
+  map.addLayer({id:'sg1',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,150,8,280,11,550,14,900],'circle-color':'#3b0764','circle-opacity':0.04,'circle-blur':1}});
+  map.addLayer({id:'sg2',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,80,8,150,11,300,14,520],'circle-color':'#6d28d9','circle-opacity':0.06,'circle-blur':1}});
+  map.addLayer({id:'sg3',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,40,9,80,12,160,14,260],'circle-color':'#a855f7','circle-opacity':0.07,'circle-blur':0.8}});
+  map.addLayer({id:'sg4',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],9,20,11,50,13,100,15,170],'circle-color':'#ec4899','circle-opacity':0.05,'circle-blur':0.7}});
+  // 부산 cyan/blue glow
+  map.addSource('bg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[129.076,35.180]},properties:{}}});
+  map.addLayer({id:'bg1',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,100,8,200,11,380,14,650],'circle-color':'#0c4a6e','circle-opacity':0.04,'circle-blur':1}});
+  map.addLayer({id:'bg2',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,60,9,120,12,240,14,420],'circle-color':'#0ea5e9','circle-opacity':0.06,'circle-blur':0.9}});
+  map.addLayer({id:'bg3',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,30,11,70,13,130,15,220],'circle-color':'#22d3ee','circle-opacity':0.05,'circle-blur':0.7}});
+  // 대구/광주/대전 mini glow
+  [{id:'dg',lng:128.601,lat:35.871,c:'#f59e0b'},{id:'gg',lng:126.853,lat:35.160,c:'#10b981'},{id:'dj',lng:127.385,lat:36.350,c:'#6366f1'}].forEach(function(city){
+    map.addSource(city.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[city.lng,city.lat]},properties:{}}});
+    map.addLayer({id:city.id+'1',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,50,9,110,12,220],'circle-color':city.c,'circle-opacity':0.035,'circle-blur':1}});
+    map.addLayer({id:city.id+'2',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,20,11,50,13,100],'circle-color':city.c,'circle-opacity':0.05,'circle-blur':0.8}});
+  });
+
   // 초기 데이터
   spawnDummy('busan');spawnAdLayer('busan');spawnAdMarkers('busan');renderTop();
 
@@ -1219,9 +1237,18 @@ function doDrift(){
   map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:64+(Math.random()-.5)*6,duration:18000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
   driftTimer=setTimeout(doDrift,15000);
 }
-function stopDrift(){driftActive=false;clearTimeout(driftTimer);}
-map.on('dragstart',stopDrift);
-map.on('touchstart',function(){stopDrift();setTimeout(startDrift,20000);});
+function stopDrift(){
+  driftActive=false;
+  clearTimeout(driftTimer);
+  clearTimeout(_driftRestartTimer);
+  if(map)map.stop(); // 진행 중인 easeTo 즉시 중단
+}
+var _driftRestartTimer=null;
+map.on('dragstart',function(){stopDrift();clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
+map.on('touchstart',function(){stopDrift();clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
+map.on('zoomstart',function(){stopDrift();clearTimeout(_driftRestartTimer);});
+map.on('zoomend',function(){clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
+map.on('rotatestart',function(){stopDrift();clearTimeout(_driftRestartTimer);});
 
 // ── 인트로 ──
 function runIntro(){
