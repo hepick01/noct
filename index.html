@@ -897,7 +897,6 @@ function updateVibe(){
   var v=getVibe();var t=document.getElementById('vibeTag');
   t.textContent=v.tag;t.style.cssText='background:'+v.c+'18;border:1px solid '+v.c+'35;color:'+v.c+';border-radius:20px;padding:4px 11px;font-size:11px;font-weight:500;';
   var n=new Date();document.getElementById('vibeTime').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  checkDawn();
 }
 updateVibe();setInterval(updateVibe,60000);
 
@@ -974,8 +973,6 @@ function applyAtmosphere(){
 }
 
 function checkDawn(){applyAtmosphere();}
-applyAtmosphere();
-setInterval(applyAtmosphere,300000);
 
 // ── 지도 ──
 var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing,antialias:true});
@@ -1107,6 +1104,11 @@ if(map.getLayer('bld-top')){
   // Supabase
   initSupabase();
   if(db){loadLiveUsers();subscribeRT();setInterval(loadLiveUsers,45000);}
+
+  // 분위기 적용 (ATM 선언 이후 안전하게)
+  applyAtmosphere();
+  setInterval(applyAtmosphere,300000);
+  setInterval(checkDawn,60000);
 
   // UI 표시
   setTimeout(function(){
