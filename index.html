@@ -967,7 +967,79 @@ function applyAtmosphere(){
   }
 }
 
-function checkDawn(){applyAtmosphere();}
+// ── 새 시간대 분위기 시스템 ──
+var TIME_MOODS = {
+  earlyDawn:{
+    fog:{color:'rgb(3,4,18)','high-color':'rgb(8,10,35)','horizon-blend':0.04,'space-color':'rgb(2,2,14)','star-intensity':0.85},
+    bldBase:'#04030f',bldTop:'#1a1250',overlay:'rgba(2,4,22,0.5)',bloom:'rgba(20,30,100,0.04)',water:'rgba(3,6,24,0.97)',glow:0.7,road:0.12,label:'rgba(200,210,255,0.88)',labelOp:0.78
+  },
+  morning:{
+    fog:{color:'rgb(18,22,38)','high-color':'rgb(40,50,80)','horizon-blend':0.02,'space-color':'rgb(10,14,30)','star-intensity':0.1},
+    bldBase:'#0e1020',bldTop:'#252560',overlay:'rgba(10,14,30,0.2)',bloom:'rgba(80,100,160,0.02)',water:'rgba(8,14,36,0.93)',glow:0.85,road:0.25,label:'rgba(230,230,255,0.94)',labelOp:0.9
+  },
+  day:{
+    fog:{color:'rgb(22,26,42)','high-color':'rgb(55,65,95)','horizon-blend':0.02,'space-color':'rgb(14,18,34)','star-intensity':0.0},
+    bldBase:'#141622',bldTop:'#2a2a6a',overlay:'rgba(8,10,22,0.12)',bloom:'rgba(60,70,120,0.02)',water:'rgba(10,16,38,0.92)',glow:0.9,road:0.32,label:'rgba(240,235,255,0.97)',labelOp:0.95
+  },
+  sunset:{
+    fog:{color:'rgb(18,8,22)','high-color':'rgb(70,25,60)','horizon-blend':0.06,'space-color':'rgb(10,4,18)','star-intensity':0.3},
+    bldBase:'#0f0612',bldTop:'#4a1560',overlay:'rgba(40,10,30,0.28)',bloom:'rgba(180,60,100,0.05)',water:'rgba(8,4,18,0.96)',glow:1.2,road:0.22,label:'rgba(255,220,200,0.92)',labelOp:0.85
+  },
+  night:{
+    fog:{color:'rgb(3,3,14)','high-color':'rgb(10,6,28)','horizon-blend':0.05,'space-color':'rgb(2,2,10)','star-intensity':0.65},
+    bldBase:'#06041a',bldTop:'#2d1b69',overlay:'rgba(4,2,18,0.4)',bloom:'rgba(80,20,160,0.05)',water:'rgba(4,6,24,0.97)',glow:1.0,road:0.16,label:'rgba(210,195,255,0.92)',labelOp:0.82
+  }
+};
+
+function getTimeMood(){
+  var utc=new Date().getTime()+(new Date().getTimezoneOffset()*60000);
+  var h=new Date(utc+9*3600000).getHours();
+  if(h>=3&&h<6)return 'earlyDawn';
+  if(h>=6&&h<11)return 'morning';
+  if(h>=11&&h<17)return 'day';
+  if(h>=17&&h<20)return 'sunset';
+  return 'night';
+}
+
+var _lastMood='';
+function applyMood(moodKey){
+  var m=TIME_MOODS[moodKey];if(!m)return;
+  _lastMood=moodKey;
+  var base=document.getElementById('atmBase');
+  var bloom=document.getElementById('atmBloom');
+  if(base){base.style.transition='background 6s ease';base.style.background=m.overlay;base.style.opacity='1';}
+  if(bloom){bloom.style.transition='background 6s ease';bloom.style.background=m.bloom;bloom.style.opacity='1';}
+  if(!map||!map.isStyleLoaded())return;
+  try{map.setFog(m.fog);}catch(e){}
+  try{if(map.getLayer('bld'))map.setPaintProperty('bld','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,m.bldBase,40,'#0e0f24',150,'#161640']);}catch(e){}
+  try{if(map.getLayer('bld-top'))map.setPaintProperty('bld-top','fill-extrusion-color',m.bldTop);}catch(e){}
+  try{
+    map.getStyle().layers.forEach(function(lyr){
+      try{
+        var id=lyr.id;
+        if(lyr.type==='fill'&&id.includes('water')){map.setPaintProperty(id,'fill-color',m.water);}
+        if(lyr.type==='symbol'){
+          var isMajor=id.includes('place-city')||id.includes('place-town')||id.includes('settlement-major')||id.includes('settlement-subdivision');
+          var isMinor=id.includes('place')&&!isMajor;
+          if(isMajor){map.setPaintProperty(id,'text-color',m.label);map.setPaintProperty(id,'text-opacity',m.labelOp);}
+          else if(isMinor){map.setPaintProperty(id,'text-opacity',m.labelOp*0.55);}
+          else if(id.includes('road')||id.includes('street')){map.setPaintProperty(id,'text-opacity',0.1);}
+        }
+        if(lyr.type==='line'){
+          var isHwy=id.includes('major')||id.includes('highway')||id.includes('motorway');
+          map.setPaintProperty(id,'line-opacity',isHwy?m.road:m.road*0.5);
+        }
+      }catch(e){}
+    });
+  }catch(e){}
+  var gOp=0.04*m.glow;
+  try{if(map.getLayer('dummy-glow'))map.setPaintProperty('dummy-glow','circle-opacity',['interpolate',['linear'],['zoom'],8,gOp*0.5,12,gOp*1.2,15,gOp*1.8]);}catch(e){}
+}
+
+function checkDawn(){
+  var mood=getTimeMood();
+  if(mood!==_lastMood)applyMood(mood);
+}
 
 // ── 지도 ──
 var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing,antialias:true});
@@ -1122,8 +1194,8 @@ if(map.getLayer('bld-top')){
   if(db){loadLiveUsers();subscribeRT();setInterval(loadLiveUsers,45000);}
 
   // 시간대 분위기 초기 적용 (라벨 설정 후 실행)
-  setTimeout(function(){ applyMood(getTimeMood(), false); }, 500);
-  setInterval(checkTimeMood, 60000);
+  setTimeout(checkDawn, 500);
+  setInterval(checkDawn, 60000);
 
   // UI 표시
   setTimeout(function(){
