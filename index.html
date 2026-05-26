@@ -1121,8 +1121,8 @@ if(map.getLayer('bld-top')){
   initSupabase();
   if(db){loadLiveUsers();subscribeRT();setInterval(loadLiveUsers,45000);}
 
-  // 시간대 분위기 초기 적용
-  applyMood(getTimeMood(), false);
+  // 시간대 분위기 초기 적용 (라벨 설정 후 실행)
+  setTimeout(function(){ applyMood(getTimeMood(), false); }, 500);
   setInterval(checkTimeMood, 60000);
 
   // UI 표시
