@@ -1000,30 +1000,42 @@ if(map.getLayer('bld-top')){
   map.getStyle().layers.forEach(function(layer){
     if(layer.type==='symbol'){
       try{
-        // 주요 도시명은 40~50% 밝기, 보조는 20~30%
-        var isCity=layer.id.includes('place')&&(layer.id.includes('city')||layer.id.includes('town'));
-        var isLabel=layer.id.includes('place');
-        var op=isCity?0.55:isLabel?0.35:0.18;
-        var sz=isCity?1.1:1.0;
-        map.setPaintProperty(layer.id,'text-opacity',op);
-        map.setPaintProperty(layer.id,'icon-opacity',op*0.6);
-        map.setPaintProperty(layer.id,'text-color','rgba(220,200,255,'+op+')');
-        if(isCity){try{map.setLayoutProperty(layer.id,'text-size',['*',['get','text-size']||12,sz]);}catch(e){}}
+        var id=layer.id;
+        // 광역시/주요도시 (city 레벨) - 흰 글자, 잘 보이게
+        var isMajor=id.includes('place-city')||id.includes('place-town')||
+                    id.includes('settlement-major')||id.includes('settlement-subdivision');
+        // 보조 (구/동/village)
+        var isMinor=id.includes('place')&&!isMajor;
+        // 도로명
+        var isRoad=id.includes('road')||id.includes('street')||id.includes('highway');
+
+        if(isMajor){
+          map.setPaintProperty(id,'text-color','rgba(255,255,255,0.92)');
+          map.setPaintProperty(id,'text-opacity',0.9);
+          try{map.setPaintProperty(id,'text-halo-color','rgba(0,0,0,0.8)');}catch(e){}
+          try{map.setPaintProperty(id,'text-halo-width',1.5);}catch(e){}
+        } else if(isMinor){
+          map.setPaintProperty(id,'text-color','rgba(210,200,240,0.6)');
+          map.setPaintProperty(id,'text-opacity',0.55);
+          try{map.setPaintProperty(id,'text-halo-color','rgba(0,0,0,0.7)');}catch(e){}
+          try{map.setPaintProperty(id,'text-halo-width',1);}catch(e){}
+        } else if(isRoad){
+          map.setPaintProperty(id,'text-opacity',0.15);
+        } else {
+          map.setPaintProperty(id,'text-opacity',0.12);
+        }
       }catch(e){}
     }
     if(layer.type==='line'){
       try{
         var isHighway=layer.id.includes('major')||layer.id.includes('highway')||layer.id.includes('motorway');
-        var lineOp=isHighway?0.28:0.15;
-        map.setPaintProperty(layer.id,'line-opacity',lineOp);
-        // 도로 색을 살짝 보라빛으로
+        map.setPaintProperty(layer.id,'line-opacity',isHighway?0.28:0.14);
         if(isHighway){try{map.setPaintProperty(layer.id,'line-color','rgba(120,100,180,0.5)');}catch(e){}}
       }catch(e){}
     }
     if(layer.type==='fill'&&!layer.id.includes('building')&&!layer.id.includes('water')){
       try{map.setPaintProperty(layer.id,'fill-opacity',0.06);}catch(e){}
     }
-    // 강/바다 구분
     if(layer.type==='fill'&&layer.id.includes('water')){
       try{map.setPaintProperty(layer.id,'fill-color','rgba(6,12,30,0.95)');}catch(e){}
     }
