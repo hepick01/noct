@@ -1129,7 +1129,7 @@ if(map.getLayer('bld-top')){
   map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],'circle-blur':1.4}});
   map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],'circle-blur':0.6}});
   map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],1.2],12,['*',['get','size'],3],15,['*',['get','size'],4.5]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.9,15,1]}});
-  map.addLayer({id:'dummy-label',source:'dummy',type:'symbol',minzoom:13,layout:{'text-field':['get','title'],'text-size':10,'text-anchor':'top','text-offset':[0,0.8],'text-font':['DIN Offc Pro Regular','Arial Unicode MS Regular']},paint:{'text-color':['get','color'],'text-opacity':0.7,'text-halo-color':'rgba(0,0,0,0.8)','text-halo-width':1}});
+  
   map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
   map.on('mouseenter','dummy-core',function(){map.getCanvas().style.cursor='pointer';});
   map.on('mouseleave','dummy-core',function(){map.getCanvas().style.cursor='';});
@@ -1138,17 +1138,13 @@ if(map.getLayer('bld-top')){
   map.addSource('ad-spots',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1,'circle-blur':1}});
 
-  // 서울 purple/pink glow
+  // 서울/부산 glow (각 2레이어로 경량화)
   map.addSource('sg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.978,37.566]},properties:{}}});
-  map.addLayer({id:'sg1',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,150,8,280,11,550,14,900],'circle-color':'#3b0764','circle-opacity':0.04,'circle-blur':1}});
-  map.addLayer({id:'sg2',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,80,8,150,11,300,14,520],'circle-color':'#6d28d9','circle-opacity':0.06,'circle-blur':1}});
-  map.addLayer({id:'sg3',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,40,9,80,12,160,14,260],'circle-color':'#a855f7','circle-opacity':0.07,'circle-blur':0.8}});
-  map.addLayer({id:'sg4',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],9,20,11,50,13,100,15,170],'circle-color':'#ec4899','circle-opacity':0.05,'circle-blur':0.7}});
-  // 부산 cyan/blue glow
+  map.addLayer({id:'sg1',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,120,8,240,11,480],'circle-color':'#6d28d9','circle-opacity':0.05,'circle-blur':1}});
+  map.addLayer({id:'sg2',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,35,10,80,13,160],'circle-color':'#a855f7','circle-opacity':0.07,'circle-blur':0.8}});
   map.addSource('bg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[129.076,35.180]},properties:{}}});
-  map.addLayer({id:'bg1',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,100,8,200,11,380,14,650],'circle-color':'#0c4a6e','circle-opacity':0.04,'circle-blur':1}});
-  map.addLayer({id:'bg2',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,60,9,120,12,240,14,420],'circle-color':'#0ea5e9','circle-opacity':0.06,'circle-blur':0.9}});
-  map.addLayer({id:'bg3',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,30,11,70,13,130,15,220],'circle-color':'#22d3ee','circle-opacity':0.05,'circle-blur':0.7}});
+  map.addLayer({id:'bg1',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,80,8,180,11,340],'circle-color':'#0ea5e9','circle-opacity':0.05,'circle-blur':1}});
+  map.addLayer({id:'bg2',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,25,10,65,13,130],'circle-color':'#22d3ee','circle-opacity':0.06,'circle-blur':0.8}});
   // 대구/광주/대전 mini glow
   [{id:'dg',lng:128.601,lat:35.871,c:'#f59e0b'},{id:'gg',lng:126.853,lat:35.160,c:'#10b981'},{id:'dj',lng:127.385,lat:36.350,c:'#6366f1'}].forEach(function(city){
     map.addSource(city.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[city.lng,city.lat]},properties:{}}});
@@ -1192,8 +1188,8 @@ function startDrift(){if(driftActive)return;driftActive=true;doDrift();}
 function doDrift(){
   if(!driftActive)return;
   var c=CITIES[currentCity];
-  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:64+(Math.random()-.5)*6,duration:18000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
-  driftTimer=setTimeout(doDrift,15000);
+  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:64+(Math.random()-.5)*6,duration:22000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
+  driftTimer=setTimeout(doDrift,23000);
 }
 function stopDrift(){
   driftActive=false;
@@ -1202,11 +1198,14 @@ function stopDrift(){
   if(map)map.stop(); // 진행 중인 easeTo 즉시 중단
 }
 var _driftRestartTimer=null;
-map.on('dragstart',function(){stopDrift();clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
-map.on('touchstart',function(){stopDrift();clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
-map.on('zoomstart',function(){stopDrift();clearTimeout(_driftRestartTimer);});
-map.on('zoomend',function(){clearTimeout(_driftRestartTimer);_driftRestartTimer=setTimeout(startDrift,30000);});
-map.on('rotatestart',function(){stopDrift();clearTimeout(_driftRestartTimer);});
+function onUserInteract(){
+  stopDrift();
+  clearTimeout(_driftRestartTimer);
+  _driftRestartTimer=setTimeout(startDrift,25000);
+}
+map.on('dragstart',onUserInteract);
+map.on('zoomstart',onUserInteract);
+map.on('rotatestart',onUserInteract);
 
 // ── 인트로 ──
 function runIntro(){
