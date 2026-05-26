@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>noct — 지금 이 도시의 음악</title>
 <meta name="theme-color" content="#c77dff">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+<meta name="mobile-web-app-capable" content="yes">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1013,25 +1014,20 @@ function applyMood(moodKey){
   try{map.setFog(m.fog);}catch(e){}
   try{if(map.getLayer('bld'))map.setPaintProperty('bld','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,m.bldBase,40,'#0e0f24',150,'#161640']);}catch(e){}
   try{if(map.getLayer('bld-top'))map.setPaintProperty('bld-top','fill-extrusion-color',m.bldTop);}catch(e){}
-  try{
-    map.getStyle().layers.forEach(function(lyr){
-      try{
-        var id=lyr.id;
-        if(lyr.type==='fill'&&id.includes('water')){map.setPaintProperty(id,'fill-color',m.water);}
-        if(lyr.type==='symbol'){
-          var isMajor=id.includes('place-city')||id.includes('place-town')||id.includes('settlement-major')||id.includes('settlement-subdivision');
-          var isMinor=id.includes('place')&&!isMajor;
-          if(isMajor){map.setPaintProperty(id,'text-color',m.label);map.setPaintProperty(id,'text-opacity',m.labelOp);}
-          else if(isMinor){map.setPaintProperty(id,'text-opacity',m.labelOp*0.55);}
-          else if(id.includes('road')||id.includes('street')){map.setPaintProperty(id,'text-opacity',0.1);}
-        }
-        if(lyr.type==='line'){
-          var isHwy=id.includes('major')||id.includes('highway')||id.includes('motorway');
-          map.setPaintProperty(id,'line-opacity',isHwy?m.road:m.road*0.5);
-        }
-      }catch(e){}
-    });
-  }catch(e){}
+  // 레이어 업데이트 분산 처리 (렉 방지)
+  setTimeout(function(){
+    try{
+      _majorLabelIds.forEach(function(id){try{map.setPaintProperty(id,'text-color',m.label);map.setPaintProperty(id,'text-opacity',m.labelOp);}catch(e){}});
+      _waterFillIds.forEach(function(id){try{map.setPaintProperty(id,'fill-color',m.water);}catch(e){}});
+    }catch(e){}
+  },50);
+  setTimeout(function(){
+    try{
+      _minorLabelIds.forEach(function(id){try{map.setPaintProperty(id,'text-opacity',m.labelOp*0.55);}catch(e){}});
+      _highwayIds.forEach(function(id){try{map.setPaintProperty(id,'line-opacity',m.road);}catch(e){}});
+      _roadIds.forEach(function(id){try{map.setPaintProperty(id,'line-opacity',m.road*0.5);}catch(e){}});
+    }catch(e){}
+  },150);
   var gOp=0.04*m.glow;
   try{if(map.getLayer('dummy-glow'))map.setPaintProperty('dummy-glow','circle-opacity',['interpolate',['linear'],['zoom'],8,gOp*0.5,12,gOp*1.2,15,gOp*1.8]);}catch(e){}
 }
@@ -1126,9 +1122,15 @@ if(map.getLayer('bld-top')){
   // 서울 ambient glow - 도시 자체가 빛나는 느낌
   // 더미 마커 소스 (GPU 렌더링)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],'circle-blur':1}});
-  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],'circle-blur':0.5}});
-  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],1.2],12,['*',['get','size'],3],15,['*',['get','size'],4.5]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.9,15,1]}});
+  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],7,6,10,12,13,18,16,24],
+    'circle-opacity':['interpolate',['linear'],['zoom'],7,0.05,10,0.1,14,0.18],
+    'circle-blur':1}});
+  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],7,1.5,10,3,13,5,16,7],
+    'circle-opacity':['interpolate',['linear'],['zoom'],7,0.6,10,0.85,14,1]}});
   
   map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
   map.on('mouseenter','dummy-core',function(){map.getCanvas().style.cursor='pointer';});
@@ -1159,7 +1161,7 @@ if(map.getLayer('bld-top')){
   map.on('moveend',function(){clearTimeout(moveEndTimer);moveEndTimer=setTimeout(function(){var c=map.getCenter();var r=getNearestRegion(c.lat,c.lng);if(!r)return;document.getElementById('cityname').textContent=r.name;updateRegionCount(r.name,c.lat,c.lng);},1000);});
 
   // 카메라 드리프트 시작
-  startDrift();
+  
 
   // Supabase
   initSupabase();
@@ -1167,7 +1169,7 @@ if(map.getLayer('bld-top')){
 
   // 시간대 분위기 초기 적용 (라벨 설정 후 실행)
   setTimeout(checkDawn, 500);
-  setInterval(checkDawn, 60000);
+  setInterval(checkDawn, 300000);
 
   // UI 표시
   setTimeout(function(){
@@ -1184,24 +1186,14 @@ if(map.getLayer('bld-top')){
 });
 
 // ── 카메라 드리프트 ──
-function startDrift(){if(driftActive)return;driftActive=true;doDrift();}
-function doDrift(){
-  if(!driftActive)return;
-  var c=CITIES[currentCity];
-  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:62+(Math.random()-.5)*4,duration:22000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
-  driftTimer=setTimeout(doDrift,23000);
-}
-function stopDrift(){
-  driftActive=false;
-  clearTimeout(driftTimer);
-  clearTimeout(_driftRestartTimer);
-  if(map)map.stop(); // 진행 중인 easeTo 즉시 중단
-}
+function startDrift(){} // 드리프트 비활성화
+function doDrift(){}
+function stopDrift(){if(map)map.stop();}
 var _driftRestartTimer=null;
 function onUserInteract(){
   stopDrift();
   clearTimeout(_driftRestartTimer);
-  _driftRestartTimer=setTimeout(startDrift,25000);
+  
 }
 map.on('dragstart',onUserInteract);
 map.on('zoomstart',onUserInteract);
@@ -1662,7 +1654,7 @@ function getSlotFromHour(){
 }
 
 // ── 주기 업데이트 ──
-setInterval(function(){var s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];showToast('🎵 '+s.title+' — '+s.channel);},20000);
+// 자동 토스트 제거 (성능)
 setInterval(renderTop,120000);
 ;
 
