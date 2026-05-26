@@ -944,11 +944,31 @@ gwangju:[
 ],
 };
 var CITIES = {
-busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
-seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
-daegu:{center:[128.601,35.869],zoom:13.5,pitch:60,bearing:10,spots:DAEGU_SPOTS,name:"대구",count:94},
-incheon:{center:[126.705,37.456],zoom:13.5,pitch:60,bearing:-10,spots:INCHEON_SPOTS,name:"인천",count:127},
-gwangju:{center:[126.852,35.160],zoom:13.5,pitch:60,bearing:5,spots:GWANGJU_SPOTS,name:"광주",count:68},
+busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,name:"부산",count:183,spots:[
+  {name:"서면",lng:129.059,lat:35.156},{name:"해운대",lng:129.160,lat:35.163},
+  {name:"광안리",lng:129.118,lat:35.153},{name:"남포동",lng:129.037,lat:35.097},
+  {name:"동래",lng:129.085,lat:35.198},{name:"센텀시티",lng:129.131,lat:35.169},
+  {name:"부산역",lng:129.041,lat:35.115},{name:"기장",lng:129.222,lat:35.244}
+]},
+seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,name:"서울",count:312,spots:[
+  {name:"강남",lng:127.027,lat:37.497},{name:"홍대",lng:126.924,lat:37.556},
+  {name:"이태원",lng:126.994,lat:37.534},{name:"성수",lng:127.056,lat:37.544},
+  {name:"신촌",lng:126.937,lat:37.555},{name:"종로",lng:126.981,lat:37.572},
+  {name:"여의도",lng:126.924,lat:37.521},{name:"잠실",lng:127.100,lat:37.511},
+  {name:"건대",lng:127.070,lat:37.540},{name:"판교",lng:127.111,lat:37.395}
+]},
+daegu:{center:[128.601,35.869],zoom:13.5,pitch:60,bearing:10,name:"대구",count:94,spots:[
+  {name:"동성로",lng:128.601,lat:35.869},{name:"수성구",lng:128.631,lat:35.857},
+  {name:"칠성시장",lng:128.598,lat:35.882},{name:"동대구역",lng:128.629,lat:35.879}
+]},
+incheon:{center:[126.705,37.456],zoom:13.5,pitch:60,bearing:-10,name:"인천",count:87,spots:[
+  {name:"송도",lng:126.638,lat:37.383},{name:"부평",lng:126.722,lat:37.489},
+  {name:"인천시청",lng:126.705,lat:37.456},{name:"월미도",lng:126.596,lat:37.474}
+]},
+gwangju:{center:[126.852,35.160],zoom:13.5,pitch:60,bearing:5,name:"광주",count:76,spots:[
+  {name:"충장로",lng:126.915,lat:35.149},{name:"상무지구",lng:126.852,lat:35.160},
+  {name:"첨단지구",lng:126.844,lat:35.220},{name:"광주역",lng:126.900,lat:35.157}
+]}
 };
 var DAILY_TEMPLATES = {
 busan: [
