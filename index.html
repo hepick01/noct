@@ -311,6 +311,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 @keyframes glowBreath{0%,100%{opacity:.1}50%{opacity:.32}}
 @keyframes myPulse{0%{box-shadow:0 0 0 0 rgba(199,125,255,.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}
 
+/* vignette */
+#vignette{background:radial-gradient(ellipse at 50% 50%,transparent 42%,rgba(3,3,10,0.45) 100%)}
+
+/* PC cinematic */
+@media(min-width:1024px){
+  #songcard{width:280px;bottom:100px;}
+  #adcard{max-width:300px;bottom:100px;}
+  #livebadge{bottom:110px;}
+  #mainBtn{bottom:110px;padding:14px 22px;font-size:14px;}
+  .rbg{gap:7px;}
+  .ib{padding:8px 14px;font-size:12px;}
+  #ambientText{bottom:180px;}
+  .at-main{font-size:14px;letter-spacing:.2em;}
+  .at-sub{font-size:11px;}
+}
+
+/* 유저 마커 pulse 랜덤 - CSS var로 처리 */
+.lm-slow{animation-duration:3.2s !important}
+.lm-mid{animation-duration:2.4s !important}
+.lm-fast{animation-duration:1.8s !important}
+
 /* 인트로 */
 .i-logo{font-size:30px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:7px;opacity:0;animation:iUp .8s ease .3s forwards}
 .i-sub{color:rgba(255,255,255,.35);font-size:12px;margin-bottom:44px;opacity:0;animation:iUp .8s ease .6s forwards}
@@ -1045,11 +1066,11 @@ function initSupabase(){
 
 // ── 시간대 분위기 ──
 var TIME_MOODS={
-  earlyDawn:{overlay:'rgba(2,4,18,0.3)',fog:{color:'rgb(3,4,18)','high-color':'rgb(8,10,35)','horizon-blend':0.04,'space-color':'rgb(2,2,14)','star-intensity':0.85},stars:true},
-  morning:{overlay:'rgba(10,14,28,0.15)',fog:{color:'rgb(18,22,38)','high-color':'rgb(40,50,80)','horizon-blend':0.02,'space-color':'rgb(10,14,28)','star-intensity':0.1},stars:false},
-  day:{overlay:'rgba(8,10,20,0.08)',fog:{color:'rgb(22,26,42)','high-color':'rgb(55,65,90)','horizon-blend':0.02,'space-color':'rgb(14,18,32)','star-intensity':0.0},stars:false},
-  sunset:{overlay:'rgba(28,8,18,0.22)',fog:{color:'rgb(18,8,22)','high-color':'rgb(70,25,60)','horizon-blend':0.05,'space-color':'rgb(10,4,18)','star-intensity':0.3},stars:false},
-  night:{overlay:'rgba(3,2,14,0.28)',fog:{color:'rgb(3,3,14)','high-color':'rgb(10,6,28)','horizon-blend':0.04,'space-color':'rgb(2,2,10)','star-intensity':0.65},stars:true}
+  earlyDawn:{overlay:'rgba(2,4,18,0.35)',fog:{color:'rgb(3,4,18)','high-color':'rgb(8,10,35)','horizon-blend':0.04,'space-color':'rgb(2,2,14)','star-intensity':0.9},labelColor:'rgba(200,210,255,0.82)',labelOp:0.75,roadOp:0.1,stars:true,label:'이른 새벽 🌙'},
+  morning:{overlay:'rgba(10,14,28,0.12)',fog:{color:'rgb(18,22,38)','high-color':'rgb(40,50,80)','horizon-blend':0.02,'space-color':'rgb(10,14,28)','star-intensity':0.08},labelColor:'rgba(225,225,255,0.92)',labelOp:0.88,roadOp:0.22,stars:false,label:'아침 ☀️'},
+  day:{overlay:'rgba(8,10,20,0.06)',fog:{color:'rgb(22,26,42)','high-color':'rgb(55,65,90)','horizon-blend':0.02,'space-color':'rgb(14,18,32)','star-intensity':0.0},labelColor:'rgba(240,235,255,0.97)',labelOp:0.95,roadOp:0.3,stars:false,label:'낮 🌤️'},
+  sunset:{overlay:'rgba(30,8,20,0.25)',fog:{color:'rgb(18,8,22)','high-color':'rgb(70,25,60)','horizon-blend':0.05,'space-color':'rgb(10,4,18)','star-intensity':0.3},labelColor:'rgba(255,215,195,0.9)',labelOp:0.85,roadOp:0.18,stars:false,label:'노을 🌇'},
+  night:{overlay:'rgba(3,2,14,0.3)',fog:{color:'rgb(3,3,14)','high-color':'rgb(10,6,28)','horizon-blend':0.04,'space-color':'rgb(2,2,10)','star-intensity':0.7},labelColor:'rgba(210,195,255,0.9)',labelOp:0.82,roadOp:0.14,stars:true,label:'밤 🌃'}
 };
 function getTimeMood(){
   var utc=new Date().getTime()+(new Date().getTimezoneOffset()*60000);
@@ -1107,8 +1128,38 @@ function updateVibe(){
 updateVibe();
 setInterval(updateVibe,60000);
 
+// ── cinematic drift ──
+var _driftTimer=null,_driftActive=false,_driftRestartTimer=null;
+function startDrift(){
+  if(_driftActive)return;
+  _driftActive=true;
+  _doDrift();
+}
+function _doDrift(){
+  if(!_driftActive)return;
+  var city=CITIES[currentCity];if(!city)return;
+  map.easeTo({
+    center:[city.center[0]+(Math.random()-.5)*.007,city.center[1]+(Math.random()-.5)*.005],
+    bearing:(city.bearing||0)+(Math.random()-.5)*8,
+    pitch:58+(Math.random()-.5)*5,
+    duration:18000,
+    easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+  });
+  _driftTimer=setTimeout(_doDrift,19000);
+}
+function stopDrift(){
+  _driftActive=false;
+  clearTimeout(_driftTimer);
+  clearTimeout(_driftRestartTimer);
+  map.stop();
+}
+function resumeDrift(){
+  clearTimeout(_driftRestartTimer);
+  _driftRestartTimer=setTimeout(startDrift,28000);
+}
+
 // ── 지도 초기화 ──
-// antialias 없음, pitch는 CITIES에서 가져옴
+// antialias 없음
 var map=new mapboxgl.Map({
   container:'map',
   style:'mapbox://styles/mapbox/dark-v11',
@@ -1142,22 +1193,14 @@ map.on('load',function(){
 
   // 더미 마커 소스 (circle-blur 없음)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({
-    id:'dummy-glow',source:'dummy',type:'circle',
-    paint:{
-      'circle-color':['get','color'],
-      'circle-radius':['interpolate',['linear'],['zoom'],8,8,12,15,16,22],
-      'circle-opacity':['interpolate',['linear'],['zoom'],8,0.07,12,0.15,16,0.2]
-    }
-  });
-  map.addLayer({
-    id:'dummy-core',source:'dummy',type:'circle',
-    paint:{
-      'circle-color':['get','color'],
-      'circle-radius':['interpolate',['linear'],['zoom'],8,2,12,4,16,6],
-      'circle-opacity':['interpolate',['linear'],['zoom'],8,0.65,12,0.9,16,1.0]
-    }
-  });
+  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','sz'],8],12,['*',['get','sz'],14],16,['*',['get','sz'],20]],
+    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.13,16,0.18]}});
+  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
+    'circle-color':['get','color'],
+    'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','sz'],2],12,['*',['get','sz'],3.5],16,['*',['get','sz'],5]],
+    'circle-opacity':['interpolate',['linear'],['zoom'],8,0.6,12,0.88,16,1.0]}});
   map.on('click','dummy-core',function(e){
     var p=e.features[0].properties;
     closeAdCard();
@@ -1168,10 +1211,17 @@ map.on('load',function(){
 
   // 광고 소스
   map.addSource('ad-spots',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({
-    id:'ad-glow',source:'ad-spots',type:'circle',
-    paint:{'circle-radius':22,'circle-color':['get','color'],'circle-opacity':0.1}
-  });
+  map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':22,'circle-color':['get','color'],'circle-opacity':0.1}});
+
+  // 서울 purple glow
+  map.addSource('sg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.978,37.566]},properties:{}}});
+  map.addLayer({id:'sg1',source:'sg',type:'circle',paint:{'circle-color':'#6d28d9','circle-radius':['interpolate',['linear'],['zoom'],5,80,8,160,11,320],'circle-opacity':0.04}});
+  map.addLayer({id:'sg2',source:'sg',type:'circle',paint:{'circle-color':'#a855f7','circle-radius':['interpolate',['linear'],['zoom'],7,35,10,80,13,150],'circle-opacity':0.06}});
+
+  // 부산 cyan glow
+  map.addSource('bg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[129.076,35.180]},properties:{}}});
+  map.addLayer({id:'bg1',source:'bg',type:'circle',paint:{'circle-color':'#0ea5e9','circle-radius':['interpolate',['linear'],['zoom'],5,60,8,130,11,260],'circle-opacity':0.04}});
+  map.addLayer({id:'bg2',source:'bg',type:'circle',paint:{'circle-color':'#22d3ee','circle-radius':['interpolate',['linear'],['zoom'],7,25,10,60,13,120],'circle-opacity':0.06}});
 
   // 한국어 라벨 (지연)
   setTimeout(function(){
@@ -1195,6 +1245,12 @@ map.on('load',function(){
   },2000);
 
   // moveend: 지역 감지 (DB 쿼리 없음)
+  // 사용자 인터랙션 시 drift 즉시 중단
+  map.on('dragstart',function(){stopDrift();resumeDrift();});
+  map.on('zoomstart',function(){stopDrift();resumeDrift();});
+  map.on('rotatestart',function(){stopDrift();resumeDrift();});
+  map.on('pitchstart',function(){stopDrift();resumeDrift();});
+
   map.on('moveend',function(){
     clearTimeout(moveEndTimer);
     moveEndTimer=setTimeout(function(){
@@ -1222,6 +1278,8 @@ map.on('load',function(){
   setInterval(checkMood,300000);
 
   // UI 표시
+  setTimeout(startDrift,6000);
+
   setTimeout(function(){
     document.getElementById('livebadge').style.opacity='1';
     document.getElementById('mainBtn').style.opacity='1';
@@ -1270,7 +1328,7 @@ function spawnDummy(k){
     for(var i=0;i<n;i++){
       var s=shuffled[idx%shuffled.length];idx++;
       var r=Math.random();
-      var sz=r<0.80?0.3+Math.random()*0.5:r<0.95?1.0+Math.random()*0.8:1.8+Math.random()*1.0;
+      var sz=r<0.80?0.25+Math.random()*0.45:r<0.95?1.0+Math.random()*0.7:1.9+Math.random()*0.9;
       features.push({type:'Feature',
         geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},
         properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',
@@ -1320,7 +1378,9 @@ async function flyToCity(k,el){
   document.getElementById('cityname').textContent=city.name;
   document.getElementById('livenum').textContent=city.count;
   document.getElementById('reportCity').textContent=city.name;
+  stopDrift();
   setTimeout(function(){spawnDummy(k);spawnAdLayer(k);spawnAdMarkers(k);},1400);
+  setTimeout(startDrift,3000);
   renderTop();
   if(db){
     try{
@@ -1848,9 +1908,13 @@ async function updateHotBanner(){
 function updateAmbientText(){
   var cityName=document.getElementById('cityname').textContent.toUpperCase();
   var count=document.getElementById('livenum').textContent;
+  var mood=TIME_MOODS[_lastMood];
+  var moodLabel=mood?mood.label:'';
   document.getElementById('ambientMain').textContent=count+' souls listening tonight';
-  document.getElementById('ambientSub').textContent=cityName+' · LIVE';
-  var el=document.getElementById('ambientText');el.style.opacity='1';
+  document.getElementById('ambientSub').textContent=cityName+' · '+moodLabel+' · LIVE';
+  var el=document.getElementById('ambientText');
+  el.style.transition='opacity 2s ease';
+  el.style.opacity='1';
 }
 
 // ── 지도 검색 ──
