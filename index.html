@@ -951,6 +951,7 @@ function getTimeAtm(){
 }
 
 function applyAtmosphere(){
+  if(!atmAutoMode)return;
   var atm=getTimeAtm();
   var base=document.getElementById('atmBase');
   var bloom=document.getElementById('atmBloom');
@@ -958,8 +959,10 @@ function applyAtmosphere(){
   base.style.opacity='0.08';
   bloom.style.background=atm.bloom;
   bloom.style.opacity='0.12';
-  // fog 업데이트
   if(map.isStyleLoaded())map.setFog(atm.fog);
+  // 슬롯 UI 동기화
+  var slot=getSlotFromHour();
+  if(typeof selectAtmSlot==='function')selectAtmSlot(slot);
   // 새벽/자정: 별 추가
   var isDawn=(atm.label==='midnight'||atm.label==='dawn');
   if(isDawn&&!dawnMode){
@@ -1308,6 +1311,14 @@ async function flyToCity(k){
   if(db){try{var r=await db.from('live_users').select('id',{count:'exact'}).eq('city',k).gte('updated_at',new Date(Date.now()-300000).toISOString());document.getElementById('livenum').textContent=city.count+(r.count||0);}catch(e){}}
 }
 
+function flyToAll(el){
+  document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(t.dataset.city==='all'?' active':'');});
+  currentCity='busan';
+  map.flyTo({center:[127.8,36.5],zoom:6.5,pitch:50,bearing:0,duration:2400,essential:true});
+  stopDrift();
+  document.getElementById('cityname').textContent='전국';
+}
+
 // ── 지역 감지 ──
 function getNearestRegion(lat,lng){
   if(lat<33||lat>39||lng<124||lng>132)return null;
@@ -1569,6 +1580,54 @@ function generateShareCard(){
 function rrFill(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();}
 function downloadCard(){var c=document.getElementById('shareCanvas');var l=document.createElement('a');l.download='noct.png';l.href=c.toDataURL('image/png');l.click();showToast('📥 이미지 저장됐어요!');}
 function closeShareCard(){document.getElementById('shareCardOverlay').classList.remove('open');}
+
+// ── 시간대 분위기 패널 ──
+var atmPanelOpen=false;
+var atmAutoMode=true;
+var atmSlotIndex=0;
+var ATM_SLOTS=[
+  {key:'midnight',idx:0},{key:'dawn',idx:1},{key:'morning',idx:2},
+  {key:'morning',idx:3},{key:'sunset',idx:4},{key:'midnight',idx:5}
+];
+
+function getSlotFromHour(){
+  var h=new Date().getHours();
+  if(h<6)return 0;if(h<9)return 1;if(h<12)return 2;
+  if(h<17)return 3;if(h<20)return 4;return 5;
+}
+
+function toggleAtmPanel(){
+  atmPanelOpen=!atmPanelOpen;
+  document.getElementById('atmPanel').classList.toggle('open',atmPanelOpen);
+  document.getElementById('atmBtn').classList.toggle('active',atmPanelOpen);
+}
+
+function toggleAtmAuto(){
+  atmAutoMode=!atmAutoMode;
+  document.getElementById('atmAutoToggle').classList.toggle('on',atmAutoMode);
+  if(atmAutoMode){selectAtmSlot(getSlotFromHour());}
+}
+
+function selectAtmSlot(idx){
+  atmSlotIndex=idx;
+  document.querySelectorAll('.atmp-slot').forEach(function(el,i){el.classList.toggle('active',i===idx);});
+  var slotAtmKeys=['midnight','dawn','morning','morning','sunset','midnight'];
+  var atmKey=slotAtmKeys[idx];
+  if(ATM&&ATM[atmKey]){
+    var atm=ATM[atmKey];
+    document.getElementById('atmBase').style.background=atm.base;
+    document.getElementById('atmBase').style.opacity='0.08';
+    document.getElementById('atmBloom').style.background=atm.bloom;
+    document.getElementById('atmBloom').style.opacity='0.12';
+    if(map.isStyleLoaded())map.setFog(atm.fog);
+  }
+}
+
+// 초기 슬롯 설정
+setTimeout(function(){
+  var initSlot=getSlotFromHour();
+  selectAtmSlot(initSlot);
+},500);
 
 // ── 주기 업데이트 ──
 setInterval(function(){var s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];showToast('🎵 '+s.title+' — '+s.channel);},20000);
