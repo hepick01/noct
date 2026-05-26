@@ -139,7 +139,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .ftxt{color:rgba(255,255,255,.25);font-size:11px;}
 .fago{color:rgba(255,255,255,.15);font-size:11px;}
 /* 광고 빌보드 */
-.ad-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:all;filter:drop-shadow(0 8px 20px rgba(0,0,0,.8));animation:bbf 3.5s ease-in-out infinite;}
+.ad-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:all;filter:drop-shadow(0 8px 20px rgba(0,0,0,.8));}
 @keyframes bbf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .bbc{background:rgba(6,4,16,.96);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;border:1px solid;min-width:130px;white-space:nowrap;position:relative;overflow:hidden;}
 .bbat{position:absolute;top:-8px;right:8px;background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:7px;padding:2px 7px;color:#fff;font-size:9px;font-weight:700;}
@@ -908,7 +908,7 @@ function updateAmbientText(){
   document.getElementById('ambientText').classList.add('visible');
 }
 setTimeout(updateAmbientText,5000);
-setInterval(updateAmbientText,15000);
+setInterval(updateAmbientText,30000);
 
 // ── 시간대별 분위기 시스템 ──
 var ATM = {
@@ -1126,8 +1126,8 @@ if(map.getLayer('bld-top')){
   // 서울 ambient glow - 도시 자체가 빛나는 느낌
   // 더미 마커 소스 (GPU 렌더링)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],'circle-blur':1.4}});
-  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],'circle-blur':0.6}});
+  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],6],12,['*',['get','size'],14],15,['*',['get','size'],20]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.06,12,0.15,15,0.22],'circle-blur':1}});
+  map.addLayer({id:'dummy-mid',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],2.5],12,['*',['get','size'],6],15,['*',['get','size'],9]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.18,12,0.32,15,0.45],'circle-blur':0.5}});
   map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{'circle-color':['get','color'],'circle-radius':['interpolate',['linear'],['zoom'],8,['*',['get','size'],1.2],12,['*',['get','size'],3],15,['*',['get','size'],4.5]],'circle-opacity':['interpolate',['linear'],['zoom'],8,0.7,12,0.9,15,1]}});
   
   map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
@@ -1156,7 +1156,7 @@ if(map.getLayer('bld-top')){
   spawnDummy('busan');spawnAdLayer('busan');spawnAdMarkers('busan');renderTop();
 
   // moveend: 지역 감지
-  map.on('moveend',function(){clearTimeout(moveEndTimer);moveEndTimer=setTimeout(function(){var c=map.getCenter();var r=getNearestRegion(c.lat,c.lng);if(!r)return;document.getElementById('cityname').textContent=r.name;updateRegionCount(r.name,c.lat,c.lng);},600);});
+  map.on('moveend',function(){clearTimeout(moveEndTimer);moveEndTimer=setTimeout(function(){var c=map.getCenter();var r=getNearestRegion(c.lat,c.lng);if(!r)return;document.getElementById('cityname').textContent=r.name;updateRegionCount(r.name,c.lat,c.lng);},1000);});
 
   // 카메라 드리프트 시작
   startDrift();
@@ -1188,7 +1188,7 @@ function startDrift(){if(driftActive)return;driftActive=true;doDrift();}
 function doDrift(){
   if(!driftActive)return;
   var c=CITIES[currentCity];
-  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:64+(Math.random()-.5)*6,duration:22000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
+  map.easeTo({center:[c.center[0]+(Math.random()-.5)*.01,c.center[1]+(Math.random()-.5)*.007],bearing:c.bearing+(Math.random()-.5)*10,pitch:62+(Math.random()-.5)*4,duration:22000,easing:function(t){return t<.5?2*t*t:-1+(4-2*t)*t;}});
   driftTimer=setTimeout(doDrift,23000);
 }
 function stopDrift(){
@@ -1663,7 +1663,7 @@ function getSlotFromHour(){
 
 // ── 주기 업데이트 ──
 setInterval(function(){var s=FAKE_SONGS[Math.floor(Math.random()*FAKE_SONGS.length)];showToast('🎵 '+s.title+' — '+s.channel);},20000);
-setInterval(renderTop,30000);
+setInterval(renderTop,120000);
 ;
 
 </script>
