@@ -1,313 +1,346 @@
 <!DOCTYPE html>
-<!-- noct v1779742732 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>noct — 지금 이 도시의 음악</title>
-<meta name="theme-color" content="#c77dff">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="noct">
+<title>noct — 지금 이 도시의 음악</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;}
-/* 지도: 최하단 레이어 */
-#map{position:fixed;inset:0;z-index:0;}
-/* UI: pointer-events:none 기본, 필요한 것만 활성 */
-.ui{position:fixed;z-index:10;pointer-events:none;}
-.ui.clickable{pointer-events:all;}
-/* 인트로 */
-#intro{position:fixed;inset:0;z-index:9999;background:#03030a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s;;pointer-events:all}
-#intro.done{opacity:0;pointer-events:none;}
-.i-logo{font-size:32px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:8px;opacity:0;animation:iUp .8s ease .3s forwards;}
-.i-sub{color:rgba(255,255,255,0.35);font-size:13px;margin-bottom:48px;opacity:0;animation:iUp .8s ease .6s forwards;}
-.i-count{color:#fff;font-size:22px;font-weight:700;text-align:center;line-height:1.6;opacity:0;animation:iUp .8s ease .9s forwards;}
-.i-count span{color:#c77dff;}
-.i-hint{color:rgba(255,255,255,0.2);font-size:12px;margin-top:40px;opacity:0;animation:iUp .8s ease 1.8s forwards;}
-.i-dots{display:flex;gap:6px;margin-top:32px;opacity:0;animation:iUp .8s ease 1.2s forwards;}
-.i-dot{width:8px;height:8px;border-radius:50%;animation:iDot 1.5s ease-in-out infinite;}
-.i-dot:nth-child(1){background:#c77dff}.i-dot:nth-child(2){background:#60a5fa;animation-delay:.2s}.i-dot:nth-child(3){background:#34d399;animation-delay:.4s}.i-dot:nth-child(4){background:#f87171;animation-delay:.6s}.i-dot:nth-child(5){background:#fbbf24;animation-delay:.8s}
-@keyframes iUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes iDot{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:1}}
-/* 무지개 줄 */
-#vibe{position:fixed;top:0;left:0;right:0;height:2px;z-index:20;pointer-events:none;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);background-size:200%;animation:rb 6s linear infinite;}
-@keyframes rb{0%{background-position:0%}100%{background-position:200%}}
-/* 상단바 */
-#topbar{position:fixed;top:2px;left:0;right:0;z-index:20;padding:12px 16px 16px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;background:linear-gradient(to bottom,rgba(3,3,10,.95) 60%,transparent);}
-#topbar .logo,#topbar .city-tabs{pointer-events:all;}
-.logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
-.logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#c77dff,#7B68EE);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;}
-.logo-text{color:#fff;font-size:17px;font-weight:700;}
-.logo-sub{color:rgba(255,255,255,.35);font-size:10px;}
-.city-tabs{display:flex;background:rgba(255,255,255,.05);border-radius:20px;padding:3px;gap:2px;border:1px solid rgba(255,255,255,.08);overflow-x:auto;max-width:calc(100vw - 160px);scrollbar-width:none;}
-.city-tabs::-webkit-scrollbar{display:none;}
-.tab{border-radius:16px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;border:none;color:rgba(255,255,255,.35);background:transparent;font-family:inherit;white-space:nowrap;pointer-events:all;}
-.tab.active{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;}
-/* 감성 뱃지 */
-#vibebadge{position:fixed;top:68px;left:16px;z-index:20;display:flex;align-items:center;gap:7px;pointer-events:none;}
-.vt{border-radius:20px;padding:4px 11px;font-size:11px;font-weight:500;}
-/* 핫배너 */
-#hotBanner{position:fixed;top:60px;left:0;right:0;z-index:19;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .5s;border-bottom:1px solid rgba(199,125,255,.08);}
-.hbi{display:flex;white-space:nowrap;animation:bs 30s linear infinite;will-change:transform;}
-@keyframes bs{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.hb-item{display:inline-flex;align-items:center;gap:6px;padding:4px 20px;color:rgba(255,255,255,.4);font-size:11px;}
-.hb-rank{color:#c77dff;font-weight:700;font-size:10px;}
-.hb-track{color:rgba(255,255,255,.6);font-weight:500;}
-/* 우측 버튼 */
-.rbg{position:fixed;top:68px;right:16px;z-index:20;display:flex;flex-direction:column;gap:6px;pointer-events:none;opacity:0;transform:translateX(16px);transition:opacity .5s,transform .5s;}
-.rbg.visible{opacity:1;transform:translateX(0);}
-.rbg button{pointer-events:all;}
-.ib{background:rgba(6,4,16,.88);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:7px 12px;cursor:pointer;color:rgba(255,255,255,.6);font-size:11px;font-weight:500;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;}
-.ib.active{background:rgba(199,125,255,.15);border-color:rgba(199,125,255,.3);color:#c77dff;}
-/* 라이브 뱃지 */
-#livebadge{position:fixed;bottom:100px;left:16px;z-index:20;background:rgba(3,3,10,.85);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .5s;}
-.lr{display:flex;align-items:center;gap:7px;}
-.ld{width:6px;height:6px;border-radius:50%;background:#c77dff;box-shadow:0 0 8px #c77dff;animation:dp 2s infinite;}
-@keyframes dp{0%,100%{opacity:1}50%{opacity:.4}}
-.lm{color:rgba(255,255,255,.9);font-size:12px;font-weight:500;}
-.lc{color:#c77dff;font-weight:700;}
-.ls{color:rgba(255,255,255,.22);font-size:10px;padding-left:13px;}
-/* 버튼들 */
-#mainBtn{position:fixed;bottom:100px;right:16px;z-index:20;background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:14px;padding:12px 18px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;font-family:inherit;box-shadow:0 6px 24px #c77dff44;pointer-events:all;opacity:0;transition:opacity .5s,transform .15s;display:flex;align-items:center;gap:8px;}
-#mainBtn:active{transform:scale(.96);}
-#myLocBtn{position:fixed;bottom:100px;right:16px;z-index:20;background:rgba(6,4,16,.9);border:1.5px solid rgba(199,125,255,.5);border-radius:14px;padding:11px 16px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;font-family:inherit;display:none;align-items:center;gap:7px;pointer-events:all;}
-#visitorBadge{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;background:rgba(3,3,10,.7);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:5px 14px;color:rgba(255,255,255,.25);font-size:10px;white-space:nowrap;opacity:0;transition:opacity .5s;}
-#visitorBadge span{color:rgba(199,125,255,.6);font-weight:600;}
-/* 지도 검색 */
-#mapSearch{position:fixed;top:105px;left:16px;z-index:20;display:flex;align-items:center;gap:8px;background:rgba(6,4,16,.88);border:1px solid rgba(255,255,255,.1);border-radius:30px;padding:8px 14px;width:160px;pointer-events:none;opacity:0;transition:opacity .5s;}
-#mapSearch.visible{opacity:1;pointer-events:all;}
-#msi{flex:1;background:none;border:none;outline:none;color:#fff;font-size:13px;font-family:inherit;width:0;min-width:0;}
-#msi::placeholder{color:rgba(255,255,255,.2);}
-#msr{position:fixed;top:148px;left:16px;z-index:101;width:220px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;display:none;pointer-events:all;box-shadow:0 8px 24px rgba(0,0,0,.6);}
-.msi-item{padding:10px 14px;cursor:pointer;color:rgba(255,255,255,.7);font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;}
-.msi-item:last-child{border-bottom:none;}
-/* 검색 오버레이 */
-#searchOverlay{position:fixed;inset:0;z-index:1000;background:rgba(3,3,10,.85);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
-#searchOverlay.open{opacity:1;pointer-events:all;}
-#searchSheet{width:100%;max-width:560px;background:rgba(10,8,24,.99);border-radius:20px 20px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:none;padding:20px 16px 40px;max-height:85dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);}
-#searchOverlay.open #searchSheet{transform:translateY(0);}
-.sh{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 18px;}
-.st{color:#fff;font-size:16px;font-weight:700;margin-bottom:14px;flex-shrink:0;}
-.siw{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 14px;margin-bottom:14px;flex-shrink:0;}
-#searchInput{flex:1;background:none;border:none;outline:none;color:#fff;font-size:16px;font-family:inherit;}
-#searchInput::placeholder{color:rgba(255,255,255,.25);}
-#searchClear{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:18px;display:none;}
-#searchResults{flex:1;overflow-y:auto;}
-#searchResults::-webkit-scrollbar{display:none;}
-.qt{color:rgba(255,255,255,.3);font-size:11px;margin-bottom:9px;}
-.qtags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-.qtag{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:6px 13px;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;font-family:inherit;}
-.ri{display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;cursor:pointer;min-height:56px;}
-.ri:active{background:rgba(199,125,255,.08);}
-.rt{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05);}
-.ri-info{flex:1;min-width:0;}
-.ri-title{color:#fff;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.ri-ch{color:rgba(255,255,255,.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sl{text-align:center;padding:30px 0;color:rgba(255,255,255,.3);font-size:13px;}
-/* 플레이어 */
-#miniPlayer{position:fixed;bottom:0;left:0;right:0;z-index:500;background:rgba(6,4,16,.97);border-top:1px solid rgba(255,255,255,.07);padding:12px 16px 28px;pointer-events:none;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);}
-#miniPlayer.open{transform:translateY(0);pointer-events:all;}
-.pi{display:flex;align-items:center;gap:12px;}
-.pt{width:42px;height:42px;border-radius:9px;object-fit:cover;background:rgba(199,125,255,.1);flex-shrink:0;}
-.pinfo{flex:1;min-width:0;}
-.ptitle{color:#fff;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.pch{color:rgba(255,255,255,.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pctrl{display:flex;align-items:center;gap:4px;}
-.cb{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.6);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-family:inherit;}
-#playBtn{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;width:40px;height:40px;font-size:15px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.sbtn{background:rgba(199,125,255,.12);border:1px solid rgba(199,125,255,.25);border-radius:18px;padding:6px 12px;cursor:pointer;color:#c77dff;font-size:11px;font-weight:600;font-family:inherit;}
-/* 뮤직 카드 */
-#songcard{position:fixed;bottom:90px;left:16px;z-index:200;width:260px;border-radius:20px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(12px) scale(.96);transition:opacity .28s,transform .28s;box-shadow:0 16px 48px rgba(0,0,0,.7);}
-#songcard.visible{opacity:1;pointer-events:all;transform:translateY(0) scale(1);}
-.cbg{position:absolute;inset:0;background:rgba(5,3,14,.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:20px;pointer-events:none;}
-.cglow{position:absolute;inset:0;border-radius:20px;opacity:.2;transition:background .5s;pointer-events:none;}
-.cinner{position:relative;z-index:1;padding:14px;}
-.cclose{position:absolute;top:10px;right:10px;z-index:2;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:26px;text-align:center;font-family:inherit;}
-.car{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.ca{width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.06);}
-.ct{flex:1;min-width:0;}
-.ctrack{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cartist{color:rgba(255,255,255,.45);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cmr{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
-.mt{border-radius:20px;padding:3px 9px;font-size:10px;font-weight:500;}
-.cf{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);}
-.floc{display:flex;align-items:center;gap:5px;}
-.fdot{width:5px;height:5px;border-radius:50%;}
-.ftxt{color:rgba(255,255,255,.25);font-size:11px;}
-.fago{color:rgba(255,255,255,.15);font-size:11px;}
-/* 광고 빌보드 */
-.ad-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:all;filter:drop-shadow(0 8px 20px rgba(0,0,0,.8));}
-@keyframes bbf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.bbc{background:rgba(6,4,16,.96);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;border:1px solid;min-width:130px;white-space:nowrap;position:relative;overflow:hidden;}
-.bbat{position:absolute;top:-8px;right:8px;background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:7px;padding:2px 7px;color:#fff;font-size:9px;font-weight:700;}
-.bbico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.bbn{color:#fff;font-size:11px;font-weight:700;margin-bottom:1px;}
-.bbs{color:rgba(255,255,255,.35);font-size:9px;}
-.bbl{width:2px;height:18px;}
-.bba{width:7px;height:7px;border-radius:50%;margin-top:-1px;}
-/* 광고 카드 */
-#adcard{position:fixed;bottom:90px;right:16px;z-index:200;background:rgba(8,6,18,.96);border-radius:18px;width:calc(100vw - 32px);max-width:280px;opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;pointer-events:none;overflow:hidden;}
-#adcard.visible{opacity:1;transform:translateY(0);pointer-events:all;}
-.adh{height:90px;display:flex;align-items:center;justify-content:center;font-size:44px;}
-.adb{padding:10px 16px 16px;}
-.adsp{display:inline-flex;align-items:center;background:rgba(199,125,255,.1);border:1px solid rgba(199,125,255,.22);border-radius:20px;padding:3px 9px;color:#c77dff;font-size:10px;margin-bottom:8px;}
-.adt{color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;}
-.add{color:rgba(255,255,255,.38);font-size:11px;margin-bottom:12px;line-height:1.7;}
-.adcta{display:block;width:100%;padding:11px;border-radius:11px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;}
-.adstats{display:flex;margin-top:10px;border-top:1px solid rgba(255,255,255,.05);padding-top:10px;}
-.si{flex:1;text-align:center;}
-.sn{color:#fff;font-size:13px;font-weight:700;}
-.sl2{color:rgba(255,255,255,.22);font-size:10px;}
-.adcl{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.35);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,.55);cursor:pointer;font-size:15px;line-height:26px;text-align:center;font-family:inherit;}
-/* 토스트 */
-#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:9000;background:rgba(8,6,18,.92);border:1px solid rgba(255,255,255,.07);border-radius:30px;padding:8px 16px;display:flex;align-items:center;gap:8px;white-space:nowrap;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:calc(100vw - 32px);overflow:hidden;}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.tp{background:rgba(199,125,255,.15);border:1px solid rgba(199,125,255,.3);border-radius:20px;padding:2px 8px;color:#c77dff;font-size:10px;font-weight:500;}
-/* 닉네임 */
-#nickOverlay{position:fixed;inset:0;z-index:2000;background:rgba(3,3,10,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
-#nickOverlay.open{opacity:1;pointer-events:all;}
-#nickBox{background:rgba(10,8,24,.99);border:1px solid rgba(199,125,255,.2);border-radius:24px;padding:32px 24px;width:calc(100vw - 48px);max-width:340px;text-align:center;}
-.ne{font-size:48px;margin-bottom:16px;}
-.nt{color:#fff;font-size:20px;font-weight:700;margin-bottom:8px;}
-.ns{color:rgba(255,255,255,.35);font-size:13px;margin-bottom:24px;line-height:1.6;}
-#nickInput{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(199,125,255,.3);border-radius:12px;padding:13px 16px;color:#fff;font-size:16px;font-family:inherit;outline:none;text-align:center;margin-bottom:12px;}
-.nb{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:15px;font-weight:700;font-family:inherit;}
-/* 패널들 */
-#topPanel{position:fixed;top:140px;right:16px;z-index:100;width:220px;background:rgba(6,4,16,.95);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .25s,transform .25s;}
-#topPanel.visible{opacity:1;transform:translateY(0);pointer-events:all;}
-.ptitle{color:rgba(255,255,255,.4);font-size:10px;letter-spacing:.05em;margin-bottom:10px;}
-.titem{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.titem:last-child{border-bottom:none;}
-.trank{color:#c77dff;font-size:11px;font-weight:700;width:14px;}
-.ttrack{color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tartist{color:rgba(255,255,255,.3);font-size:10px;}
-/* VS */
-#vsPanel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);z-index:600;width:calc(100vw - 32px);max-width:380px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:22px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
-#vsPanel.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
-.vstitle{color:#fff;font-size:16px;font-weight:700;}
-.vscities{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:16px;}
-.vscity{display:flex;flex-direction:column;gap:4px;}
-.vscname{font-size:13px;font-weight:700;margin-bottom:4px;}
-.vsdiv{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:18px;font-weight:700;padding-top:20px;}
-.vstrack{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.vstrack:last-child{border-bottom:none;}
-.vsrank{font-size:10px;font-weight:700;}
-.vsname{color:#fff;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.vsartist{color:rgba(255,255,255,.3);font-size:9px;}
-.vsbar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:6px;}
-.vsbarfill{height:100%;border-radius:2px;transition:width .8s;}
-.vs-swrap{position:relative;}
-.vs-sbtn{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 12px;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
-.vs-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:1000;background:#0d0b1e;border:1px solid rgba(199,125,255,.25);border-radius:12px;overflow:hidden;overflow-y:auto;max-height:240px;display:none;box-shadow:0 8px 32px rgba(0,0,0,.8);}
-.vs-drop.open{display:block;}
-.vs-drop::-webkit-scrollbar{width:3px;}
-.vs-drop::-webkit-scrollbar-thumb{background:rgba(199,125,255,.3);}
-.vs-dg{color:rgba(199,125,255,.5);font-size:10px;padding:8px 12px 4px;background:#0d0b1e;}
-.vs-di{padding:9px 14px;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;background:#0d0b1e;display:flex;align-items:center;gap:8px;}
-.vs-di:hover{background:rgba(199,125,255,.12);color:#fff;}
-.vs-di.selected{color:#c77dff;}
-/* 리포트 */
-#reportPanel{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:600;width:calc(100vw - 32px);max-width:340px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
-#reportPanel.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
-.rptitle{color:#fff;font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
-.rpbar{margin-bottom:10px;}
-.rpbn{display:flex;justify-content:space-between;margin-bottom:4px;}
-.rpbl{color:rgba(255,255,255,.6);font-size:11px;}
-.rpbp{color:#c77dff;font-size:11px;font-weight:600;}
-.rptrack{height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;}
-.rpfill{height:100%;border-radius:3px;transition:width 1s;}
-.rpsum{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.35);font-size:11px;line-height:1.7;}
-/* 히스토리 */
-#historyPanel{position:fixed;top:0;left:0;bottom:0;z-index:700;width:300px;background:rgba(6,4,16,.98);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .35s;pointer-events:none;}
-#historyPanel.open{transform:translateX(0);pointer-events:all;}
-.hphead{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
-.hptitle{color:#fff;font-size:15px;font-weight:700;}
-.hpclose{background:rgba(255,255,255,.06);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:26px;text-align:center;font-family:inherit;}
-.hplist{flex:1;overflow-y:auto;}
-.hplist::-webkit-scrollbar{display:none;}
-.hpempty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:10px;}
-.hpei{font-size:32px;opacity:.3;}
-.hpet{color:rgba(255,255,255,.2);font-size:12px;}
-.hpitem{display:flex;align-items:center;gap:11px;padding:10px 18px;cursor:pointer;}
-.hpthumb{width:42px;height:42px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.05);flex-shrink:0;}
-.hptrack{color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.hpartist{color:rgba(255,255,255,.35);font-size:11px;}
-.hptime{color:rgba(255,255,255,.18);font-size:10px;flex-shrink:0;}
-.hpclear{padding:14px 18px;border-top:1px solid rgba(255,255,255,.05);}
-.hpclearbtn{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,0,0,.15);background:rgba(255,0,0,.08);color:rgba(255,100,100,.6);font-size:11px;font-family:inherit;cursor:pointer;}
-/* 광고신청 */
-#adApplyPanel{position:fixed;top:0;right:0;bottom:0;z-index:700;width:320px;background:rgba(6,4,16,.98);border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s;pointer-events:none;}
-#adApplyPanel.open{transform:translateX(0);pointer-events:all;}
-.aphead{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
-.aptitle{color:#fff;font-size:15px;font-weight:700;}
-.apclose{background:rgba(255,255,255,.06);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;line-height:26px;text-align:center;font-family:inherit;}
-.apbody{flex:1;overflow-y:auto;padding:16px 18px;}
-.apbody::-webkit-scrollbar{display:none;}
-.pkgcard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;}
-.pkgcard.selected{border-color:rgba(199,125,255,.5);background:rgba(199,125,255,.08);}
-.pkgname{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px;display:flex;justify-content:space-between;}
-.pkgprice{color:#c77dff;font-weight:700;}
-.pkgdesc{color:rgba(255,255,255,.35);font-size:11px;line-height:1.6;}
-.apinput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px;}
-.aplabel{color:rgba(255,255,255,.35);font-size:11px;margin-bottom:5px;display:block;}
-.apsubmit{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:14px;font-weight:700;font-family:inherit;margin-top:12px;}
-.apsuccess{display:none;text-align:center;padding:20px 0;}
-.apsi{font-size:48px;margin-bottom:12px;}
-.apst{color:#fff;font-size:15px;font-weight:700;margin-bottom:6px;}
-.apss{color:rgba(255,255,255,.35);font-size:12px;line-height:1.6;}
-/* 감성분석 */
-#moodAnalysis{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);z-index:600;width:calc(100vw - 32px);max-width:340px;background:rgba(6,4,16,.97);border:1px solid rgba(199,125,255,.2);border-radius:22px;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}
-#moodAnalysis.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
-/* 오늘의 noct */
-#dailyCard{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);z-index:600;width:calc(100vw - 32px);max-width:340px;background:rgba(6,4,16,.97);border:1px solid rgba(199,125,255,.2);border-radius:22px;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}
-#dailyCard.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
-.dcemoji{font-size:44px;margin-bottom:12px;}
-.dctitle{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:.08em;margin-bottom:8px;}
-.dctext{color:#fff;font-size:17px;font-weight:700;line-height:1.5;margin-bottom:16px;}
-.dcshare{background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:12px;padding:11px 24px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:8px;}
-.dcclose{background:rgba(255,255,255,.06);border:none;border-radius:12px;padding:11px 18px;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:inherit;}
-/* 공유카드 */
-#shareCardOverlay{position:fixed;inset:0;z-index:3000;background:rgba(3,3,10,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
-#shareCardOverlay.open{opacity:1;pointer-events:all;}
-#shareCanvas{border-radius:16px;max-width:calc(100vw - 48px);}
-.scbtns{display:flex;gap:10px;}
-.scbtn{padding:12px 22px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;}
-.scsave{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;}
-.scclose{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);}
-/* 이웃알림 / 같이듣기 */
-#neighborAlert{position:fixed;top:110px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:300;background:rgba(6,4,16,.92);border:1px solid rgba(199,125,255,.25);border-radius:20px;padding:10px 18px;display:flex;align-items:center;gap:10px;white-space:nowrap;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;}
-#neighborAlert.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#togetherBadge{position:fixed;top:95px;left:16px;z-index:20;background:rgba(3,3,10,.82);border:1px solid rgba(199,125,255,.2);border-radius:12px;padding:6px 12px;display:none;align-items:center;gap:6px;pointer-events:none;}
-/* PWA */
-#installBanner{position:fixed;bottom:0;left:0;right:0;z-index:4000;background:linear-gradient(135deg,rgba(199,125,255,.15),rgba(123,104,238,.15));border-top:1px solid rgba(199,125,255,.25);padding:14px 16px 24px;display:none;align-items:center;gap:12px;pointer-events:none;}
-#installBanner.show{display:flex;pointer-events:all;}
-/* 새벽별 */
-.dstar{position:fixed;border-radius:50%;background:#fff;pointer-events:none;animation:tw 3s ease-in-out infinite;z-index:2;}
-@keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
-/* bottom gradient fade */
+/* ── 리셋 ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:'Noto Sans KR',-apple-system,sans-serif}
 
-/* top gradient */
+/* ══════════════════════════════════════
+   핵심 규칙:
+   지도(z-index:0)는 항상 터치/드래그 수신
+   UI는 pointer-events:none 기본
+   버튼만 pointer-events:all
+══════════════════════════════════════ */
+#map{position:fixed;inset:0;z-index:0}
+
+/* 인트로: 표시중엔 all, 사라지면 none */
+#intro{position:fixed;inset:0;z-index:9999;background:#03030a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease;pointer-events:all}
+#intro.done{opacity:0;pointer-events:none}
+
+/* 시간대 분위기 오버레이 (얇게) */
+#atmLayer{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:background 8s ease,opacity 3s ease}
+
+/* 비네트 */
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(3,3,10,0.5) 100%)}
+
+/* 무지개 줄 */
+#vibe{position:fixed;top:0;left:0;right:0;height:2px;z-index:30;pointer-events:none;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);background-size:200%;animation:rainbow 6s linear infinite}
+@keyframes rainbow{0%{background-position:0%}100%{background-position:200%}}
+
+/* 상단바 */
+#topbar{position:fixed;top:2px;left:0;right:0;z-index:30;padding:10px 14px 12px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;background:linear-gradient(to bottom,rgba(3,3,10,.96) 55%,transparent)}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer;pointer-events:all;flex-shrink:0}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#c77dff,#7B68EE);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.logo-text{color:#fff;font-size:17px;font-weight:700}
+.logo-sub{color:rgba(255,255,255,.35);font-size:10px}
+.city-tabs{display:flex;align-items:center;gap:2px;pointer-events:all;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.city-tabs::-webkit-scrollbar{display:none}
+.tab{border-radius:20px;padding:6px 13px;font-size:12px;font-weight:500;cursor:pointer;border:none;color:rgba(255,255,255,.45);background:rgba(255,255,255,.06);font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;box-shadow:0 2px 12px rgba(199,125,255,.4)}
+
+/* 핫배너 */
+#hotBanner{position:fixed;top:58px;left:0;right:0;z-index:28;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .5s;border-bottom:1px solid rgba(199,125,255,.07)}
+.hbi{display:flex;white-space:nowrap;animation:bannerScroll 30s linear infinite;will-change:transform}
+@keyframes bannerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.hb-item{display:inline-flex;align-items:center;gap:5px;padding:4px 18px;color:rgba(255,255,255,.4);font-size:11px}
+.hb-rank{color:#c77dff;font-weight:700;font-size:10px}
+.hb-track{color:rgba(255,255,255,.6);font-weight:500}
+
+/* 감성 뱃지 */
+#vibebadge{position:fixed;top:68px;left:14px;z-index:29;pointer-events:none;display:flex;align-items:center;gap:6px}
+.vt{border-radius:20px;padding:4px 10px;font-size:11px;font-weight:500}
+#vibeTime{color:rgba(255,255,255,.25);font-size:11px}
+
+/* 우측 버튼 */
+.rbg{position:fixed;top:66px;right:14px;z-index:30;display:flex;flex-direction:column;gap:5px;pointer-events:none;opacity:0;transform:translateX(14px);transition:opacity .5s,transform .5s}
+.rbg.visible{opacity:1;transform:translateX(0)}
+.rbg button{pointer-events:all}
+.ib{background:rgba(6,4,16,.88);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:6px 11px;cursor:pointer;color:rgba(255,255,255,.6);font-size:11px;font-weight:500;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .15s}
+.ib:active{transform:scale(.97)}
+.ib.active{background:rgba(199,125,255,.15);border-color:rgba(199,125,255,.3);color:#c77dff}
+
+/* 라이브뱃지 */
+#livebadge{position:fixed;bottom:104px;left:14px;z-index:29;background:rgba(3,3,10,.85);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:9px 13px;pointer-events:none;opacity:0;transition:opacity .5s}
+.live-row{display:flex;align-items:center;gap:6px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#c77dff;box-shadow:0 0 8px #c77dff;animation:dp 2s infinite}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.4}}
+.live-main{color:rgba(255,255,255,.9);font-size:12px;font-weight:500}
+.live-count{color:#c77dff;font-weight:700}
+.live-sub{color:rgba(255,255,255,.22);font-size:10px;padding-left:12px}
+
+/* 메인버튼 */
+#mainBtn{position:fixed;bottom:104px;right:14px;z-index:30;background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:14px;padding:12px 17px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;font-family:inherit;box-shadow:0 6px 20px rgba(199,125,255,.4);pointer-events:all;opacity:0;transition:opacity .5s,transform .12s;display:flex;align-items:center;gap:7px}
+#mainBtn:active{transform:scale(.96)}
+#myLocBtn{position:fixed;bottom:104px;right:14px;z-index:30;background:rgba(6,4,16,.9);border:1.5px solid rgba(199,125,255,.5);border-radius:14px;padding:11px 15px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;font-family:inherit;display:none;align-items:center;gap:6px;pointer-events:all}
+#visitorBadge{position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:29;pointer-events:none;background:rgba(3,3,10,.7);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:5px 13px;color:rgba(255,255,255,.22);font-size:10px;white-space:nowrap;opacity:0;transition:opacity .5s}
+#visitorBadge span{color:rgba(199,125,255,.6);font-weight:600}
+
+/* ambient text */
+#ambientText{position:fixed;bottom:164px;left:50%;transform:translateX(-50%);z-index:25;pointer-events:none;text-align:center;opacity:0;transition:opacity 2s}
+.at-main{color:rgba(255,255,255,.12);font-size:12px;font-weight:300;letter-spacing:.18em;white-space:nowrap}
+.at-sub{color:rgba(199,125,255,.16);font-size:10px;font-weight:300;letter-spacing:.22em;margin-top:3px}
+
+/* 지도검색 */
+#mapSearch{position:fixed;top:108px;left:14px;z-index:30;display:flex;align-items:center;gap:7px;background:rgba(6,4,16,.88);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:8px 13px;width:160px;pointer-events:none;opacity:0;transition:opacity .5s}
+#mapSearch.visible{opacity:1;pointer-events:all}
+#msi{flex:1;background:none;border:none;outline:none;color:#fff;font-size:13px;font-family:inherit;min-width:0}
+#msi::placeholder{color:rgba(255,255,255,.2)}
+#msr{position:fixed;top:150px;left:14px;z-index:31;width:220px;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;display:none;pointer-events:all;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.msi-item{padding:10px 14px;cursor:pointer;color:rgba(255,255,255,.7);font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px}
+.msi-item:last-child{border-bottom:none}
+.msi-item:active{background:rgba(199,125,255,.1)}
+
+/* 미니플레이어 */
+#miniPlayer{position:fixed;bottom:0;left:0;right:0;z-index:500;background:rgba(6,4,16,.97);border-top:1px solid rgba(255,255,255,.07);padding:12px 14px 26px;pointer-events:none;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
+#miniPlayer.open{transform:translateY(0);pointer-events:all}
+.pi{display:flex;align-items:center;gap:11px}
+.pt{width:42px;height:42px;border-radius:9px;object-fit:cover;background:rgba(199,125,255,.1);flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.ptitle{color:#fff;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.pch{color:rgba(255,255,255,.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pctrl{display:flex;align-items:center;gap:4px}
+.cb{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.6);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-family:inherit}
+#playBtn{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;width:40px;height:40px;font-size:14px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sbtn{background:rgba(199,125,255,.12);border:1px solid rgba(199,125,255,.25);border-radius:18px;padding:6px 11px;cursor:pointer;color:#c77dff;font-size:11px;font-weight:600;font-family:inherit}
+
+/* 뮤직카드 */
+#songcard{position:fixed;bottom:92px;left:14px;z-index:200;width:256px;border-radius:20px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(10px) scale(.97);transition:opacity .25s,transform .25s;box-shadow:0 14px 40px rgba(0,0,0,.7)}
+#songcard.visible{opacity:1;pointer-events:all;transform:translateY(0) scale(1)}
+.cbg{position:absolute;inset:0;background:rgba(5,3,14,.86);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.09);border-radius:20px;pointer-events:none}
+.cglow{position:absolute;inset:0;border-radius:20px;opacity:.2;transition:background .4s;pointer-events:none}
+.cinner{position:relative;z-index:1;padding:13px}
+.cclose{position:absolute;top:9px;right:9px;z-index:2;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,.4);cursor:pointer;font-size:13px;line-height:24px;text-align:center;font-family:inherit}
+.car{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.ca{width:54px;height:54px;border-radius:9px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.06)}
+.ct{flex:1;min-width:0}
+.ctrack{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cartist{color:rgba(255,255,255,.45);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmr{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px}
+.mt{border-radius:20px;padding:3px 8px;font-size:10px;font-weight:500}
+.cf{display:flex;align-items:center;justify-content:space-between;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)}
+.floc{display:flex;align-items:center;gap:4px}
+.fdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ftxt{color:rgba(255,255,255,.25);font-size:10px}
+.fago{color:rgba(255,255,255,.15);font-size:10px}
+
+/* 광고카드 */
+#adcard{position:fixed;bottom:92px;right:14px;z-index:200;background:rgba(8,6,18,.96);border-radius:18px;width:calc(100vw - 28px);max-width:272px;opacity:0;transform:translateY(8px);transition:opacity .22s,transform .22s;pointer-events:none;overflow:hidden}
+#adcard.visible{opacity:1;transform:translateY(0);pointer-events:all}
+.adh{height:80px;display:flex;align-items:center;justify-content:center;font-size:40px}
+.adb{padding:8px 14px 14px}
+.adsp{display:inline-flex;align-items:center;background:rgba(199,125,255,.1);border:1px solid rgba(199,125,255,.22);border-radius:20px;padding:2px 8px;color:#c77dff;font-size:10px;margin-bottom:6px}
+.adt{color:#fff;font-size:14px;font-weight:700;margin-bottom:3px}
+.add{color:rgba(255,255,255,.38);font-size:10px;margin-bottom:10px;line-height:1.6}
+.adcta{display:block;width:100%;padding:10px;border-radius:10px;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit}
+.adcl{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,.55);cursor:pointer;font-size:14px;line-height:24px;text-align:center;font-family:inherit}
+
+/* 광고 빌보드 */
+.ad-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:all;filter:drop-shadow(0 6px 16px rgba(0,0,0,.8))}
+.bbc{background:rgba(6,4,16,.96);border-radius:11px;padding:7px 11px;display:flex;align-items:center;gap:7px;border:1px solid;min-width:120px;white-space:nowrap;position:relative;overflow:hidden}
+.bbat{position:absolute;top:-7px;right:7px;background:linear-gradient(135deg,#c77dff,#7B68EE);border-radius:6px;padding:2px 6px;color:#fff;font-size:9px;font-weight:700}
+.bbico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bbn{color:#fff;font-size:10px;font-weight:700;margin-bottom:1px}
+.bbs{color:rgba(255,255,255,.35);font-size:9px}
+.bbl{width:2px;height:14px}
+.bba{width:6px;height:6px;border-radius:50%;margin-top:-1px}
+
+/* 토스트 */
+#toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9000;background:rgba(8,6,18,.92);border:1px solid rgba(255,255,255,.07);border-radius:28px;padding:7px 14px;display:flex;align-items:center;gap:7px;white-space:nowrap;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;max-width:calc(100vw - 28px);overflow:hidden}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.tp{background:rgba(199,125,255,.15);border:1px solid rgba(199,125,255,.3);border-radius:20px;padding:2px 7px;color:#c77dff;font-size:10px;font-weight:500}
+
+/* 닉네임 */
+#nickOverlay{position:fixed;inset:0;z-index:2000;background:rgba(3,3,10,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#nickOverlay.open{opacity:1;pointer-events:all}
+#nickBox{background:rgba(10,8,24,.99);border:1px solid rgba(199,125,255,.2);border-radius:22px;padding:28px 22px;width:calc(100vw - 48px);max-width:320px;text-align:center}
+.ne{font-size:44px;margin-bottom:14px}
+.nt{color:#fff;font-size:19px;font-weight:700;margin-bottom:7px}
+.ns{color:rgba(255,255,255,.35);font-size:12px;margin-bottom:22px;line-height:1.6}
+#nickInput{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(199,125,255,.3);border-radius:11px;padding:12px 14px;color:#fff;font-size:16px;font-family:inherit;outline:none;text-align:center;margin-bottom:11px}
+.nb{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:14px;font-weight:700;font-family:inherit}
+
+/* 검색 오버레이 */
+#searchOverlay{position:fixed;inset:0;z-index:1000;background:rgba(3,3,10,.85);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+#searchOverlay.open{opacity:1;pointer-events:all}
+#searchSheet{width:100%;max-width:560px;background:rgba(10,8,24,.99);border-radius:20px 20px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:none;padding:18px 14px 36px;max-height:85dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1)}
+#searchOverlay.open #searchSheet{transform:translateY(0)}
+.sh{width:32px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 16px}
+.st{color:#fff;font-size:15px;font-weight:700;margin-bottom:12px;flex-shrink:0}
+.siw{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 13px;margin-bottom:12px;flex-shrink:0}
+#searchInput{flex:1;background:none;border:none;outline:none;color:#fff;font-size:16px;font-family:inherit}
+#searchInput::placeholder{color:rgba(255,255,255,.25)}
+#searchClear{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:17px;display:none}
+#searchResults{flex:1;overflow-y:auto}
+#searchResults::-webkit-scrollbar{display:none}
+.qt{color:rgba(255,255,255,.3);font-size:10px;margin-bottom:8px}
+.qtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.qtag{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 12px;color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;font-family:inherit}
+.ri{display:flex;align-items:center;gap:10px;padding:9px;border-radius:10px;cursor:pointer;min-height:54px}
+.ri:active{background:rgba(199,125,255,.08)}
+.rt{width:42px;height:42px;border-radius:7px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05)}
+.ri-info{flex:1;min-width:0}
+.ri-title{color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.ri-ch{color:rgba(255,255,255,.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl{text-align:center;padding:28px 0;color:rgba(255,255,255,.3);font-size:12px}
+
+/* 패널 기본 */
+.panel{position:fixed;z-index:600;background:rgba(6,4,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s}
+.panel.visible{opacity:1;pointer-events:all}
+
+/* TOP5 */
+#topPanel{top:138px;right:14px;width:215px;transform:translateY(-6px)}
+#topPanel.visible{transform:translateY(0)}
+.ptitle{color:rgba(255,255,255,.38);font-size:10px;letter-spacing:.05em;margin-bottom:9px}
+.titem{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.titem:last-child{border-bottom:none}
+.trank{color:#c77dff;font-size:10px;font-weight:700;width:13px;flex-shrink:0}
+.ttrack{color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tartist{color:rgba(255,255,255,.3);font-size:10px}
+
+/* VS 패널 */
+#vsPanel{top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);max-width:370px;width:calc(100vw - 28px)}
+#vsPanel.visible{transform:translate(-50%,-50%) scale(1)}
+.vstitle{color:#fff;font-size:15px;font-weight:700}
+.vsgrid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin:14px 0}
+.vscity{display:flex;flex-direction:column;gap:3px}
+.vscname{font-size:12px;font-weight:700;margin-bottom:3px}
+.vsdiv{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:17px;font-weight:700;padding-top:18px}
+.vstrack{display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.vstrack:last-child{border-bottom:none}
+.vsrank{font-size:10px;font-weight:700;flex-shrink:0}
+.vsname{color:#fff;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsartist{color:rgba(255,255,255,.3);font-size:9px}
+.vs-swrap{position:relative}
+.vs-sbtn{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:9px;padding:7px 10px;color:#fff;font-size:11px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.vs-drop{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:700;background:#0d0b1e;border:1px solid rgba(199,125,255,.25);border-radius:11px;overflow:hidden;overflow-y:auto;max-height:220px;display:none;box-shadow:0 8px 28px rgba(0,0,0,.8)}
+.vs-drop.open{display:block}
+.vs-drop::-webkit-scrollbar{width:3px}
+.vs-drop::-webkit-scrollbar-thumb{background:rgba(199,125,255,.3)}
+.vs-dg{color:rgba(199,125,255,.5);font-size:10px;padding:7px 11px 3px;background:#0d0b1e}
+.vs-di{padding:8px 12px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer;background:#0d0b1e;display:flex;align-items:center;gap:7px}
+.vs-di:active,.vs-di:hover{background:rgba(199,125,255,.1);color:#fff}
+.vs-di.selected{color:#c77dff}
+
+/* 리포트 */
+#reportPanel{bottom:104px;left:50%;transform:translateX(-50%) translateY(14px);max-width:330px;width:calc(100vw - 28px)}
+#reportPanel.visible{transform:translateX(-50%) translateY(0)}
+.rptitle{color:#fff;font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.rpbar{margin-bottom:8px}
+.rpbn{display:flex;justify-content:space-between;margin-bottom:3px}
+.rpbl{color:rgba(255,255,255,.55);font-size:10px}
+.rpbp{color:#c77dff;font-size:10px;font-weight:600}
+.rptrack{height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+.rpfill{height:100%;border-radius:3px;transition:width .9s}
+.rpsum{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.33);font-size:10px;line-height:1.7}
+
+/* 감성분석 / 오늘의noct / 데일리카드 */
+.center-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);z-index:600;max-width:330px;width:calc(100vw - 28px);background:rgba(6,4,16,.97);border:1px solid rgba(199,125,255,.2);border-radius:20px;padding:22px;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;text-align:center}
+.center-panel.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}
+
+/* 청취기록 */
+#historyPanel{position:fixed;top:0;left:0;bottom:0;z-index:700;width:290px;background:rgba(6,4,16,.98);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .32s;pointer-events:none}
+#historyPanel.open{transform:translateX(0);pointer-events:all}
+.hphead{padding:18px 16px 12px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.hptitle{color:#fff;font-size:14px;font-weight:700}
+.hpclose{background:rgba(255,255,255,.06);border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,.4);cursor:pointer;font-size:13px;line-height:24px;text-align:center;font-family:inherit}
+.hplist{flex:1;overflow-y:auto}
+.hplist::-webkit-scrollbar{display:none}
+.hpempty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;gap:9px}
+.hpei{font-size:28px;opacity:.3}
+.hpet{color:rgba(255,255,255,.2);font-size:11px}
+.hpitem{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer}
+.hpthumb{width:40px;height:40px;border-radius:7px;object-fit:cover;background:rgba(255,255,255,.05);flex-shrink:0}
+.hptrack{color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.hpartist{color:rgba(255,255,255,.35);font-size:10px}
+.hptime{color:rgba(255,255,255,.18);font-size:9px;flex-shrink:0}
+.hpclear{padding:12px 16px;border-top:1px solid rgba(255,255,255,.05)}
+.hpclearbtn{width:100%;padding:8px;border-radius:9px;border:1px solid rgba(255,0,0,.15);background:rgba(255,0,0,.08);color:rgba(255,100,100,.6);font-size:10px;font-family:inherit;cursor:pointer}
+
+/* 광고신청 */
+#adApplyPanel{position:fixed;top:0;right:0;bottom:0;z-index:700;width:310px;background:rgba(6,4,16,.98);border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s;pointer-events:none}
+#adApplyPanel.open{transform:translateX(0);pointer-events:all}
+.aphead{padding:18px 16px 12px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.aptitle{color:#fff;font-size:14px;font-weight:700}
+.apclose{background:rgba(255,255,255,.06);border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,.4);cursor:pointer;font-size:13px;line-height:24px;text-align:center;font-family:inherit}
+.apbody{flex:1;overflow-y:auto;padding:14px 16px}
+.apbody::-webkit-scrollbar{display:none}
+.pkgcard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
+.pkgcard.selected{border-color:rgba(199,125,255,.5);background:rgba(199,125,255,.08)}
+.pkgname{color:#fff;font-size:12px;font-weight:700;margin-bottom:2px;display:flex;justify-content:space-between}
+.pkgprice{color:#c77dff;font-weight:700}
+.pkgdesc{color:rgba(255,255,255,.35);font-size:10px;line-height:1.5}
+.apinput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 12px;color:#fff;font-size:12px;font-family:inherit;outline:none;margin-bottom:7px}
+.aplabel{color:rgba(255,255,255,.35);font-size:10px;margin-bottom:4px;display:block}
+.apsubmit{width:100%;padding:12px;border-radius:11px;border:none;cursor:pointer;background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:13px;font-weight:700;font-family:inherit;margin-top:10px}
+
+/* 이웃알림 */
+#neighborAlert{position:fixed;top:108px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:300;background:rgba(6,4,16,.92);border:1px solid rgba(199,125,255,.25);border-radius:18px;padding:9px 16px;display:flex;align-items:center;gap:8px;white-space:nowrap;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+#neighborAlert.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#togetherBadge{position:fixed;top:92px;left:14px;z-index:29;background:rgba(3,3,10,.82);border:1px solid rgba(199,125,255,.2);border-radius:11px;padding:5px 11px;display:none;align-items:center;gap:5px;pointer-events:none}
+
+/* 공유카드 */
+#shareCardOverlay{position:fixed;inset:0;z-index:3000;background:rgba(3,3,10,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+#shareCardOverlay.open{opacity:1;pointer-events:all}
+#shareCanvas{border-radius:14px;max-width:calc(100vw - 44px)}
+.scbtns{display:flex;gap:9px}
+.scbtn{padding:11px 20px;border-radius:11px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.scsave{background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff}
+.scclose{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
+
+/* PWA */
+#installBanner{position:fixed;bottom:0;left:0;right:0;z-index:4000;background:linear-gradient(135deg,rgba(199,125,255,.15),rgba(123,104,238,.15));border-top:1px solid rgba(199,125,255,.25);padding:13px 14px 22px;display:none;align-items:center;gap:11px;pointer-events:none}
+#installBanner.show{display:flex;pointer-events:all}
+
+/* 새벽 별 */
+.dstar{position:fixed;border-radius:50%;background:#fff;pointer-events:none;animation:tw 3s ease-in-out infinite;z-index:2}
+@keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* 마커 */
-.nm{cursor:pointer;overflow:visible;}
-@keyframes ro{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
-@keyframes gb{0%,100%{opacity:.1}50%{opacity:.35}}
-@keyframes myp{0%{box-shadow:0 0 0 0 rgba(199,125,255,.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}
-/* ambient text */
-#ambientText{position:fixed;bottom:160px;left:50%;transform:translateX(-50%);z-index:15;pointer-events:none;text-align:center;opacity:0;transition:opacity 2s ease;}
-#ambientText.visible{opacity:1;}
-.at-main{color:rgba(255,255,255,0.12);font-size:12px;font-weight:300;letter-spacing:0.18em;white-space:nowrap;}
-.at-sub{color:rgba(199,125,255,0.16);font-size:10px;font-weight:300;letter-spacing:0.22em;margin-top:4px;}
+@keyframes ringOut{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
+@keyframes glowBreath{0%,100%{opacity:.1}50%{opacity:.32}}
+@keyframes myPulse{0%{box-shadow:0 0 0 0 rgba(199,125,255,.9)}70%{box-shadow:0 0 0 20px rgba(199,125,255,0)}100%{box-shadow:0 0 0 0 rgba(199,125,255,0)}}
+
+/* 인트로 */
+.i-logo{font-size:30px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:7px;opacity:0;animation:iUp .8s ease .3s forwards}
+.i-sub{color:rgba(255,255,255,.35);font-size:12px;margin-bottom:44px;opacity:0;animation:iUp .8s ease .6s forwards}
+.i-count{color:#fff;font-size:20px;font-weight:700;text-align:center;line-height:1.6;opacity:0;animation:iUp .8s ease .9s forwards}
+.i-count span{color:#c77dff}
+.i-hint{color:rgba(255,255,255,.2);font-size:11px;margin-top:36px;opacity:0;animation:iUp .8s ease 1.8s forwards}
+.i-dots{display:flex;gap:6px;margin-top:28px;opacity:0;animation:iUp .8s ease 1.2s forwards}
+.i-dot{width:7px;height:7px;border-radius:50%;animation:iDot 1.5s ease-in-out infinite}
+.i-dot:nth-child(1){background:#c77dff}.i-dot:nth-child(2){background:#60a5fa;animation-delay:.2s}.i-dot:nth-child(3){background:#34d399;animation-delay:.4s}.i-dot:nth-child(4){background:#f87171;animation-delay:.6s}.i-dot:nth-child(5){background:#fbbf24;animation-delay:.8s}
+@keyframes iUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes iDot{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:1}}
+
 /* 모바일 */
-@media(max-width:480px){.city-tabs{max-width:calc(100vw - 130px);}#songcard{left:12px;right:12px;width:auto;}#adcard{left:12px;right:12px;max-width:none;}.rbg{gap:4px;}.ib{padding:5px 9px;font-size:10px;}}
+@media(max-width:480px){
+  .logo-sub{display:none}
+  .city-tabs{max-width:calc(100vw - 130px)}
+  .tab{padding:5px 9px;font-size:11px}
+  .rbg{top:60px;right:10px;gap:3px}
+  .ib{padding:5px 8px;font-size:10px}
+  #songcard{left:10px;right:10px;width:auto}
+  #adcard{left:10px;right:10px;max-width:none}
+  #visitorBadge{display:none}
+  #mapSearch{top:92px}
+}
 .mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo,.mapboxgl-ctrl-attrib{display:none!important}
 </style>
 </head>
 <body>
+
+<!-- 인트로: z-index:9999, 종료시 done 클래스 -->
 <div id="intro">
   <div class="i-logo">noct</div>
   <div class="i-sub">지금 이 도시의 음악</div>
@@ -315,17 +348,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   <div class="i-dots"><div class="i-dot"></div><div class="i-dot"></div><div class="i-dot"></div><div class="i-dot"></div><div class="i-dot"></div></div>
   <div class="i-hint">글로우 점을 클릭하면 음악이 보여요</div>
 </div>
+
+<!-- 지도: z-index:0 -->
 <div id="map"></div>
-<!-- Atmosphere layers -->
-<div id="atmBase" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:background 4s ease,opacity 2s;opacity:0;"></div>
 
-
-
+<!-- 분위기 오버레이: pointer-events:none -->
+<div id="atmLayer"></div>
+<div id="vignette"></div>
 <div id="vibe"></div>
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
+
+<!-- 상단바 -->
 <div id="topbar">
-  <div class="logo" onclick="toggleHistory()"><div class="logo-icon">N</div><div><div class="logo-text">noct</div><div class="logo-sub">지금 이 도시의 음악</div></div></div>
+  <div class="logo" onclick="toggleHistory()">
+    <div class="logo-icon">N</div>
+    <div><div class="logo-text">noct</div><div class="logo-sub">지금 이 도시의 음악</div></div>
+  </div>
   <div class="city-tabs">
+    <button class="tab" data-city="all" onclick="flyToAll(this)">전체</button>
     <button class="tab active" data-city="busan" onclick="flyToCity('busan',this)">부산</button>
     <button class="tab" data-city="seoul" onclick="flyToCity('seoul',this)">서울</button>
     <button class="tab" data-city="daegu" onclick="flyToCity('daegu',this)">대구</button>
@@ -333,9 +373,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
     <button class="tab" data-city="gwangju" onclick="flyToCity('gwangju',this)">광주</button>
   </div>
 </div>
-<div id="vibebadge"><span class="vt" id="vibeTag"></span><span id="vibeTime" style="color:rgba(255,255,255,.25);font-size:11px;"></span></div>
+
 <div id="hotBanner"><div class="hbi" id="hotBannerInner"></div></div>
-<div id="togetherBadge"><div style="width:5px;height:5px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;"></div><span style="color:rgba(255,255,255,.7);font-size:11px;font-weight:500;"><span id="togetherCount" style="color:#c77dff;font-weight:700;">0</span>명이 같은 곡</span></div>
+<div id="vibebadge"><span class="vt" id="vibeTag"></span><span id="vibeTime"></span></div>
+<div id="togetherBadge"><div style="width:5px;height:5px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;flex-shrink:0;"></div><span style="color:rgba(255,255,255,.7);font-size:11px;font-weight:500;"><span id="togetherCount" style="color:#c77dff;font-weight:700;">0</span>명이 같은 곡</span></div>
+
 <div class="rbg" id="rightBtns">
   <button class="ib" id="topBtn" onclick="toggleTop()">🔥 TOP 5</button>
   <button class="ib" id="vsBtn" onclick="toggleVs()">⚔️ 도시 대결</button>
@@ -344,75 +386,208 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   <button class="ib" id="moodBtn" onclick="showMoodAnalysis()">🎭 내 감성 분석</button>
   <button class="ib" id="adBtn" onclick="toggleAdApply()">📢 광고 문의</button>
 </div>
-<div id="topPanel"><div class="ptitle">🔥 TOP 5</div><div id="topList"></div></div>
-<div id="livebadge"><div class="lr"><div class="ld"></div><span class="lm">지금 <span id="cityname">부산</span>에서 <span class="lc" id="livenum">183</span>명</span></div><div class="ls" id="livesub">실시간 음악 중</div></div>
-<button id="mainBtn" onclick="openSearch()"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>내 음악 올리기</button>
+
+<div id="topPanel" class="panel"><div class="ptitle">🔥 TOP 5</div><div id="topList"></div></div>
+
+<div id="livebadge">
+  <div class="live-row"><div class="live-dot"></div><span class="live-main">지금 <span id="cityname">부산</span>에서 <span class="live-count" id="livenum">183</span>명</span></div>
+  <div class="live-sub" id="livesub">실시간 음악 중</div>
+</div>
+
+<button id="mainBtn" onclick="openSearch()">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+  내 음악 올리기
+</button>
 <button id="myLocBtn" onclick="flyToMyMarker()">📍 내 위치로</button>
 <div id="visitorBadge">오늘 <span id="visitorCount">0</span>명 방문</div>
-<div id="mapSearch"><span style="color:rgba(255,255,255,.3);font-size:14px;">🔍</span><input id="msi" placeholder="동네, 도시 검색..." oninput="handleMapSearch()"><button style="background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:16px;" onclick="clearMapSearch()">×</button></div>
+<div id="ambientText"><div class="at-main" id="ambientMain">183 souls listening tonight</div><div class="at-sub" id="ambientSub">BUSAN · LIVE</div></div>
+
+<div id="mapSearch">
+  <span style="color:rgba(255,255,255,.3);font-size:13px;">🔍</span>
+  <input id="msi" placeholder="동네, 도시 검색..." oninput="handleMapSearch()">
+  <button style="background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:15px;" onclick="clearMapSearch()">×</button>
+</div>
 <div id="msr"></div>
+
+<!-- 검색 오버레이 -->
 <div id="searchOverlay" onclick="if(event.target===this)closeSearch()">
   <div id="searchSheet">
     <div class="sh"></div>
     <div class="st">🎵 지금 듣고 싶은 곡 검색</div>
-    <div class="siw"><span style="color:rgba(255,255,255,.3);">🔍</span><input id="searchInput" type="text" placeholder="아이유, BTS, NewJeans..." oninput="handleSI()" onkeydown="if(event.key==='Enter')doSearch()"><button id="searchClear" onclick="clearSearch()">×</button></div>
-    <div id="quickSection"><div class="qt">⚡ 인기 검색어</div><div class="qtags"><button class="qtag" onclick="setSearch('아이유 밤편지')">아이유 밤편지</button><button class="qtag" onclick="setSearch('NewJeans Attention')">NewJeans</button><button class="qtag" onclick="setSearch('BTS 봄날')">BTS 봄날</button><button class="qtag" onclick="setSearch('혁오 오래된 노래')">혁오</button><button class="qtag" onclick="setSearch('Frank Ocean Ivy')">Frank Ocean</button><button class="qtag" onclick="setSearch('The Weeknd Blinding Lights')">The Weeknd</button><button class="qtag" onclick="setSearch('Epik High 낙화')">에픽하이</button><button class="qtag" onclick="setSearch('IVE LOVE DIVE')">IVE</button></div></div>
+    <div class="siw">
+      <span style="color:rgba(255,255,255,.3);">🔍</span>
+      <input id="searchInput" type="text" placeholder="아이유, BTS, NewJeans..." oninput="handleSI()" onkeydown="if(event.key==='Enter')doSearch()">
+      <button id="searchClear" onclick="clearSearch()">×</button>
+    </div>
+    <div id="quickSection">
+      <div class="qt">⚡ 인기 검색어</div>
+      <div class="qtags">
+        <button class="qtag" onclick="setSearch('아이유 밤편지')">아이유 밤편지</button>
+        <button class="qtag" onclick="setSearch('NewJeans Attention')">NewJeans</button>
+        <button class="qtag" onclick="setSearch('BTS 봄날')">BTS 봄날</button>
+        <button class="qtag" onclick="setSearch('혁오 오래된 노래')">혁오</button>
+        <button class="qtag" onclick="setSearch('Frank Ocean Ivy')">Frank Ocean</button>
+        <button class="qtag" onclick="setSearch('The Weeknd Blinding Lights')">The Weeknd</button>
+        <button class="qtag" onclick="setSearch('IVE LOVE DIVE')">IVE</button>
+        <button class="qtag" onclick="setSearch('Epik High 낙화')">에픽하이</button>
+      </div>
+    </div>
     <div id="searchResults"></div>
   </div>
 </div>
-<div id="miniPlayer"><div class="pi"><img class="pt" id="playerThumb" src="" alt=""><div class="pinfo"><div class="ptitle" id="playerTitle">곡을 선택해주세요</div><div class="pch" id="playerChannel">지도에 내 위치가 표시됩니다</div></div><div class="pctrl"><button id="playBtn" onclick="togglePlay()">▶</button><button class="cb" onclick="stopAndClear()">✕</button></div><button class="sbtn" onclick="generateShareCard()">공유 📤</button></div></div>
-<div id="songcard"><div class="cbg"></div><div class="cglow" id="cardGlow"></div><button class="cclose" onclick="closeCard()">×</button><div class="cinner"><div class="car"><img class="ca" id="cardcover" src="" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div id="cardcoverFallback" style="display:none;width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#c77dff33,#c77dff11);flex-shrink:0;align-items:center;justify-content:center;font-size:22px;">🎵</div><div class="ct"><div class="ctrack" id="cardtrack"></div><div class="cartist" id="cardartist"></div></div></div><div class="cmr" id="cardmoods"></div><div class="cf"><div class="floc"><div class="fdot" id="footerdot"></div><span class="ftxt" id="cardfooter"></span></div><span class="fago">방금 전</span></div></div></div>
-<div id="adcard"><button class="adcl" onclick="closeAdCard()">×</button><div class="adh" id="adhero"></div><div class="adb"><div class="adsp">✦ SPONSORED</div><div class="adt" id="adtitle"></div><div class="add" id="adsub"></div><button class="adcta" id="adcta"></button><div class="adstats"><div class="si"><div class="sn" id="s1n"></div><div class="sl2" id="s1l"></div></div><div class="si"><div class="sn" id="s2n"></div><div class="sl2" id="s2l"></div></div><div class="si"><div class="sn" id="s3n"></div><div class="sl2" id="s3l"></div></div></div></div></div>
-<div id="ambientText">
-  <div class="at-main" id="ambientMain">183 souls listening tonight</div>
-  <div class="at-sub" id="ambientSub">BUSAN · LIVE</div>
-</div>
-<div id="toast"><span class="tp">noct</span><span id="toastMsg" style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span></div>
-<div id="neighborAlert"><div style="width:7px;height:7px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;"></div><span style="color:rgba(255,255,255,.8);font-size:12px;font-weight:500;"><span id="neighborCount" style="color:#c77dff;font-weight:700;">0</span>명이 근처에서 같이 듣는 중</span></div>
-<div id="nickOverlay"><div id="nickBox"><div class="ne">🎵</div><div class="nt">noct에 오신 걸 환영해요</div><div class="ns">지도에 표시될 닉네임을 입력하세요</div><input id="nickInput" placeholder="닉네임 입력..." maxlength="10" onkeydown="if(event.key==='Enter')saveNick()"><button class="nb" onclick="saveNick()">시작하기 🚀</button></div></div>
-<div id="vsPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div class="vstitle">⚔️ 도시 음악 취향 대결</div><button onclick="toggleVs()" style="background:rgba(255,255,255,.06);border:none;border-radius:50%;width:26px;height:26px;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;font-family:inherit;">×</button></div>
-  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:16px;">
-    <div><div style="color:rgba(255,255,255,.3);font-size:10px;margin-bottom:5px;text-align:center;">왼쪽</div><div class="vs-swrap"><button class="vs-sbtn" id="vsBtn1" onclick="toggleVsDrop(1)"><span id="vsBtnText1">부산</span><span style="font-size:10px;opacity:.5;">▼</span></button><div class="vs-drop" id="vsDrop1"></div></div></div>
-    <div style="color:rgba(255,255,255,.25);font-size:18px;font-weight:700;text-align:center;">VS</div>
-    <div><div style="color:rgba(255,255,255,.3);font-size:10px;margin-bottom:5px;text-align:center;">오른쪽</div><div class="vs-swrap"><button class="vs-sbtn" id="vsBtn2" onclick="toggleVsDrop(2)"><span id="vsBtnText2">서울</span><span style="font-size:10px;opacity:.5;">▼</span></button><div class="vs-drop" id="vsDrop2"></div></div></div>
+
+<!-- 미니플레이어 -->
+<div id="miniPlayer">
+  <div class="pi">
+    <img class="pt" id="playerThumb" src="" alt="">
+    <div class="pinfo">
+      <div class="ptitle" id="playerTitle">곡을 선택해주세요</div>
+      <div class="pch" id="playerChannel">지도에 내 위치가 표시됩니다</div>
+    </div>
+    <div class="pctrl">
+      <button id="playBtn" onclick="togglePlay()">▶</button>
+      <button class="cb" onclick="stopAndClear()">✕</button>
+    </div>
+    <button class="sbtn" onclick="generateShareCard()">공유 📤</button>
   </div>
-  <div class="vscities"><div class="vscity"><div class="vscname" id="vsName1" style="color:#60a5fa;">🌊 부산</div><div id="vsList1"></div></div><div class="vsdiv"></div><div class="vscity" style="align-items:flex-end;"><div class="vscname" id="vsName2" style="color:#c084fc;text-align:right;">서울 🏙️</div><div id="vsList2" style="text-align:right;"></div></div></div>
+</div>
+
+<!-- 뮤직카드 -->
+<div id="songcard">
+  <div class="cbg"></div><div class="cglow" id="cardGlow"></div>
+  <button class="cclose" onclick="closeCard()">×</button>
+  <div class="cinner">
+    <div class="car">
+      <img class="ca" id="cardcover" src="" alt="" onerror="this.style.display='none';document.getElementById('cardcoverFb').style.display='flex'">
+      <div id="cardcoverFb" style="display:none;width:54px;height:54px;border-radius:9px;background:rgba(199,125,255,.15);flex-shrink:0;align-items:center;justify-content:center;font-size:20px;">🎵</div>
+      <div class="ct"><div class="ctrack" id="cardtrack"></div><div class="cartist" id="cardartist"></div></div>
+    </div>
+    <div class="cmr" id="cardmoods"></div>
+    <div class="cf">
+      <div class="floc"><div class="fdot" id="footerdot"></div><span class="ftxt" id="cardfooter"></span></div>
+      <span class="fago">방금 전</span>
+    </div>
+  </div>
+</div>
+
+<!-- 광고카드 -->
+<div id="adcard">
+  <button class="adcl" onclick="closeAdCard()">×</button>
+  <div class="adh" id="adhero"></div>
+  <div class="adb">
+    <div class="adsp">✦ SPONSORED</div>
+    <div class="adt" id="adtitle"></div><div class="add" id="adsub"></div>
+    <button class="adcta" id="adcta"></button>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"><span class="tp">noct</span><span id="toastMsg" style="color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span></div>
+
+<!-- 이웃알림 -->
+<div id="neighborAlert"><div style="width:6px;height:6px;border-radius:50%;background:#c77dff;animation:dp 2s infinite;"></div><span style="color:rgba(255,255,255,.8);font-size:11px;font-weight:500;"><span id="neighborCount" style="color:#c77dff;font-weight:700;">0</span>명이 근처에서 같이 듣는 중</span></div>
+
+<!-- 닉네임 -->
+<div id="nickOverlay">
+  <div id="nickBox">
+    <div class="ne">🎵</div>
+    <div class="nt">noct에 오신 걸 환영해요</div>
+    <div class="ns">지도에 표시될 닉네임을 입력하세요</div>
+    <input id="nickInput" placeholder="닉네임 입력..." maxlength="10" onkeydown="if(event.key==='Enter')saveNick()">
+    <button class="nb" onclick="saveNick()">시작하기 🚀</button>
+  </div>
+</div>
+
+<!-- VS 패널 -->
+<div id="vsPanel" class="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div class="vstitle">⚔️ 도시 음악 취향 대결</div>
+    <button onclick="toggleVs()" style="background:rgba(255,255,255,.06);border:none;border-radius:50%;width:24px;height:24px;color:rgba(255,255,255,.4);cursor:pointer;font-size:13px;font-family:inherit;">×</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:7px;align-items:center;margin-bottom:14px;">
+    <div><div style="color:rgba(255,255,255,.3);font-size:9px;margin-bottom:4px;text-align:center;">왼쪽</div>
+      <div class="vs-swrap"><button class="vs-sbtn" onclick="toggleVsDrop(1)"><span id="vsBtnText1">부산</span><span style="font-size:9px;opacity:.5;">▼</span></button><div class="vs-drop" id="vsDrop1"></div></div>
+    </div>
+    <div style="color:rgba(255,255,255,.2);font-size:16px;font-weight:700;text-align:center;">VS</div>
+    <div><div style="color:rgba(255,255,255,.3);font-size:9px;margin-bottom:4px;text-align:center;">오른쪽</div>
+      <div class="vs-swrap"><button class="vs-sbtn" onclick="toggleVsDrop(2)"><span id="vsBtnText2">서울</span><span style="font-size:9px;opacity:.5;">▼</span></button><div class="vs-drop" id="vsDrop2"></div></div>
+    </div>
+  </div>
+  <div class="vsgrid">
+    <div class="vscity"><div class="vscname" id="vsName1" style="color:#60a5fa;">🌊 부산</div><div id="vsList1"></div></div>
+    <div class="vsdiv"></div>
+    <div class="vscity" style="align-items:flex-end;"><div class="vscname" id="vsName2" style="color:#c084fc;text-align:right;">서울 🏙️</div><div id="vsList2" style="text-align:right;"></div></div>
+  </div>
   <div id="vsBarWrap"></div>
-  <div id="vsLiveTag" style="text-align:center;color:rgba(199,125,255,.5);font-size:10px;margin-top:8px;"></div>
+  <div id="vsLiveTag" style="text-align:center;color:rgba(199,125,255,.45);font-size:9px;margin-top:7px;"></div>
 </div>
-<div id="reportPanel"><div class="rptitle">📊 오늘 <span id="reportCity">부산</span> 감성 리포트 <button onclick="toggleReport()" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;font-family:inherit;">×</button></div><div id="reportBars"></div><div class="rpsum" id="reportSummary"></div></div>
-<div id="moodAnalysis">
-  <div style="color:rgba(255,255,255,.4);font-size:11px;letter-spacing:.08em;margin-bottom:16px;">🎵 내 감성 분석</div>
-  <div id="maType" style="font-size:48px;margin-bottom:8px;">🌙</div>
-  <div id="maName" style="color:#fff;font-size:22px;font-weight:700;margin-bottom:6px;"></div>
-  <div id="maDesc" style="color:rgba(255,255,255,.4);font-size:13px;line-height:1.7;margin-bottom:20px;"></div>
-  <div style="text-align:left;background:rgba(255,255,255,.03);border-radius:12px;padding:12px;margin-bottom:16px;"><div style="color:rgba(255,255,255,.25);font-size:10px;margin-bottom:8px;">최근 들은 곡</div><div id="maTracks"></div></div>
-  <button onclick="closeMoodAnalysis()" style="background:rgba(255,255,255,.06);border:none;border-radius:12px;padding:11px 24px;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:inherit;width:100%;">닫기</button>
+
+<!-- 리포트 -->
+<div id="reportPanel" class="panel">
+  <div class="rptitle">📊 오늘 <span id="reportCity">부산</span> 감성 리포트 <button onclick="toggleReport()" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:15px;font-family:inherit;">×</button></div>
+  <div id="reportBars"></div><div class="rpsum" id="reportSummary"></div>
 </div>
-<div id="dailyCard"><div class="dcemoji" id="dailyEmoji">🌙</div><div class="dctitle">오늘의 noct</div><div class="dctext" id="dailyText"></div><button class="dcshare" onclick="shareDailyCard()">공유하기</button><button class="dcclose" onclick="closeDailyCard()">닫기</button></div>
-<div id="historyPanel"><div class="hphead"><span class="hptitle">🎵 내 청취 기록</span><button class="hpclose" onclick="toggleHistory()">×</button></div><div class="hplist" id="historyList"></div><div class="hpclear"><button class="hpclearbtn" onclick="clearHistory()">기록 전체 삭제</button></div></div>
+
+<!-- 감성분석 -->
+<div id="moodAnalysis" class="center-panel">
+  <div style="color:rgba(255,255,255,.38);font-size:10px;letter-spacing:.08em;margin-bottom:14px;">🎵 내 감성 분석</div>
+  <div id="maType" style="font-size:44px;margin-bottom:7px;">🌙</div>
+  <div id="maName" style="color:#fff;font-size:20px;font-weight:700;margin-bottom:5px;"></div>
+  <div id="maDesc" style="color:rgba(255,255,255,.4);font-size:12px;line-height:1.7;margin-bottom:18px;"></div>
+  <div style="text-align:left;background:rgba(255,255,255,.03);border-radius:11px;padding:11px;margin-bottom:14px;"><div style="color:rgba(255,255,255,.25);font-size:9px;margin-bottom:7px;">최근 들은 곡</div><div id="maTracks"></div></div>
+  <button onclick="closeMoodAnalysis()" style="background:rgba(255,255,255,.06);border:none;border-radius:11px;padding:10px 22px;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit;width:100%;">닫기</button>
+</div>
+
+<!-- 오늘의 noct -->
+<div id="dailyCard" class="center-panel">
+  <div style="font-size:40px;margin-bottom:10px;" id="dailyEmoji">🌙</div>
+  <div style="color:rgba(255,255,255,.38);font-size:10px;letter-spacing:.08em;margin-bottom:7px;">오늘의 noct</div>
+  <div id="dailyText" style="color:#fff;font-size:16px;font-weight:700;line-height:1.5;margin-bottom:14px;"></div>
+  <button onclick="shareDailyCard()" style="background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:11px;padding:10px 22px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:7px;">공유하기</button>
+  <button onclick="closeDailyCard()" style="background:rgba(255,255,255,.06);border:none;border-radius:11px;padding:10px 16px;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit;">닫기</button>
+</div>
+
+<!-- 청취기록 -->
+<div id="historyPanel">
+  <div class="hphead"><span class="hptitle">🎵 내 청취 기록</span><button class="hpclose" onclick="toggleHistory()">×</button></div>
+  <div class="hplist" id="historyList"></div>
+  <div class="hpclear"><button class="hpclearbtn" onclick="clearHistory()">기록 전체 삭제</button></div>
+</div>
+
+<!-- 광고신청 -->
 <div id="adApplyPanel">
   <div class="aphead"><span class="aptitle">📢 광고 문의</span><button class="apclose" onclick="toggleAdApply()">×</button></div>
-  <div class="apbody" id="applyBody">
-    <div style="color:rgba(255,255,255,.4);font-size:11px;margin-bottom:14px;line-height:1.7;">noct 지도 위에 브랜드를 올려보세요.</div>
+  <div class="apbody">
+    <div style="color:rgba(255,255,255,.4);font-size:10px;margin-bottom:12px;line-height:1.7;">noct 지도 위에 브랜드를 올려보세요.<br>새벽에 음악 듣는 MZ세대에게 정확히 노출됩니다.</div>
     <div class="pkgcard" id="pkg1" onclick="selectPkg(1)"><div class="pkgname">Basic <span class="pkgprice">월 30만원</span></div><div class="pkgdesc">빌보드 마커 1개 · 구 단위 노출</div></div>
     <div class="pkgcard" id="pkg2" onclick="selectPkg(2)"><div class="pkgname">Premium <span class="pkgprice">월 100만원</span></div><div class="pkgdesc">빌보드 + 상세 카드 + CTA 버튼</div></div>
     <div class="pkgcard" id="pkg3" onclick="selectPkg(3)"><div class="pkgname">Exclusive <span class="pkgprice">월 300만원</span></div><div class="pkgdesc">지역 독점 + 토스트 노출 + 리포트</div></div>
-    <div style="margin-top:14px;"><span class="aplabel">브랜드명</span><input class="apinput" id="applyBrand" placeholder="예: 메가커피"><span class="aplabel">연락처</span><input class="apinput" id="applyContact" placeholder="contact@brand.com"><span class="aplabel">희망 지역</span><input class="apinput" id="applyArea" placeholder="예: 부산 해운대"></div>
+    <div style="margin-top:12px;">
+      <span class="aplabel">브랜드명</span><input class="apinput" id="applyBrand" placeholder="예: 메가커피">
+      <span class="aplabel">연락처</span><input class="apinput" id="applyContact" placeholder="contact@brand.com">
+      <span class="aplabel">희망 지역</span><input class="apinput" id="applyArea" placeholder="예: 부산 해운대">
+    </div>
     <button class="apsubmit" onclick="submitApply()">신청하기 🚀</button>
-    <div class="apsuccess" id="applySuccess"><div class="apsi">🎉</div><div class="apst">신청이 완료됐어요!</div><div class="apss">빠른 시일 내에 연락드리겠습니다.</div></div>
+    <div id="applySuccess" style="display:none;text-align:center;padding:18px 0;"><div style="font-size:44px;margin-bottom:10px;">🎉</div><div style="color:#fff;font-size:14px;font-weight:700;margin-bottom:5px;">신청이 완료됐어요!</div><div style="color:rgba(255,255,255,.35);font-size:11px;line-height:1.6;">빠른 시일 내에 연락드리겠습니다.</div></div>
   </div>
 </div>
-<script>
-// ── API 키 ──
-mapboxgl.accessToken = 'pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
-var YT_KEY = 'AIzaSyDwV2-CKSCc3igQoO4gp2nPEtmH9IilS9E';
-var SB_URL = 'https://ivnwqfqhbooxsqerweah.supabase.co';
-var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
-var db = null;
 
-// ── 데이터 ──
+<!-- 공유카드 -->
+<div id="shareCardOverlay">
+  <canvas id="shareCanvas" width="360" height="560"></canvas>
+  <div class="scbtns"><button class="scbtn scsave" onclick="downloadCard()">📥 이미지 저장</button><button class="scbtn scclose" onclick="closeShareCard()">닫기</button></div>
+</div>
+
+<!-- PWA -->
+<div id="installBanner">
+  <div style="font-size:26px;flex-shrink:0;">🎵</div>
+  <div style="flex:1;"><div style="color:#fff;font-size:12px;font-weight:700;margin-bottom:2px;">noct 앱으로 설치하기</div><div style="color:rgba(255,255,255,.4);font-size:10px;">홈 화면에 추가하면 앱처럼 사용</div></div>
+  <button onclick="installPWA()" style="background:linear-gradient(135deg,#c77dff,#7B68EE);border:none;border-radius:9px;padding:7px 14px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">설치</button>
+  <button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:18px;cursor:pointer;font-family:inherit;">×</button>
+</div>
+
+
+<script>
 var FAKE_SONGS = [
 {title:"밤편지",channel:"IU",mood:["그리움","새벽 3시"],color:"#60a5fa",vid:"BzYnNdJhZQw"},
 {title:"Slow Dancing in the Dark",channel:"Joji",mood:["몽환","감정 잠수"],color:"#c084fc",vid:"nky4me4NP70"},
@@ -768,6 +943,13 @@ gwangju:[
 {name:"힙합",pct:15,color:"#f472b6"},
 ],
 };
+var CITIES = {
+busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
+seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
+daegu:{center:[128.601,35.869],zoom:13.5,pitch:60,bearing:10,spots:DAEGU_SPOTS,name:"대구",count:94},
+incheon:{center:[126.705,37.456],zoom:13.5,pitch:60,bearing:-10,spots:INCHEON_SPOTS,name:"인천",count:127},
+gwangju:{center:[126.852,35.160],zoom:13.5,pitch:60,bearing:5,spots:GWANGJU_SPOTS,name:"광주",count:68},
+};
 var DAILY_TEMPLATES = {
 busan: [
 {emoji:'🌊', text:'오늘 부산은 Joji가 지배했다'},
@@ -794,200 +976,61 @@ gwangju: [
 {emoji:'🎵', text:'광주의 밤 IU의 감성이 물들었다'},
 ],
 };
-var BUSAN_SPOTS = [
-{lng:129.059,lat:35.156,name:"서면"},{lng:129.160,lat:35.158,name:"해운대"},
-{lng:129.030,lat:35.097,name:"남포동"},{lng:129.118,lat:35.153,name:"광안리"},
-{lng:129.131,lat:35.168,name:"센텀시티"},{lng:129.075,lat:35.210,name:"연산동"},
-{lng:129.087,lat:35.204,name:"동래"},{lng:129.103,lat:35.158,name:"수영구"},
-{lng:129.024,lat:35.179,name:"사상구"},{lng:129.172,lat:35.238,name:"기장군"},
-];
-var SEOUL_SPOTS = [
-{lng:127.027,lat:37.497,name:"강남"},{lng:126.923,lat:37.566,name:"홍대"},
-{lng:126.976,lat:37.570,name:"광화문"},{lng:127.049,lat:37.514,name:"잠실"},
-{lng:126.904,lat:37.513,name:"여의도"},{lng:127.000,lat:37.560,name:"명동"},
-{lng:127.056,lat:37.517,name:"삼성동"},{lng:126.987,lat:37.583,name:"성수동"},
-{lng:127.044,lat:37.542,name:"건대입구"},{lng:126.936,lat:37.555,name:"마포구"},
-{lng:127.003,lat:37.517,name:"한남동"},{lng:126.976,lat:37.620,name:"노원구"},
-];
-var DAEGU_SPOTS = [
-{lng:128.601,lat:35.869,name:"동성로"},{lng:128.626,lat:35.856,name:"수성구"},
-{lng:128.553,lat:35.886,name:"칠성시장"},{lng:128.617,lat:35.901,name:"북구"},
-{lng:128.574,lat:35.838,name:"달서구"},
-];
-var INCHEON_SPOTS = [
-{lng:126.705,lat:37.456,name:"부평"},{lng:126.730,lat:37.476,name:"주안"},
-{lng:126.491,lat:37.474,name:"송도"},{lng:126.617,lat:37.496,name:"계양"},
-{lng:126.676,lat:37.450,name:"남동구"},
-];
-var GWANGJU_SPOTS = [
-{lng:126.852,lat:35.160,name:"충장로"},{lng:126.888,lat:35.146,name:"수완지구"},
-{lng:126.913,lat:35.176,name:"첨단지구"},{lng:126.849,lat:35.131,name:"봉선동"},
-];
-var CITIES = {
-busan:{center:[129.059,35.156],zoom:13.5,pitch:60,bearing:-15,spots:BUSAN_SPOTS,name:"부산",count:183},
-seoul:{center:[127.027,37.497],zoom:13.5,pitch:60,bearing:15,spots:SEOUL_SPOTS,name:"서울",count:312},
-daegu:{center:[128.601,35.869],zoom:13.5,pitch:60,bearing:10,spots:DAEGU_SPOTS,name:"대구",count:94},
-incheon:{center:[126.705,37.456],zoom:13.5,pitch:60,bearing:-10,spots:INCHEON_SPOTS,name:"인천",count:127},
-gwangju:{center:[126.852,35.160],zoom:13.5,pitch:60,bearing:5,spots:GWANGJU_SPOTS,name:"광주",count:68},
-};
-var MOOD_TYPES = [
-{type:'🌙', name:'새벽 감성형', desc:'혼자만의 시간을 즐기는 타입이에요. 음악으로 감정을 정리하는 당신.', keywords:['밤편지','Ivy','Slow Dancing','After Hours','낙화','Through the Night','흰눈']},
-{type:'⚡', name:'에너지 폭발형', desc:'활기찬 에너지로 하루를 채우는 타입. 음악이 당신의 원동력이에요.', keywords:['BLINDING','Dynamite','Attention','Levitating','Butter','Savage','Rollin']},
-{type:'💜', name:'감성 인디형', desc:'남들이 모르는 좋은 음악을 아는 타입. 깊이 있는 감성을 가졌어요.', keywords:['혁오','오래된','DEAN','She','폴킴','적재','춤을 춰','나는 나비']},
-{type:'🌸', name:'로맨틱 팝형', desc:'사랑스럽고 설레는 감성을 가진 타입. 음악으로 감정을 표현해요.', keywords:['LOVE DIVE','Celebrity','봄날','Golden Hour','Perfect','사랑인가봐','봄봄봄','소나기']},
-{type:'🎤', name:'트렌드 리더형', desc:'항상 최신 음악을 빠르게 접하는 타입. 당신의 취향이 곧 트렌드예요.', keywords:['NewJeans','IVE','BTS','Olivia','Harry','drivers','ELEVEN','Peaches']},
-];
-var VS_CITY_DB_KEYS = {
-seoul:'seoul', busan:'busan', daegu:'daegu', incheon:'incheon', gwangju:'gwangju',
-suwon:'seoul', seongnam:'seoul', goyang:'seoul', yongin:'seoul', bucheon:'seoul',
-anyang:'seoul', hwaseong:'seoul', gimpo:'seoul',
-ulsan:'busan', changwon:'busan', jinju:'busan', geoje:'busan', yangsan:'busan',
-pohang:'daegu', gyeongju:'daegu', gumi:'daegu', andong:'daegu',
-jeonju:'gwangju', gunsan:'gwangju', yeosu:'gwangju', suncheon:'gwangju', mokpo:'gwangju',
-daejeon:'daejeon', sejong:'daejeon', cheonan:'daejeon', cheongju:'daejeon', asan:'daejeon',
-chuncheon:'chuncheon', wonju:'chuncheon', gangneung:'chuncheon', sokcho:'chuncheon',
-jeju:'jeju', seogwipo:'jeju',
-};
-
-
+var VS_DB={'seoul':'seoul','busan':'busan','daegu':'daegu','incheon':'incheon','gwangju':'gwangju','suwon':'seoul','seongnam':'seoul','goyang':'seoul','yongin':'seoul','bucheon':'seoul','anyang':'seoul','hwaseong':'seoul','gimpo':'seoul','ulsan':'busan','changwon':'busan','jinju':'busan','geoje':'busan','yangsan':'busan','pohang':'daegu','gyeongju':'daegu','gumi':'daegu','andong':'daegu','jeonju':'gwangju','gunsan':'gwangju','yeosu':'gwangju','suncheon':'gwangju','mokpo':'gwangju','daejeon':'daejeon','sejong':'daejeon','cheonan':'daejeon','cheongju':'daejeon','asan':'daejeon','chuncheon':'chuncheon','wonju':'chuncheon','gangneung':'chuncheon','sokcho':'chuncheon','jeju':'jeju','seogwipo':'jeju'};
 // ── API ──
 mapboxgl.accessToken='pk.eyJ1IjoicnVkcmpzMzI1MCIsImEiOiJjbXBqY2lhNnQxZzd2MnJxdnpqOHZkbnAxIn0.o3jxy41-0KMkusHSqmw0Aw';
 var YT_KEY='AIzaSyDwV2-CKSCc3igQoO4gp2nPEtmH9IilS9E';
 var SB_URL='https://ivnwqfqhbooxsqerweah.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bndxZnFoYm9veHNxZXJ3ZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzgxMTcsImV4cCI6MjA5NTIxNDExN30.1Z4Ez7n-t5y7GtUMHlnE8sp_FkRcJIEjDFd4Z8iTEnA';
 var db=null;
-function initSupabase(){if(window.supabase)db=window.supabase.createClient(SB_URL,SB_KEY);}
 
 // ── 상태 ──
-var currentCity='busan',ytPlayer=null,ytReady=false,isPlaying=false;
+var currentCity='busan';
+var ytPlayer=null,ytReady=false,isPlaying=false;
 var currentSong=null,myMarker=null,myLng=null,myLat=null;
 var myNick=localStorage.getItem('noct_nick')||'';
 var myUserId=localStorage.getItem('noct_uid')||null;
 var adMarkers=[],liveMarkers={};
-var searchTimer=null,topVisible=false,vsVisible=false,reportVisible=false;
+var searchTimer=null,moveEndTimer=null;
+var topVisible=false,vsVisible=false,reportVisible=false;
 var selectedPkg=0,dawnStars=[],dawnMode=false;
 var gpsWatchId=null,gpsReady=false;
 var listenHistory=JSON.parse(localStorage.getItem('noct_history')||'[]');
 var vsSel1='busan',vsSel2='seoul';
-var moveEndTimer=null,pendingSong=null;
-var driftTimer=null,driftActive=false;
+var pendingSong=null;
 var ALL_LOCATIONS=[];
+var _lastMood='';
 
 // ── YouTube ──
-var yts=document.createElement('script');yts.src='https://www.youtube.com/iframe_api';document.head.appendChild(yts);
+var yts=document.createElement('script');
+yts.src='https://www.youtube.com/iframe_api';
+document.head.appendChild(yts);
 function onYouTubeIframeAPIReady(){
-  ytPlayer=new YT.Player('ytPlayer',{height:'1',width:'1',playerVars:{autoplay:0,controls:0},
-    events:{onReady:function(){ytReady=true;},
-    onStateChange:function(e){
-      if(e.data===YT.PlayerState.PLAYING){isPlaying=true;document.getElementById('playBtn').textContent='⏸';}
-      else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED){isPlaying=false;document.getElementById('playBtn').textContent='▶';}
-    }}});
+  ytPlayer=new YT.Player('ytPlayer',{height:'1',width:'1',
+    playerVars:{autoplay:0,controls:0},
+    events:{
+      onReady:function(){ytReady=true;},
+      onStateChange:function(e){
+        if(e.data===YT.PlayerState.PLAYING){isPlaying=true;document.getElementById('playBtn').textContent='⏸';}
+        else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED){isPlaying=false;document.getElementById('playBtn').textContent='▶';}
+      }
+    }
+  });
 }
 
-// ── 감성태그 ──
-function getVibe(){var h=new Date().getHours();if(h<5)return{tag:'새벽 감성 🌙',c:'#a78bfa'};if(h<9)return{tag:'이른 아침 ☀️',c:'#fbbf24'};if(h<12)return{tag:'오전 에너지 ⚡',c:'#34d399'};if(h<15)return{tag:'점심 여유 🍜',c:'#60a5fa'};if(h<18)return{tag:'오후 감성 🌤️',c:'#fb923c'};if(h<21)return{tag:'저녁 퇴근길 🚇',c:'#f472b6'};return{tag:'야간 감성 🌃',c:'#c077ff'};}
-function updateVibe(){
-  var v=getVibe();var t=document.getElementById('vibeTag');
-  t.textContent=v.tag;t.style.cssText='background:'+v.c+'18;border:1px solid '+v.c+'35;color:'+v.c+';border-radius:20px;padding:4px 11px;font-size:11px;font-weight:500;';
-  var n=new Date();document.getElementById('vibeTime').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+// ── Supabase ──
+function initSupabase(){
+  if(window.supabase)db=window.supabase.createClient(SB_URL,SB_KEY);
 }
-updateVibe();setInterval(updateVibe,60000);
 
-// Ambient text 업데이트
-function updateAmbientText(){
-  var cityNames={busan:'BUSAN',seoul:'SEOUL',daegu:'DAEGU',incheon:'INCHEON',gwangju:'GWANGJU'};
-  var cityName=document.getElementById('cityname').textContent.toUpperCase();
-  var count=document.getElementById('livenum').textContent;
-  var h=new Date().getHours();
-  var feels=['feels electric tonight','is alive with music','glows through the night','hums with melody','breathes music tonight'];
-  var feel=feels[Math.floor(Math.random()*feels.length)];
-  document.getElementById('ambientMain').textContent=count+' souls listening tonight';
-  document.getElementById('ambientSub').textContent=cityName+' · LIVE';
-  document.getElementById('ambientText').classList.add('visible');
-}
-setTimeout(updateAmbientText,5000);
-setInterval(updateAmbientText,30000);
-
-// ── 시간대별 분위기 시스템 ──
-var ATM = {
-  midnight: {
-    base:'linear-gradient(180deg,rgba(2,1,18,0.85) 0%,rgba(5,2,25,0.6) 40%,rgba(3,1,15,0.8) 100%)',
-    bloom:'radial-gradient(ellipse at 50% 30%,rgba(80,20,160,0.08) 0%,transparent 60%)',
-    fog:{color:'rgb(2,1,12)','high-color':'rgb(12,5,35)','horizon-blend':0.03,'space-color':'rgb(2,1,12)','star-intensity':0.9},
-    vignette:'rgba(2,1,12,0.75)',label:'midnight'
-  },
-  dawn: {
-    base:'linear-gradient(180deg,rgba(8,2,30,0.8) 0%,rgba(20,5,45,0.55) 40%,rgba(5,2,20,0.75) 100%)',
-    bloom:'radial-gradient(ellipse at 50% 60%,rgba(120,40,200,0.07) 0%,transparent 60%)',
-    fog:{color:'rgb(5,2,18)','high-color':'rgb(25,8,55)','horizon-blend':0.03,'space-color':'rgb(3,1,15)','star-intensity':0.7},
-    vignette:'rgba(4,1,18,0.72)',label:'dawn'
-  },
-  morning: {
-    base:'linear-gradient(180deg,rgba(10,5,30,0.7) 0%,rgba(15,8,35,0.45) 40%,rgba(8,3,22,0.65) 100%)',
-    bloom:'radial-gradient(ellipse at 60% 20%,rgba(80,60,180,0.06) 0%,transparent 60%)',
-    fog:{color:'rgb(8,6,22)','high-color':'rgb(30,20,55)','horizon-blend':0.03,'space-color':'rgb(5,3,18)','star-intensity':0.3},
-    vignette:'rgba(5,3,18,0.68)',label:'morning'
-  },
-  sunset: {
-    base:'linear-gradient(180deg,rgba(15,5,35,0.78) 0%,rgba(30,8,50,0.55) 40%,rgba(10,2,28,0.72) 100%)',
-    bloom:'radial-gradient(ellipse at 40% 10%,rgba(180,60,120,0.07) 0%,transparent 55%)',
-    fog:{color:'rgb(12,4,22)','high-color':'rgb(50,15,60)','horizon-blend':0.03,'space-color':'rgb(8,2,18)','star-intensity':0.45},
-    vignette:'rgba(8,2,20,0.72)',label:'sunset'
-  }
+// ── 시간대 분위기 ──
+var TIME_MOODS={
+  earlyDawn:{overlay:'rgba(2,4,18,0.3)',fog:{color:'rgb(3,4,18)','high-color':'rgb(8,10,35)','horizon-blend':0.04,'space-color':'rgb(2,2,14)','star-intensity':0.85},stars:true},
+  morning:{overlay:'rgba(10,14,28,0.15)',fog:{color:'rgb(18,22,38)','high-color':'rgb(40,50,80)','horizon-blend':0.02,'space-color':'rgb(10,14,28)','star-intensity':0.1},stars:false},
+  day:{overlay:'rgba(8,10,20,0.08)',fog:{color:'rgb(22,26,42)','high-color':'rgb(55,65,90)','horizon-blend':0.02,'space-color':'rgb(14,18,32)','star-intensity':0.0},stars:false},
+  sunset:{overlay:'rgba(28,8,18,0.22)',fog:{color:'rgb(18,8,22)','high-color':'rgb(70,25,60)','horizon-blend':0.05,'space-color':'rgb(10,4,18)','star-intensity':0.3},stars:false},
+  night:{overlay:'rgba(3,2,14,0.28)',fog:{color:'rgb(3,3,14)','high-color':'rgb(10,6,28)','horizon-blend':0.04,'space-color':'rgb(2,2,10)','star-intensity':0.65},stars:true}
 };
-
-function getTimeAtm(){
-  var h=new Date().getHours();
-  if(h>=0&&h<5) return ATM.midnight;
-  if(h>=5&&h<10) return ATM.dawn;
-  if(h>=10&&h<18) return ATM.morning;
-  if(h>=18&&h<22) return ATM.sunset;
-  return ATM.midnight;
-}
-
-function applyAtmosphere(){
-  var atm=getTimeAtm();
-  var base=document.getElementById('atmBase');
-    base.style.background=atm.base;
-  base.style.opacity='0.08';
-  bloom.style.background=atm.bloom;
-  bloom.style.opacity='0.12';
-  if(map.isStyleLoaded())map.setFog(atm.fog);
-
-  // 새벽/자정: 별 추가
-  var isDawn=(atm.label==='midnight'||atm.label==='dawn');
-  if(isDawn&&!dawnMode){
-    dawnMode=true;
-    for(var i=0;i<40;i++){var s=document.createElement('div');s.className='dstar';var sz=Math.random()*2+1;s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'vw;top:'+Math.random()*50+'vh;animation-delay:'+Math.random()*3+'s;animation-duration:'+(2+Math.random()*3)+'s;';document.body.appendChild(s);dawnStars.push(s);}
-  }else if(!isDawn&&dawnMode){
-    dawnMode=false;dawnStars.forEach(function(s){s.remove();});dawnStars=[];
-  }
-}
-
-// ── 새 시간대 분위기 시스템 ──
-var TIME_MOODS = {
-  earlyDawn:{
-    fog:{color:'rgb(3,4,18)','high-color':'rgb(8,10,35)','horizon-blend':0.04,'space-color':'rgb(2,2,14)','star-intensity':0.85},
-    bldBase:'#04030f',bldTop:'#1a1250',overlay:'rgba(2,4,22,0.5)',bloom:'rgba(20,30,100,0.04)',water:'rgba(3,6,24,0.97)',glow:0.7,road:0.12,label:'rgba(200,210,255,0.88)',labelOp:0.78
-  },
-  morning:{
-    fog:{color:'rgb(18,22,38)','high-color':'rgb(40,50,80)','horizon-blend':0.02,'space-color':'rgb(10,14,30)','star-intensity':0.1},
-    bldBase:'#0e1020',bldTop:'#252560',overlay:'rgba(10,14,30,0.2)',bloom:'rgba(80,100,160,0.02)',water:'rgba(8,14,36,0.93)',glow:0.85,road:0.25,label:'rgba(230,230,255,0.94)',labelOp:0.9
-  },
-  day:{
-    fog:{color:'rgb(22,26,42)','high-color':'rgb(55,65,95)','horizon-blend':0.02,'space-color':'rgb(14,18,34)','star-intensity':0.0},
-    bldBase:'#141622',bldTop:'#2a2a6a',overlay:'rgba(8,10,22,0.12)',bloom:'rgba(60,70,120,0.02)',water:'rgba(10,16,38,0.92)',glow:0.9,road:0.32,label:'rgba(240,235,255,0.97)',labelOp:0.95
-  },
-  sunset:{
-    fog:{color:'rgb(18,8,22)','high-color':'rgb(70,25,60)','horizon-blend':0.06,'space-color':'rgb(10,4,18)','star-intensity':0.3},
-    bldBase:'#0f0612',bldTop:'#4a1560',overlay:'rgba(40,10,30,0.28)',bloom:'rgba(180,60,100,0.05)',water:'rgba(8,4,18,0.96)',glow:1.2,road:0.22,label:'rgba(255,220,200,0.92)',labelOp:0.85
-  },
-  night:{
-    fog:{color:'rgb(3,3,14)','high-color':'rgb(10,6,28)','horizon-blend':0.05,'space-color':'rgb(2,2,10)','star-intensity':0.65},
-    bldBase:'#06041a',bldTop:'#2d1b69',overlay:'rgba(4,2,18,0.4)',bloom:'rgba(80,20,160,0.05)',water:'rgba(4,6,24,0.97)',glow:1.0,road:0.16,label:'rgba(210,195,255,0.92)',labelOp:0.82
-  }
-};
-
 function getTimeMood(){
   var utc=new Date().getTime()+(new Date().getTimezoneOffset()*60000);
   var h=new Date(utc+9*3600000).getHours();
@@ -997,210 +1040,244 @@ function getTimeMood(){
   if(h>=17&&h<20)return 'sunset';
   return 'night';
 }
-
-var _lastMood='';
-function applyMood(moodKey){
-  var m=TIME_MOODS[moodKey];if(!m)return;
-  _lastMood=moodKey;
-  var base=document.getElementById('atmBase');
-  if(base){base.style.background=m.overlay;base.style.opacity='1';}
+function applyMood(key){
+  var m=TIME_MOODS[key];if(!m)return;
+  _lastMood=key;
+  var atm=document.getElementById('atmLayer');
+  if(atm){atm.style.background=m.overlay;atm.style.opacity='1';}
+  if(map&&map.isStyleLoaded()){try{map.setFog(m.fog);}catch(e){}}
+  if(m.stars&&!dawnMode){
+    dawnMode=true;
+    for(var i=0;i<35;i++){
+      var s=document.createElement('div');s.className='dstar';
+      var sz=Math.random()*2+1;
+      s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'vw;top:'+Math.random()*55+'vh;animation-delay:'+Math.random()*3+'s;animation-duration:'+(2+Math.random()*3)+'s;';
+      document.body.appendChild(s);dawnStars.push(s);
+    }
+  } else if(!m.stars&&dawnMode){
+    dawnMode=false;dawnStars.forEach(function(s){s.remove();});dawnStars=[];
+  }
+}
+function checkMood(){
+  var mood=getTimeMood();
+  if(mood!==_lastMood)applyMood(mood);
 }
 
-function checkDawn(){var mood=getTimeMood();if(mood!==_lastMood)applyMood(mood);}
+// ── 감성 태그 ──
+function getVibe(){
+  var h=new Date().getHours();
+  if(h<5)return{tag:'새벽 감성 🌙',c:'#a78bfa'};
+  if(h<9)return{tag:'이른 아침 ☀️',c:'#fbbf24'};
+  if(h<12)return{tag:'오전 에너지 ⚡',c:'#34d399'};
+  if(h<15)return{tag:'점심 여유 🍜',c:'#60a5fa'};
+  if(h<18)return{tag:'오후 감성 🌤️',c:'#fb923c'};
+  if(h<21)return{tag:'저녁 퇴근길 🚇',c:'#f472b6'};
+  return{tag:'야간 감성 🌃',c:'#c077ff'};
+}
+function updateVibe(){
+  var v=getVibe();
+  var t=document.getElementById('vibeTag');
+  t.textContent=v.tag;
+  t.style.cssText='background:'+v.c+'18;border:1px solid '+v.c+'35;color:'+v.c+';border-radius:20px;padding:4px 10px;font-size:11px;font-weight:500;';
+  var n=new Date();
+  document.getElementById('vibeTime').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('vibeTime').style.color='rgba(255,255,255,.25)';
+  document.getElementById('vibeTime').style.fontSize='11px';
+}
+updateVibe();
+setInterval(updateVibe,60000);
 
-// ── 지도 ──
-var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing});
+// ── 지도 초기화 ──
+// antialias 없음, pitch는 CITIES에서 가져옴
+var map=new mapboxgl.Map({
+  container:'map',
+  style:'mapbox://styles/mapbox/dark-v11',
+  center:CITIES.busan.center,
+  zoom:CITIES.busan.zoom,
+  pitch:CITIES.busan.pitch,
+  bearing:CITIES.busan.bearing
+});
 
+// ── 지도 로드 ──
 map.on('load',function(){
-  // 3D 건물
+
+  // 3D 건물 (minzoom 높게)
   var layers=map.getStyle().layers,labelId=null;
-  for(var i=0;i<layers.length;i++){if(layers[i].type==='symbol'&&layers[i].layout['text-field']){labelId=layers[i].id;break;}}
-  map.addLayer({id:'bld',source:'composite','source-layer':'building',filter:['==','extrude','true'],type:'fill-extrusion',minzoom:12,paint:{'fill-extrusion-color':['interpolate',['linear'],['get','height'],0,'#080520',40,'#0e0f24',150,'#161640'],'fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':0.95}},labelId);
-  map.addLayer({id:'bld-top',source:'composite','source-layer':'building',filter:['all',['==','extrude','true'],['>=','height',20]],type:'fill-extrusion',minzoom:14,paint:{'fill-extrusion-color':'#2d1b69','fill-extrusion-height':['+',['get','height'],0.5],'fill-extrusion-base':['get','height'],'fill-extrusion-opacity':0.4}});
-  // 시간대별 fog 적용
-var _initAtm=getTimeAtm();
-map.setFog(_initAtm.fog);
-
-// 건물 색감: deep navy indigo
-if(map.getLayer('bld')){
-  map.setPaintProperty('bld','fill-extrusion-color',
-    ['interpolate',['linear'],['get','height'],
-      0,'#06041a', 8,'#0a0720', 20,'#0e0b2a',
-      50,'#120e35', 100,'#160f40', 200,'#1a1250'
-    ]);
-  map.setPaintProperty('bld','fill-extrusion-opacity',0.96);
-}
-if(map.getLayer('bld-top')){
-  map.setPaintProperty('bld-top','fill-extrusion-color','#2d1b69');
-  map.setPaintProperty('bld-top','fill-extrusion-opacity',0.45);
-}
-
-  // 지도 텍스트 contrast 낮추기 (음악 불빛이 주인공)
-  // 지도 레이블 전체 한국어로
-  map.getStyle().layers.forEach(function(layer){
-    if(layer.type==='symbol'&&layer.layout&&layer.layout['text-field']){
-      try{
-        map.setLayoutProperty(layer.id,'text-field',['coalesce',['get','name_ko'],['get','name']]);
-      }catch(e){}
+  for(var i=0;i<layers.length;i++){
+    if(layers[i].type==='symbol'&&layers[i].layout['text-field']){labelId=layers[i].id;break;}
+  }
+  map.addLayer({
+    id:'bld',source:'composite','source-layer':'building',
+    filter:['==','extrude','true'],type:'fill-extrusion',minzoom:14,
+    paint:{
+      'fill-extrusion-color':['interpolate',['linear'],['get','height'],0,'#080520',40,'#0e0f24',150,'#161640'],
+      'fill-extrusion-height':['get','height'],
+      'fill-extrusion-base':['get','min_height'],
+      'fill-extrusion-opacity':0.95
     }
-  });
+  },labelId);
 
-  map.getStyle().layers.forEach(function(layer){
-    if(layer.type==='symbol'){
-      try{
-        var id=layer.id;
-        // 광역시/주요도시 (city 레벨) - 흰 글자, 잘 보이게
-        var isMajor=id.includes('place-city')||id.includes('place-town')||
-                    id.includes('settlement-major')||id.includes('settlement-subdivision');
-        // 보조 (구/동/village)
-        var isMinor=id.includes('place')&&!isMajor;
-        // 도로명
-        var isRoad=id.includes('road')||id.includes('street')||id.includes('highway');
+  // fog 설정
+  map.setFog({color:'rgb(3,3,10)','high-color':'rgb(8,6,20)','horizon-blend':0.04,'space-color':'rgb(3,3,10)','star-intensity':0.6});
 
-        if(isMajor){
-          map.setPaintProperty(id,'text-color','rgba(255,255,255,0.92)');
-          map.setPaintProperty(id,'text-opacity',0.9);
-          try{map.setPaintProperty(id,'text-halo-color','rgba(0,0,0,0.8)');}catch(e){}
-          try{map.setPaintProperty(id,'text-halo-width',1.5);}catch(e){}
-        } else if(isMinor){
-          map.setPaintProperty(id,'text-color','rgba(210,200,240,0.6)');
-          map.setPaintProperty(id,'text-opacity',0.55);
-          try{map.setPaintProperty(id,'text-halo-color','rgba(0,0,0,0.7)');}catch(e){}
-          try{map.setPaintProperty(id,'text-halo-width',1);}catch(e){}
-        } else if(isRoad){
-          map.setPaintProperty(id,'text-opacity',0.15);
-        } else {
-          map.setPaintProperty(id,'text-opacity',0.12);
-        }
-      }catch(e){}
-    }
-    if(layer.type==='line'){
-      try{
-        var isHighway=layer.id.includes('major')||layer.id.includes('highway')||layer.id.includes('motorway');
-        map.setPaintProperty(layer.id,'line-opacity',isHighway?0.28:0.14);
-        if(isHighway){try{map.setPaintProperty(layer.id,'line-color','rgba(120,100,180,0.5)');}catch(e){}}
-      }catch(e){}
-    }
-    if(layer.type==='fill'&&!layer.id.includes('building')&&!layer.id.includes('water')){
-      try{map.setPaintProperty(layer.id,'fill-opacity',0.06);}catch(e){}
-    }
-    if(layer.type==='fill'&&layer.id.includes('water')){
-      try{map.setPaintProperty(layer.id,'fill-color','rgba(6,12,30,0.95)');}catch(e){}
-    }
-  });
-
-  // 서울 ambient glow 소스 추가
-  // 서울 ambient glow - 도시 자체가 빛나는 느낌
-  // 더미 마커 소스 (GPU 렌더링)
+  // 더미 마커 소스 (circle-blur 없음)
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
-    'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],9,8,14,16],
-    'circle-opacity':0.12,
-    }});
-  map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
-    'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],9,2,14,5],
-    'circle-opacity':['interpolate',['linear'],['zoom'],7,0.6,10,0.85,14,1]}});
-  
-  map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
+  map.addLayer({
+    id:'dummy-glow',source:'dummy',type:'circle',
+    paint:{
+      'circle-color':['get','color'],
+      'circle-radius':['interpolate',['linear'],['zoom'],8,8,12,15,16,22],
+      'circle-opacity':['interpolate',['linear'],['zoom'],8,0.07,12,0.15,16,0.2]
+    }
+  });
+  map.addLayer({
+    id:'dummy-core',source:'dummy',type:'circle',
+    paint:{
+      'circle-color':['get','color'],
+      'circle-radius':['interpolate',['linear'],['zoom'],8,2,12,4,16,6],
+      'circle-opacity':['interpolate',['linear'],['zoom'],8,0.65,12,0.9,16,1.0]
+    }
+  });
+  map.on('click','dummy-core',function(e){
+    var p=e.features[0].properties;
+    closeAdCard();
+    showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);
+  });
   map.on('mouseenter','dummy-core',function(){map.getCanvas().style.cursor='pointer';});
   map.on('mouseleave','dummy-core',function(){map.getCanvas().style.cursor='';});
 
   // 광고 소스
   map.addSource('ad-spots',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1}});
+  map.addLayer({
+    id:'ad-glow',source:'ad-spots',type:'circle',
+    paint:{'circle-radius':22,'circle-color':['get','color'],'circle-opacity':0.1}
+  });
 
-  // 서울/부산 glow (각 2레이어로 경량화)
-  
-  
-  
-  
-  
-  
-  // 대구/광주/대전 mini glow
-  [{id:'dg',lng:128.601,lat:35.871,c:'#f59e0b'},{id:'gg',lng:126.853,lat:35.160,c:'#10b981'},{id:'dj',lng:127.385,lat:36.350,c:'#6366f1'}].forEach(function(city){
-    map.addSource(city.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[city.lng,city.lat]},properties:{}}});
-    map.addLayer({id:city.id+'1',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,50,9,110,12,220],'circle-color':city.c,'circle-opacity':0.035}});
-    map.addLayer({id:city.id+'2',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,20,11,50,13,100],'circle-color':city.c,'circle-opacity':0.05}});
+  // 한국어 라벨 (지연)
+  setTimeout(function(){
+    try{
+      map.getStyle().layers.forEach(function(l){
+        if(l.type==='symbol'&&l.layout&&l.layout['text-field']){
+          try{
+            map.setLayoutProperty(l.id,'text-field',['coalesce',['get','name_ko'],['get','name']]);
+            var id=l.id;
+            var isMajor=id.includes('place-city')||id.includes('place-town')||id.includes('settlement-major');
+            if(isMajor){
+              map.setPaintProperty(id,'text-color','rgba(255,255,255,0.9)');
+              map.setPaintProperty(id,'text-opacity',0.9);
+              try{map.setPaintProperty(id,'text-halo-color','rgba(0,0,0,0.8)');}catch(e){}
+              try{map.setPaintProperty(id,'text-halo-width',1.5);}catch(e){}
+            }
+          }catch(e){}
+        }
+      });
+    }catch(e){}
+  },2000);
+
+  // moveend: 지역 감지 (DB 쿼리 없음)
+  map.on('moveend',function(){
+    clearTimeout(moveEndTimer);
+    moveEndTimer=setTimeout(function(){
+      var c=map.getCenter();
+      var r=getNearestRegion(c.lat,c.lng);
+      if(!r)return;
+      document.getElementById('cityname').textContent=r.name;
+      document.getElementById('reportCity').textContent=r.name;
+      var seed=Math.abs(Math.floor(c.lat*100+c.lng*100))%200;
+      document.getElementById('livenum').textContent=30+seed;
+    },800);
   });
 
   // 초기 데이터
-  spawnDummy('busan');spawnAdLayer('busan');spawnAdMarkers('busan');renderTop();
-
-  // moveend: 지역 감지
-  map.on('moveend',function(){
-  clearTimeout(moveEndTimer);
-  moveEndTimer=setTimeout(function(){
-    var center=map.getCenter();
-    var r=getNearestRegion(center.lat,center.lng);
-    if(!r)return;
-    document.getElementById('cityname').textContent=r.name;
-    document.getElementById('reportCity').textContent=r.name;
-  },800);
-});
-
-  // 카메라 드리프트 시작
-  
+  spawnDummy('busan');
+  spawnAdLayer('busan');
+  spawnAdMarkers('busan');
 
   // Supabase
   initSupabase();
   if(db){loadLiveUsers();subscribeRT();setInterval(loadLiveUsers,45000);}
 
-  // 시간대 분위기 초기 적용 (라벨 설정 후 실행)
-  setTimeout(checkDawn, 500);
-  setInterval(checkDawn, 300000);
+  // 시간대 분위기 (맵 로드 후)
+  setTimeout(function(){applyMood(getTimeMood());},500);
+  setInterval(checkMood,300000);
 
   // UI 표시
   setTimeout(function(){
     document.getElementById('livebadge').style.opacity='1';
     document.getElementById('mainBtn').style.opacity='1';
     document.getElementById('visitorBadge').style.opacity='1';
-    document.getElementById('rightBtns').classList.add('visible');
     document.getElementById('hotBanner').style.opacity='1';
     document.getElementById('mapSearch').classList.add('visible');
+    document.getElementById('rightBtns').classList.add('visible');
+    renderTop();
+    updateHotBanner();
+    updateAmbientText();
   },4500);
-  setTimeout(updateHotBanner,3500);setInterval(updateHotBanner,60000);
+
+  setInterval(updateHotBanner,60000);
+  setInterval(renderTop,120000);
+  setInterval(updateAmbientText,30000);
+
   setTimeout(autoLocate,5000);
   initVisitor();
 });
 
-// ── 카메라 드리프트 ──
-function startDrift(){} // 드리프트 비활성화
-function doDrift(){}
-function stopDrift(){if(map)map.stop();}
-var _driftRestartTimer=null;
-function onUserInteract(){
-  stopDrift();
-  clearTimeout(_driftRestartTimer);
-  
-}
-map.on('dragstart',onUserInteract);
-map.on('zoomstart',onUserInteract);
-map.on('rotatestart',onUserInteract);
-
 // ── 인트로 ──
 function runIntro(){
-  var el=document.getElementById('intro');if(!el)return;
-  var target=183+Math.floor(Math.random()*80),cur=0,step=Math.ceil(target/40);
-  var t=setInterval(function(){cur=Math.min(cur+step,target);document.getElementById('introNum').textContent=cur;if(cur>=target)clearInterval(t);},40);
-  setTimeout(function(){el.classList.add('done');setTimeout(function(){el.style.display='none';},1000);},3500);
+  var intro=document.getElementById('intro');
+  if(!intro)return;
+  var target=183+Math.floor(Math.random()*80);
+  var cur=0,step=Math.ceil(target/40);
+  var t=setInterval(function(){
+    cur=Math.min(cur+step,target);
+    document.getElementById('introNum').textContent=cur;
+    if(cur>=target)clearInterval(t);
+  },40);
+  setTimeout(function(){
+    intro.classList.add('done');
+    setTimeout(function(){intro.style.display='none';},1000);
+  },3500);
 }
 setTimeout(runIntro,300);
 
-// ── GeoJSON 더미 ──
+// ── GeoJSON 더미 마커 ──
 function spawnDummy(k){
-  var features=[],shuffled=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),idx=0;
-  function mf(spot,n){for(var i=0;i<n;i++){var s=shuffled[idx%shuffled.length];idx++;var r=Math.random();var sz=r<0.80?0.3+Math.random()*0.6:r<0.95?1.0+Math.random()*0.8:1.9+Math.random()*1.2;
-features.push({type:'Feature',geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',color:s.color,district:spot.name,thumb:s.vid?'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg':'',size:sz}});}}
-  CITIES[k].spots.forEach(function(s){mf(s,Math.floor(2+Math.random()*4));});
-  var ns=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;}),ni=0;
-  NATIONAL_SPOTS.forEach(function(s){var f=ns[ni%ns.length];ni++;var nr=Math.random();var nsz=nr<0.82?0.2+Math.random()*0.5:nr<0.96?0.9+Math.random()*0.7:1.8+Math.random()*1.0;
-features.push({type:'Feature',geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',color:f.color,district:s.name,thumb:f.vid?'https://i.ytimg.com/vi/'+f.vid+'/mqdefault.jpg':'',size:nsz}});});
+  var features=[];
+  var shuffled=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;});
+  var idx=0;
+  CITIES[k].spots.forEach(function(spot){
+    var n=Math.floor(2+Math.random()*4);
+    for(var i=0;i<n;i++){
+      var s=shuffled[idx%shuffled.length];idx++;
+      var r=Math.random();
+      var sz=r<0.80?0.3+Math.random()*0.5:r<0.95?1.0+Math.random()*0.8:1.8+Math.random()*1.0;
+      features.push({type:'Feature',
+        geometry:{type:'Point',coordinates:[spot.lng+(Math.random()-.5)*.02,spot.lat+(Math.random()-.5)*.015]},
+        properties:{title:s.title,channel:s.channel,mood1:s.mood[0],mood2:s.mood[1]||'',
+          color:s.color,district:spot.name,thumb:s.vid?'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg':'',sz:sz}
+      });
+    }
+  });
+  // 전국 (30% 샘플)
+  var ns=FAKE_SONGS.slice().sort(function(){return Math.random()-.5;});
+  var ni=0;
+  NATIONAL_SPOTS.forEach(function(s){
+    if(Math.random()>0.3)return;
+    var f=ns[ni%ns.length];ni++;
+    features.push({type:'Feature',
+      geometry:{type:'Point',coordinates:[s.lng+(Math.random()-.5)*.015,s.lat+(Math.random()-.5)*.012]},
+      properties:{title:f.title,channel:f.channel,mood1:f.mood[0],mood2:f.mood[1]||'',
+        color:f.color,district:s.name,thumb:f.vid?'https://i.ytimg.com/vi/'+f.vid+'/mqdefault.jpg':'',sz:0.4}
+    });
+  });
   if(map.getSource('dummy'))map.getSource('dummy').setData({type:'FeatureCollection',features:features});
 }
+
+// ── 광고 레이어 ──
 function spawnAdLayer(k){
-  var features=(ADS[k]||[]).map(function(ad){return{type:'Feature',geometry:{type:'Point',coordinates:[ad.lng,ad.lat]},properties:{color:ad.color}};});
+  var features=(ADS[k]||[]).map(function(ad){
+    return{type:'Feature',geometry:{type:'Point',coordinates:[ad.lng,ad.lat]},properties:{color:ad.color}};
+  });
   if(map.getSource('ad-spots'))map.getSource('ad-spots').setData({type:'FeatureCollection',features:features});
 }
 function spawnAdMarkers(k){
@@ -1208,22 +1285,80 @@ function spawnAdMarkers(k){
   (ADS[k]||[]).forEach(function(ad){
     var el=document.createElement('div');
     el.className='ad-wrap';
-    el.innerHTML='<div class="bbc" style="border-color:'+ad.color+'55;box-shadow:0 0 24px '+ad.color+'33"><div class="bbat">AD</div><div class="bbico" style="background:'+ad.color+'22">'+ad.icon+'</div><div><div class="bbn">'+ad.brand+'</div><div class="bbs">'+ad.tagline+'</div></div></div><div class="bbl" style="background:linear-gradient(to bottom,'+ad.color+'99,transparent)"></div><div class="bba" style="background:'+ad.color+';box-shadow:0 0 10px '+ad.color+'"></div>';
+    el.innerHTML='<div class="bbc" style="border-color:'+ad.color+'55;box-shadow:0 0 18px '+ad.color+'22"><div class="bbat">AD</div><div class="bbico" style="background:'+ad.color+'22">'+ad.icon+'</div><div><div class="bbn">'+ad.brand+'</div><div class="bbs">'+ad.tagline+'</div></div></div><div class="bbl" style="background:linear-gradient(to bottom,'+ad.color+'88,transparent)"></div><div class="bba" style="background:'+ad.color+';box-shadow:0 0 8px '+ad.color+'"></div>';
     (function(a){el.addEventListener('click',function(e){e.stopPropagation();closeCard();showAdCard(a);});})(ad);
-    adMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom',offset:[0,-4]}).setLngLat([ad.lng,ad.lat]).addTo(map));
+    adMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom',offset:[0,-3]}).setLngLat([ad.lng,ad.lat]).addTo(map));
   });
 }
 
+// ── 도시 전환 ──
+async function flyToCity(k,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(t.dataset.city===k?' active':'');});
+  currentCity=k;
+  var city=CITIES[k];
+  map.flyTo({center:city.center,zoom:city.zoom,pitch:city.pitch,bearing:city.bearing,duration:2200,essential:true});
+  document.getElementById('cityname').textContent=city.name;
+  document.getElementById('livenum').textContent=city.count;
+  document.getElementById('reportCity').textContent=city.name;
+  setTimeout(function(){spawnDummy(k);spawnAdLayer(k);spawnAdMarkers(k);},1400);
+  renderTop();
+  if(db){
+    try{
+      var r=await db.from('live_users').select('id',{count:'exact'}).eq('city',k).gte('updated_at',new Date(Date.now()-300000).toISOString());
+      document.getElementById('livenum').textContent=city.count+(r.count||0);
+    }catch(e){}
+  }
+}
+function flyToAll(el){
+  document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(t.dataset.city==='all'?' active':'');});
+  currentCity='busan';
+  map.flyTo({center:[127.8,36.5],zoom:6.5,pitch:40,bearing:0,duration:2200,essential:true});
+  document.getElementById('cityname').textContent='전국';
+}
+
+// ── 지역 감지 ──
+function getNearestRegion(lat,lng){
+  if(lat<33||lat>39||lng<124||lng>132)return null;
+  var best=null,bd=999;
+  REGION_MAP.forEach(function(r){
+    var d=Math.sqrt(Math.pow(lat-r.lat,2)+Math.pow(lng-r.lng,2));
+    if(d<bd){bd=d;best=r;}
+  });
+  return best||{name:'이 지역'};
+}
+
+// ── 자동 위치 ──
+function autoLocate(){
+  if(!navigator.geolocation||sessionStorage.getItem('noct_located'))return;
+  sessionStorage.setItem('noct_located','1');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lng=pos.coords.longitude,lat=pos.coords.latitude;
+    if(lng>124&&lng<132&&lat>33&&lat<39){
+      map.flyTo({center:[lng,lat],zoom:13,pitch:50,duration:1800});
+      showToast('📍 내 동네로 이동했어요');
+    }
+  },function(){},{enableHighAccuracy:false,timeout:5000,maximumAge:300000});
+}
+
 // ── 검색 ──
-function openSearch(){document.getElementById('searchOverlay').classList.add('open');setTimeout(function(){document.getElementById('searchInput').focus();},400);}
+function openSearch(){document.getElementById('searchOverlay').classList.add('open');setTimeout(function(){document.getElementById('searchInput').focus();},350);}
 function closeSearch(){document.getElementById('searchOverlay').classList.remove('open');}
 function setSearch(q){document.getElementById('searchInput').value=q;handleSI();doSearch();}
 function clearSearch(){document.getElementById('searchInput').value='';document.getElementById('searchClear').style.display='none';document.getElementById('searchResults').innerHTML='';document.getElementById('quickSection').style.display='block';}
-function handleSI(){var v=document.getElementById('searchInput').value;document.getElementById('searchClear').style.display=v?'block':'none';document.getElementById('quickSection').style.display=v?'none':'block';clearTimeout(searchTimer);if(v.length>1)searchTimer=setTimeout(doSearch,500);else document.getElementById('searchResults').innerHTML='';}
+function handleSI(){
+  var v=document.getElementById('searchInput').value;
+  document.getElementById('searchClear').style.display=v?'block':'none';
+  document.getElementById('quickSection').style.display=v?'none':'block';
+  clearTimeout(searchTimer);
+  if(v.length>1)searchTimer=setTimeout(doSearch,500);
+  else document.getElementById('searchResults').innerHTML='';
+}
 async function doSearch(){
-  var q=document.getElementById('searchInput').value.trim();if(!q)return;
+  var q=document.getElementById('searchInput').value.trim();
+  if(!q)return;
   document.getElementById('quickSection').style.display='none';
-  var res=document.getElementById('searchResults');res.innerHTML='<div class="sl">🔍 검색 중...</div>';
+  var res=document.getElementById('searchResults');
+  res.innerHTML='<div class="sl">🔍 검색 중...</div>';
   try{
     var data=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&q='+encodeURIComponent(q+' official audio')+'&type=video&videoCategoryId=10&maxResults=8&key='+YT_KEY).then(function(r){return r.json();});
     if(!data.items||!data.items.length){res.innerHTML='<div class="sl">검색 결과가 없어요 😢</div>';return;}
@@ -1241,18 +1376,21 @@ async function doSearch(){
 // ── 곡 선택 ──
 function selectSong(videoId,title,channel,thumb){
   if(!myNick){pendingSong={videoId:videoId,title:title,channel:channel,thumb:thumb};closeSearch();document.getElementById('nickOverlay').classList.add('open');return;}
-  closeSearch();currentSong={videoId:videoId,title:title,channel:channel,thumb:thumb};
+  closeSearch();
+  currentSong={videoId:videoId,title:title,channel:channel,thumb:thumb};
   document.getElementById('playerTitle').textContent=title;
   document.getElementById('playerChannel').textContent=channel+' · 📍 위치 표시 중';
   if(thumb)document.getElementById('playerThumb').src=thumb;
   document.getElementById('miniPlayer').classList.add('open');
-  document.getElementById('livebadge').style.bottom='88px';
+  document.getElementById('livebadge').style.bottom='90px';
   document.getElementById('mainBtn').style.display='none';
   document.getElementById('myLocBtn').style.display='flex';
   if(ytReady&&ytPlayer){ytPlayer.loadVideoById(videoId);ytPlayer.playVideo();isPlaying=true;document.getElementById('playBtn').textContent='⏸';}
   addHistory(title,channel,thumb);
-  var city=CITIES[currentCity];myLng=city.center[0];myLat=city.center[1];
-  placeMyMarker(myLng,myLat);upsertUser(myLng,myLat);
+  var city=CITIES[currentCity];
+  myLng=city.center[0];myLat=city.center[1];
+  placeMyMarker(myLng,myLat);
+  upsertUser(myLng,myLat);
   showToast('📍 '+(myNick||'내')+' 마커가 지도에 생성됐어요!');
   startGPS();
   if(db)checkSameSong(title);
@@ -1263,37 +1401,50 @@ function placeMyMarker(lng,lat){
   if(myMarker){myMarker.remove();myMarker=null;}
   var wrap=document.createElement('div');
   wrap.style.cssText='display:flex;flex-direction:column;align-items:center;cursor:pointer;overflow:visible;';
-  var nick=document.createElement('div');nick.textContent=myNick||'나';
-  nick.style.cssText='background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:11px;font-weight:700;font-family:sans-serif;padding:3px 10px;border-radius:8px;margin-bottom:5px;white-space:nowrap;box-shadow:0 2px 10px rgba(199,125,255,.5);';
+  var nick=document.createElement('div');
+  nick.textContent=myNick||'나';
+  nick.style.cssText='background:linear-gradient(135deg,#c77dff,#7B68EE);color:#fff;font-size:10px;font-weight:700;font-family:sans-serif;padding:2px 9px;border-radius:7px;margin-bottom:4px;white-space:nowrap;box-shadow:0 2px 8px rgba(199,125,255,.5);';
   var dot=document.createElement('div');
-  dot.style.cssText='width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#c77dff,#7B68EE);border:3px solid rgba(255,255,255,.95);animation:myp 1.8s ease-out infinite;box-shadow:0 0 16px rgba(199,125,255,.8);';
+  dot.style.cssText='width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#c77dff,#7B68EE);border:3px solid rgba(255,255,255,.95);animation:myPulse 1.8s ease-out infinite;box-shadow:0 0 14px rgba(199,125,255,.8);';
   wrap.appendChild(nick);wrap.appendChild(dot);
-  wrap.addEventListener('click',function(e){e.stopPropagation();if(!currentSong)return;showCardData(currentSong.title,currentSong.channel,'내 위치','#c77dff',currentSong.thumb,'지금 듣는 중 🎵');});
+  wrap.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(!currentSong)return;
+    showCardData(currentSong.title,currentSong.channel,'내 위치','#c77dff',currentSong.thumb,'지금 듣는 중 🎵');
+  });
   myMarker=new mapboxgl.Marker({element:wrap,anchor:'bottom'}).setLngLat([lng,lat]).addTo(map);
-  map.flyTo({center:[lng,lat],zoom:15,pitch:50,duration:1200});
+  map.flyTo({center:[lng,lat],zoom:15,pitch:52,duration:1100});
 }
 
 // ── GPS ──
 function startGPS(){
-  if(!navigator.geolocation)return;stopGPS();gpsReady=false;
-  gpsWatchId=navigator.geolocation.watchPosition(function(pos){
-    var lng=pos.coords.longitude,lat=pos.coords.latitude,acc=Math.round(pos.coords.accuracy);
-    myLng=lng;myLat=lat;if(myMarker)myMarker.setLngLat([lng,lat]);
-    if(!gpsReady){gpsReady=true;map.flyTo({center:[lng,lat],zoom:16,pitch:50,duration:1200});}
-    var at=acc<20?'🟢 정확':acc<100?'🟡 양호':'🔴 잡는 중';
-    if(currentSong){document.getElementById('playerChannel').textContent=currentSong.channel+' · GPS '+at;upsertUser(lng,lat);}
-  },function(){},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  if(!navigator.geolocation)return;
+  stopGPS();gpsReady=false;
+  gpsWatchId=navigator.geolocation.watchPosition(
+    function(pos){
+      var lng=pos.coords.longitude,lat=pos.coords.latitude,acc=Math.round(pos.coords.accuracy);
+      myLng=lng;myLat=lat;
+      if(myMarker)myMarker.setLngLat([lng,lat]);
+      if(!gpsReady){gpsReady=true;map.flyTo({center:[lng,lat],zoom:16,pitch:52,duration:1100});}
+      var at=acc<20?'🟢 정확':acc<100?'🟡 양호':'🔴 잡는 중';
+      if(currentSong){document.getElementById('playerChannel').textContent=currentSong.channel+' · GPS '+at;}
+      if(currentSong&&db)upsertUser(lng,lat);
+    },
+    function(){},{enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
 }
 function stopGPS(){if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}gpsReady=false;}
-function flyToMyMarker(){if(myLng&&myLat)map.flyTo({center:[myLng,myLat],zoom:16,duration:1000});}
+function flyToMyMarker(){if(myLng&&myLat)map.flyTo({center:[myLng,myLat],zoom:16,duration:900});}
 
 // ── 재생 ──
 function togglePlay(){if(!ytReady||!ytPlayer||!currentSong)return;isPlaying?ytPlayer.pauseVideo():ytPlayer.playVideo();}
 function stopAndClear(){
-  if(ytPlayer)ytPlayer.stopVideo();isPlaying=false;currentSong=null;myLng=null;myLat=null;stopGPS();
+  if(ytPlayer)ytPlayer.stopVideo();
+  isPlaying=false;currentSong=null;myLng=null;myLat=null;
+  stopGPS();
   if(myMarker){myMarker.remove();myMarker=null;}
   document.getElementById('miniPlayer').classList.remove('open');
-  document.getElementById('livebadge').style.bottom='100px';
+  document.getElementById('livebadge').style.bottom='104px';
   document.getElementById('mainBtn').style.display='flex';
   document.getElementById('myLocBtn').style.display='none';
   document.getElementById('togetherBadge').style.display='none';
@@ -1301,221 +1452,232 @@ function stopAndClear(){
 }
 
 // ── 카드 ──
-function setGlow(color){document.getElementById('cardGlow').style.background='radial-gradient(ellipse at 30% 0%,'+color+'40 0%,transparent 70%)';}
+function setGlow(color){
+  document.getElementById('cardGlow').style.background='radial-gradient(ellipse at 30% 0%,'+color+'35 0%,transparent 70%)';
+}
 function showCardData(title,channel,district,color,thumb,mood){
-  document.getElementById('cardtrack').textContent=title;document.getElementById('cardartist').textContent=channel;
-  document.getElementById('cardfooter').textContent=district;document.getElementById('footerdot').style.background=color;
-  var ce=document.getElementById('cardcover'),fe=document.getElementById('cardcoverFallback');
-  if(thumb){ce.style.display='block';ce.src=thumb;if(fe)fe.style.display='none';}
-  else{ce.style.display='none';if(fe){fe.style.display='flex';fe.style.background='linear-gradient(135deg,'+color+'33,'+color+'11)';}}
+  document.getElementById('cardtrack').textContent=title;
+  document.getElementById('cardartist').textContent=channel;
+  document.getElementById('cardfooter').textContent=district;
+  document.getElementById('footerdot').style.background=color;
+  var ce=document.getElementById('cardcover'),fb=document.getElementById('cardcoverFb');
+  if(thumb){ce.style.display='block';ce.src=thumb;if(fb)fb.style.display='none';}
+  else{ce.style.display='none';if(fb){fb.style.display='flex';fb.style.background='linear-gradient(135deg,'+color+'33,'+color+'11)';}}
   document.getElementById('cardmoods').innerHTML='<span class="mt" style="background:'+color+'18;border:1px solid '+color+'35;color:'+color+'">'+mood+'</span>';
   setGlow(color);document.getElementById('songcard').classList.add('visible');
 }
 function showFakeCard(s,district){
-  document.getElementById('cardtrack').textContent=s.title;document.getElementById('cardartist').textContent=s.channel;
-  document.getElementById('cardfooter').textContent=district;document.getElementById('footerdot').style.background=s.color;
-  // 썸네일 있으면 이미지, 없으면 컬러 그라데이션
-  var thumb = s.thumb || (s.vid ? 'https://i.ytimg.com/vi/'+s.vid+'/mqdefault.jpg' : '');
-  var coverEl = document.getElementById('cardcover');
-  var fallbackEl = document.getElementById('cardcoverFallback');
-  if(thumb){
-    coverEl.style.display = 'block';
-    coverEl.src = thumb;
-    coverEl.style.background = '';
-    if(fallbackEl) fallbackEl.style.display = 'none';
-  } else {
-    coverEl.style.display = 'none';
-    if(fallbackEl){fallbackEl.style.display='flex';fallbackEl.style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';}
-  }
+  document.getElementById('cardtrack').textContent=s.title;
+  document.getElementById('cardartist').textContent=s.channel;
+  document.getElementById('cardfooter').textContent=district;
+  document.getElementById('footerdot').style.background=s.color;
+  var ce=document.getElementById('cardcover'),fb=document.getElementById('cardcoverFb');
+  if(s.thumb){ce.style.display='block';ce.src=s.thumb;if(fb)fb.style.display='none';}
+  else{ce.style.display='none';if(fb){fb.style.display='flex';fb.style.background='linear-gradient(135deg,'+s.color+'33,'+s.color+'11)';}}
   document.getElementById('cardmoods').innerHTML=(s.mood||[]).map(function(m){return'<span class="mt" style="background:'+s.color+'18;border:1px solid '+s.color+'35;color:'+s.color+'">'+m+'</span>';}).join('');
   setGlow(s.color);document.getElementById('songcard').classList.add('visible');
 }
 function closeCard(){document.getElementById('songcard').classList.remove('visible');}
 function showAdCard(ad){
-  document.getElementById('adhero').style.background='linear-gradient(135deg,'+ad.color+'33,'+ad.color+'11)';document.getElementById('adhero').textContent=ad.icon;
-  document.getElementById('adcard').style.borderColor=ad.color+'33';document.getElementById('adtitle').textContent=ad.title;document.getElementById('adsub').textContent=ad.desc;
-  var cta=document.getElementById('adcta');cta.textContent=ad.cta;cta.style.background='linear-gradient(135deg,'+ad.color+','+ad.color+'cc)';
-  cta.style.color=['#FFCC00','#FFCD00','#FFA500'].indexOf(ad.color)>=0?'#111':'#fff';
-  ad.stats.forEach(function(s,i){document.getElementById('s'+(i+1)+'n').textContent=s.n;document.getElementById('s'+(i+1)+'l').textContent=s.l;});
+  document.getElementById('adhero').style.background='linear-gradient(135deg,'+ad.color+'33,'+ad.color+'11)';
+  document.getElementById('adhero').textContent=ad.icon;
+  document.getElementById('adcard').style.borderColor=ad.color+'33';
+  document.getElementById('adtitle').textContent=ad.title;
+  document.getElementById('adsub').textContent=ad.desc;
+  var cta=document.getElementById('adcta');cta.textContent=ad.cta;
+  cta.style.background='linear-gradient(135deg,'+ad.color+','+ad.color+'cc)';
+  cta.style.color=['#FFCC00','#FFA500'].indexOf(ad.color)>=0?'#111':'#fff';
   document.getElementById('adcard').classList.add('visible');
 }
 function closeAdCard(){document.getElementById('adcard').classList.remove('visible');}
 map.on('click',function(){closeCard();closeAdCard();});
 
-// ── 도시 전환 ──
-async function flyToCity(k){
-  document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(t.dataset.city===k?' active':'');});
-  currentCity=k;var city=CITIES[k];
-  map.flyTo({center:city.center,zoom:city.zoom,pitch:64,bearing:city.bearing,duration:2400,essential:true});
-  document.getElementById('cityname').textContent=city.name;document.getElementById('livenum').textContent=city.count;document.getElementById('reportCity').textContent=city.name;
-  stopDrift();setTimeout(startDrift,3000);
-  setTimeout(function(){spawnDummy(k);spawnAdLayer(k);spawnAdMarkers(k);renderTop();},1500);
-  if(db){try{var r=await db.from('live_users').select('id',{count:'exact'}).eq('city',k).gte('updated_at',new Date(Date.now()-300000).toISOString());document.getElementById('livenum').textContent=city.count+(r.count||0);}catch(e){}}
-}
-
-function flyToAll(el){
-  document.querySelectorAll('.tab').forEach(function(t){t.className='tab'+(t.dataset.city==='all'?' active':'');});
-  currentCity='busan';
-  map.flyTo({center:[127.8,36.5],zoom:6.5,pitch:50,bearing:0,duration:2400,essential:true});
-  stopDrift();
-  document.getElementById('cityname').textContent='전국';
-}
-
-// ── 지역 감지 ──
-function getNearestRegion(lat,lng){
-  if(lat<33||lat>39||lng<124||lng>132)return null;
-  var best=null,bd=999;
-  REGION_MAP.forEach(function(r){var d=Math.sqrt(Math.pow(lat-r.lat,2)+Math.pow(lng-r.lng,2));if(d<bd){bd=d;best=r;}});
-  return best||{name:'이 지역'};
-}
-async function updateRegionCount(name,lat,lng){
-  var seed=Math.abs(Math.floor(lat*100+lng*100))%200;
-  document.getElementById('cityname').textContent=name;
-  document.getElementById('livenum').textContent=30+seed;
-  // 감성 리포트 도시도 함께 업데이트
-  document.getElementById('reportCity').textContent=name;
-  // 리포트 열려있으면 내용도 갱신
-  if(reportVisible)renderReportByName(name);
-  if(!db)return;
-  try{var r=await db.from('live_users').select('id,lat,lng').gte('updated_at',new Date(Date.now()-300000).toISOString());if(!r.data)return;
-    var nb=r.data.filter(function(u){if(!u.lat||!u.lng)return false;var dl=(u.lat-lat)*111320,dg=(u.lng-lng)*111320*Math.cos(lat*Math.PI/180);return Math.sqrt(dl*dl+dg*dg)<30000;});
-    document.getElementById('livenum').textContent=30+seed+nb.length;
-    document.getElementById('livesub').textContent=nb.length>0?'실시간 '+nb.length+'명 포함':'실시간 음악 중';
-  }catch(e){}
-}
-
 // ── TOP5 ──
-function toggleTop(){topVisible=!topVisible;document.getElementById('topPanel').classList.toggle('visible',topVisible);document.getElementById('topBtn').classList.toggle('active',topVisible);if(topVisible)renderTop();}
+function toggleTop(){
+  topVisible=!topVisible;
+  document.getElementById('topPanel').classList.toggle('visible',topVisible);
+  document.getElementById('topBtn').classList.toggle('active',topVisible);
+}
 async function renderTop(){
-  var list=document.getElementById('topList');list.innerHTML='<div style="color:rgba(255,255,255,.2);font-size:11px;padding:4px 0;">불러오는 중...</div>';
+  var list=document.getElementById('topList');
+  list.innerHTML='<div style="color:rgba(255,255,255,.2);font-size:10px;padding:3px 0;">불러오는 중...</div>';
   var songs=null;
-  if(db){try{var r=await db.from('live_users').select('song_title,song_channel').eq('city',currentCity).gte('updated_at',new Date(Date.now()-1800000).toISOString()).not('song_title','is',null);
-    if(r.data&&r.data.length>0){var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});
-      var s=Object.keys(c).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:c[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);if(s.length>0)songs=s;}}catch(e){}}
-  var data=songs?songs.map(function(s,i){return{track:s.track,artist:s.artist,color:['#60a5fa','#c084fc','#f87171','#34d399','#fbbf24'][i],count:s.count};}):TOP5[currentCity]||TOP5.busan;
-  list.innerHTML=(songs?'<div style="color:rgba(199,125,255,.5);font-size:9px;margin-bottom:8px;">🔴 LIVE 집계</div>':'<div style="color:rgba(255,255,255,.2);font-size:9px;margin-bottom:8px;">📊 기본 데이터</div>')+
+  if(db){
+    try{
+      var r=await db.from('live_users').select('song_title,song_channel').eq('city',currentCity).gte('updated_at',new Date(Date.now()-1800000).toISOString()).not('song_title','is',null);
+      if(r.data&&r.data.length>0){
+        var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});
+        var s=Object.keys(c).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:c[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+        if(s.length)songs=s;
+      }
+    }catch(e){}
+  }
+  var data=songs?songs.map(function(s,i){return{track:s.track,artist:s.artist,color:['#60a5fa','#c084fc','#f87171','#34d399','#fbbf24'][i],count:s.count};}):(TOP5[currentCity]||TOP5.busan);
+  list.innerHTML=(songs?'<div style="color:rgba(199,125,255,.5);font-size:9px;margin-bottom:6px;">🔴 LIVE</div>':'<div style="color:rgba(255,255,255,.18);font-size:9px;margin-bottom:6px;">📊 기본</div>')+
     data.map(function(s,i){return'<div class="titem"><span class="trank" style="color:'+(s.color||'#c77dff')+'">'+(i+1)+'</span><div style="flex:1;min-width:0"><div class="ttrack">'+s.track+'</div><div class="tartist">'+s.artist+(s.count?' · '+s.count+'명':'')+'</div></div></div>';}).join('');
 }
-document.addEventListener('click',function(e){if(topVisible&&!document.getElementById('topPanel').contains(e.target)&&e.target.id!=='topBtn'){topVisible=false;document.getElementById('topPanel').classList.remove('visible');document.getElementById('topBtn').classList.remove('active');}});
+document.addEventListener('click',function(e){
+  if(topVisible&&!document.getElementById('topPanel').contains(e.target)&&e.target.id!=='topBtn'){
+    topVisible=false;document.getElementById('topPanel').classList.remove('visible');document.getElementById('topBtn').classList.remove('active');
+  }
+});
 
 // ── VS 패널 ──
-var VS_DB={'seoul':'seoul','busan':'busan','daegu':'daegu','incheon':'incheon','gwangju':'gwangju','suwon':'seoul','seongnam':'seoul','goyang':'seoul','yongin':'seoul','bucheon':'seoul','anyang':'seoul','hwaseong':'seoul','gimpo':'seoul','ulsan':'busan','changwon':'busan','jinju':'busan','geoje':'busan','yangsan':'busan','pohang':'daegu','gyeongju':'daegu','gumi':'daegu','andong':'daegu','jeonju':'gwangju','gunsan':'gwangju','yeosu':'gwangju','suncheon':'gwangju','mokpo':'gwangju','daejeon':'daejeon','sejong':'daejeon','cheonan':'daejeon','cheongju':'daejeon','asan':'daejeon','chuncheon':'chuncheon','wonju':'chuncheon','gangneung':'chuncheon','sokcho':'chuncheon','jeju':'jeju','seogwipo':'jeju'};
-function getVsCityName(key){for(var i=0;i<VS_CITIES.length;i++){for(var j=0;j<VS_CITIES[i].cities.length;j++){if(VS_CITIES[i].cities[j].key===key)return VS_CITIES[i].cities[j].emoji+' '+VS_CITIES[i].cities[j].name;}}return key;}
-function toggleVs(){vsVisible=!vsVisible;document.getElementById('vsPanel').classList.toggle('visible',vsVisible);document.getElementById('vsBtn').classList.toggle('active',vsVisible);if(vsVisible)renderVs();}
+function getVsCityName(key){
+  for(var i=0;i<VS_CITIES.length;i++)for(var j=0;j<VS_CITIES[i].cities.length;j++)if(VS_CITIES[i].cities[j].key===key)return VS_CITIES[i].cities[j].emoji+' '+VS_CITIES[i].cities[j].name;
+  return key;
+}
+function toggleVs(){
+  vsVisible=!vsVisible;
+  document.getElementById('vsPanel').classList.toggle('visible',vsVisible);
+  document.getElementById('vsBtn').classList.toggle('active',vsVisible);
+  if(vsVisible)renderVs();
+}
 function buildVsDrop(num){
-  var sel=num===1?vsSel1:vsSel2,el=document.getElementById('vsDrop'+num);el.innerHTML='';
+  var sel=num===1?vsSel1:vsSel2,el=document.getElementById('vsDrop'+num);
+  el.innerHTML='';
   VS_CITIES.forEach(function(group){
     var g=document.createElement('div');g.className='vs-dg';g.textContent=group.group;el.appendChild(g);
     group.cities.forEach(function(city){
       var item=document.createElement('div');item.className='vs-di'+(city.key===sel?' selected':'');
-      var e1=document.createElement('span');e1.textContent=city.emoji;var e2=document.createElement('span');e2.textContent=city.name;
+      var e1=document.createElement('span');e1.textContent=city.emoji;
+      var e2=document.createElement('span');e2.textContent=city.name;
       item.appendChild(e1);item.appendChild(e2);
-      (function(k,n){item.addEventListener('click',function(){if(num===1){vsSel1=k;document.getElementById('vsBtnText1').textContent=n;}else{vsSel2=k;document.getElementById('vsBtnText2').textContent=n;}document.getElementById('vsDrop'+num).classList.remove('open');renderVs();});})(city.key,city.name);
+      (function(k,n){item.addEventListener('click',function(){
+        if(num===1){vsSel1=k;document.getElementById('vsBtnText1').textContent=n;}
+        else{vsSel2=k;document.getElementById('vsBtnText2').textContent=n;}
+        document.getElementById('vsDrop'+num).classList.remove('open');
+        renderVs();
+      });})(city.key,city.name);
       el.appendChild(item);
     });
   });
 }
-function toggleVsDrop(num){var d1=document.getElementById('vsDrop1'),d2=document.getElementById('vsDrop2');if(num===1){d1.classList.toggle('open');d2.classList.remove('open');}else{d2.classList.toggle('open');d1.classList.remove('open');}if(document.getElementById('vsDrop'+num).classList.contains('open'))buildVsDrop(num);}
+function toggleVsDrop(num){
+  var d1=document.getElementById('vsDrop1'),d2=document.getElementById('vsDrop2');
+  if(num===1){d1.classList.toggle('open');d2.classList.remove('open');}
+  else{d2.classList.toggle('open');d1.classList.remove('open');}
+  if(document.getElementById('vsDrop'+num).classList.contains('open'))buildVsDrop(num);
+}
 document.addEventListener('click',function(e){if(!e.target.closest('.vs-swrap'))document.querySelectorAll('.vs-drop').forEach(function(d){d.classList.remove('open');});});
 async function renderVs(){
   var c1=vsSel1||'busan',c2=vsSel2||'seoul';
-  document.getElementById('vsName1').textContent=getVsCityName(c1);document.getElementById('vsName2').textContent=getVsCityName(c2);
-  document.getElementById('vsList1').innerHTML='<div style="color:rgba(255,255,255,.2);font-size:10px;">불러오는 중...</div>';
-  document.getElementById('vsList2').innerHTML='<div style="color:rgba(255,255,255,.2);font-size:10px;">불러오는 중...</div>';
+  document.getElementById('vsName1').textContent=getVsCityName(c1);
+  document.getElementById('vsName2').textContent=getVsCityName(c2);
+  document.getElementById('vsList1').innerHTML='<div style="color:rgba(255,255,255,.2);font-size:10px;">...</div>';
+  document.getElementById('vsList2').innerHTML='<div style="color:rgba(255,255,255,.2);font-size:10px;">...</div>';
   var isLive=false;
   for(var ci=0;ci<2;ci++){
-    var city=[c1,c2][ci],dbKey=VS_DB[city]||city,color=ci===0?'#60a5fa':'#c084fc',el=document.getElementById('vsList'+(ci+1)),liveData=null;
-    if(db){try{var r=await db.from('live_users').select('song_title,song_channel').eq('city',dbKey).gte('updated_at',new Date(Date.now()-3600000).toISOString()).not('song_title','is',null);
-      if(r.data&&r.data.length>0){var cts={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');cts[k]=(cts[k]||0)+1;}});
-        liveData=Object.keys(cts).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:cts[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);if(liveData.length>0)isLive=true;}}catch(e){}}
-    var data=liveData||(TOP5[city]||TOP5[dbKey]||TOP5.busan);
-    el.innerHTML=data.map(function(s,i){return'<div class="vstrack"><span class="vsrank" style="color:'+color+'">'+(i+1)+'</span><div style="flex:1;min-width:0"><div class="vsname">'+s.track+'</div><div class="vsartist">'+s.artist+(s.count?' · '+s.count+'명':'')+'</div></div></div>';}).join('');
+    var city=[c1,c2][ci],dbKey=VS_DB[city]||city,color=ci===0?'#60a5fa':'#c084fc',el=document.getElementById('vsList'+(ci+1)),ld=null;
+    if(db){
+      try{
+        var rv=await db.from('live_users').select('song_title,song_channel').eq('city',dbKey).gte('updated_at',new Date(Date.now()-3600000).toISOString()).not('song_title','is',null);
+        if(rv.data&&rv.data.length>0){
+          var cts={};rv.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');cts[k]=(cts[k]||0)+1;}});
+          ld=Object.keys(cts).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1],count:cts[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+          if(ld.length)isLive=true;
+        }
+      }catch(e){}
+    }
+    var dd=ld||(TOP5[city]||TOP5[dbKey]||TOP5.busan);
+    el.innerHTML=dd.map(function(s,i){return'<div class="vstrack"><span class="vsrank" style="color:'+color+'">'+(i+1)+'</span><div style="flex:1;min-width:0"><div class="vsname">'+s.track+'</div><div class="vsartist">'+s.artist+(s.count?' · '+s.count+'명':'')+'</div></div></div>';}).join('');
   }
   document.getElementById('vsLiveTag').textContent=isLive?'🔴 LIVE 데이터 반영 중':'📊 기본 데이터';
-  var m1=MOODS[VS_DB[c1]||c1]||MOODS.busan;
-  var bh='<div style="color:rgba(255,255,255,.3);font-size:10px;margin-bottom:6px;">'+getVsCityName(c1)+' 주요 감성</div>';
-  m1.slice(0,3).forEach(function(m){bh+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="color:rgba(255,255,255,.4);font-size:10px;width:60px;flex-shrink:0;">'+m.name+'</span><div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;"><div style="height:100%;border-radius:2px;background:'+m.color+';width:0%;transition:width .8s;" data-w="'+m.pct+'%"></div></div><span style="color:'+m.color+';font-size:10px;width:28px;text-align:right;">'+m.pct+'%</span></div>';});
-  document.getElementById('vsBarWrap').innerHTML=bh;
-  setTimeout(function(){document.querySelectorAll('#vsBarWrap [data-w]').forEach(function(el){el.style.width=el.dataset.w;});},100);
 }
 
-// ── 리포트 ──
-function toggleReport(){reportVisible=!reportVisible;document.getElementById('reportPanel').classList.toggle('visible',reportVisible);document.getElementById('reportBtn').classList.toggle('active',reportVisible);if(reportVisible)renderReport();}
-
-// 지역 이름으로 가장 가까운 MOODS 데이터 찾기
-function getMoodsByName(name){
-  var cityMap={
-    '서울':'seoul','부산':'busan','대구':'daegu','인천':'incheon','광주':'gwangju',
-    '대전':'daejeon','수원':'seoul','성남':'seoul','분당':'seoul','고양':'seoul',
-    '일산':'seoul','용인':'seoul','부천':'seoul','안양':'seoul','화성':'seoul',
-    '동탄':'seoul','울산':'busan','창원':'busan','진주':'busan','거제':'busan',
-    '양산':'busan','포항':'daegu','경주':'daegu','구미':'daegu','안동':'daegu',
-    '전주':'gwangju','군산':'gwangju','여수':'gwangju','순천':'gwangju','목포':'gwangju',
-    '천안':'daejeon','청주':'daejeon','세종':'daejeon','아산':'daejeon',
-    '춘천':'chuncheon','원주':'chuncheon','강릉':'chuncheon','속초':'chuncheon',
-    '제주':'jeju','서귀포':'jeju',
-  };
-  for(var key in cityMap){if(name.includes(key))return MOODS[cityMap[key]]||MOODS.busan;}
-  return MOODS.busan;
+// ── 감성 리포트 ──
+function toggleReport(){
+  reportVisible=!reportVisible;
+  document.getElementById('reportPanel').classList.toggle('visible',reportVisible);
+  document.getElementById('reportBtn').classList.toggle('active',reportVisible);
+  if(reportVisible)renderReport();
 }
-
-function renderReportByName(name){
-  var data=getMoodsByName(name);
-  renderReportData(data);
-}
-
 function renderReport(){
   var data=MOODS[currentCity]||MOODS.busan;
-  renderReportData(data);
-}
-
-function renderReportData(data){
-  document.getElementById('reportBars').innerHTML=data.map(function(m){return'<div class="rpbar"><div class="rpbn"><span class="rpbl">'+m.name+'</span><span class="rpbp">'+m.pct+'%</span></div><div class="rptrack"><div class="rpfill" style="width:0%;background:'+m.color+'" data-pct="'+m.pct+'%"></div></div></div>';}).join('');
-  var s={busan:'오늘 부산은 새벽 감성이 지배적이에요.그리움과 감성적인 곡들이 많이 흘러요.',seoul:'오늘 서울은 트렌디한 팝이 주류예요.힙합과 R&B 비중이 높아요.',daegu:'오늘 대구는 감성 발라드가 가득해요.',incheon:'오늘 인천은 댄스팝이 강세예요.',gwangju:'오늘 광주는 인디 감성이 흘러요.'};
-  document.getElementById('reportSummary').textContent=s[currentCity]||s.busan;
-  setTimeout(function(){document.querySelectorAll('.rpfill').forEach(function(el){el.style.width=el.dataset.pct;});},100);
+  document.getElementById('reportBars').innerHTML=data.map(function(m){
+    return'<div class="rpbar"><div class="rpbn"><span class="rpbl">'+m.name+'</span><span class="rpbp">'+m.pct+'%</span></div><div class="rptrack"><div class="rpfill" style="width:0%;background:'+m.color+'" data-pct="'+m.pct+'%"></div></div></div>';
+  }).join('');
+  var s={busan:'오늘 부산은 새벽 감성이 지배적이에요.',seoul:'오늘 서울은 트렌디한 팝이 주류예요.',daegu:'오늘 대구는 감성 발라드가 가득해요.',incheon:'오늘 인천은 댄스팝이 강세예요.',gwangju:'오늘 광주는 인디 감성이 흘러요.'};
+  document.getElementById('reportSummary').textContent=s[currentCity]||'이 지역의 음악 감성을 분석 중이에요.';
+  setTimeout(function(){document.querySelectorAll('.rpfill').forEach(function(el){el.style.width=el.dataset.pct;});},80);
 }
 
 // ── 오늘의 noct ──
 async function showDailyCard(){
-  document.getElementById('dailyCard').classList.add('visible');document.getElementById('dailyBtn').classList.add('active');
-  document.getElementById('dailyText').textContent='생성 중...';document.getElementById('dailyEmoji').textContent='🎵';
-  var cityName=CITIES[currentCity]?CITIES[currentCity].name:currentCity,topTrack=null,topArtist=null,totalUsers=0;
-  if(db){try{var r=await db.from('live_users').select('song_title,song_channel').eq('city',currentCity).gte('updated_at',new Date(new Date().setHours(0,0,0,0)).toISOString()).not('song_title','is',null);
-    if(r.data&&r.data.length>0){totalUsers=r.data.length;var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});
-      var top=Object.keys(c).sort(function(a,b){return c[b]-c[a];})[0];if(top){var p=top.split('||');topTrack=p[0];topArtist=p[1];}}}catch(e){}}
+  document.getElementById('dailyCard').classList.add('visible');
+  document.getElementById('dailyBtn').classList.add('active');
+  document.getElementById('dailyText').textContent='생성 중...';
+  document.getElementById('dailyEmoji').textContent='🎵';
+  var cityName=CITIES[currentCity]?CITIES[currentCity].name:currentCity;
+  var topTrack=null,topArtist=null,totalUsers=0;
+  if(db){
+    try{
+      var r=await db.from('live_users').select('song_title,song_channel').eq('city',currentCity).gte('updated_at',new Date(new Date().setHours(0,0,0,0)).toISOString()).not('song_title','is',null);
+      if(r.data&&r.data.length>0){
+        totalUsers=r.data.length;
+        var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});
+        var top=Object.keys(c).sort(function(a,b){return c[b]-c[a];})[0];
+        if(top){var p=top.split('||');topTrack=p[0];topArtist=p[1];}
+      }
+    }catch(e){}
+  }
   var h=new Date().getHours(),tw=h<5?'새벽':h<12?'오전':h<18?'오후':'밤';
   var emojis=['🌙','🎵','🌊','🏙️','✨','🎸','💜','⚡'],emoji=emojis[Math.floor(Math.random()*emojis.length)],text;
-  if(topTrack&&totalUsers>=3)text='오늘 '+cityName+' '+tw+''+topArtist+'의 '+topTrack+''+totalUsers+'명이 함께 들었다';
-  else if(topTrack)text='오늘 '+cityName+''+topTrack+''+(topArtist||'')+'의 감성';
+  if(topTrack&&totalUsers>=3)text='오늘 '+cityName+' '+tw+'\n'+topArtist+'의 '+topTrack+'\n'+totalUsers+'명이 함께 들었다';
+  else if(topTrack)text='오늘 '+cityName+'\n'+topTrack+'\n'+(topArtist||'')+'의 감성';
   else{var ts=DAILY_TEMPLATES[currentCity]||DAILY_TEMPLATES.busan;var t=ts[Math.floor(Math.random()*ts.length)];emoji=t.emoji;text=t.text;}
-  document.getElementById('dailyEmoji').textContent=emoji;document.getElementById('dailyText').textContent=text;
+  document.getElementById('dailyEmoji').textContent=emoji;
+  document.getElementById('dailyText').textContent=text;
 }
 function closeDailyCard(){document.getElementById('dailyCard').classList.remove('visible');document.getElementById('dailyBtn').classList.remove('active');}
-function shareDailyCard(){var text=document.getElementById('dailyText').textContent;var st=text+String.fromCharCode(10)+String.fromCharCode(10)+'noct'+String.fromCharCode(10)+'hepick01.github.io/noct';if(navigator.share)navigator.share({title:'noct',text:st,url:'https://hepick01.github.io/noct'});else navigator.clipboard.writeText(st).then(function(){showToast('복사됐어요!');});}
+function shareDailyCard(){
+  var text=document.getElementById('dailyText').textContent;
+  var st=text+'\n\nnoct\nhepick01.github.io/noct';
+  if(navigator.share)navigator.share({title:'noct',text:st,url:'https://hepick01.github.io/noct'});
+  else navigator.clipboard.writeText(st).then(function(){showToast('복사됐어요!');});
+}
 
 // ── 감성 분석 ──
-var MOOD_TYPES=[{type:'🌙',name:'새벽 감성형',desc:'혼자만의 시간을 즐기는 타입이에요. 음악으로 감정을 정리하는 당신.',kw:['밤편지','Ivy','Slow Dancing','After Hours','낙화']},{type:'⚡',name:'에너지 폭발형',desc:'활기찬 에너지로 하루를 채우는 타입. 음악이 당신의 원동력이에요.',kw:['BLINDING','Dynamite','Attention','Levitating','Butter']},{type:'💜',name:'감성 인디형',desc:'남들이 모르는 좋은 음악을 아는 타입. 깊이 있는 감성을 가졌어요.',kw:['혁오','오래된','DEAN','폴킴','적재']},{type:'🌸',name:'로맨틱 팝형',desc:'사랑스럽고 설레는 감성을 가진 타입.',kw:['LOVE DIVE','Celebrity','봄날','Golden Hour','Perfect']},{type:'🎤',name:'트렌드 리더형',desc:'항상 최신 음악을 빠르게 접하는 타입.',kw:['NewJeans','IVE','BTS','Olivia','Harry']}];
+var MOOD_TYPES=[
+  {type:'🌙',name:'새벽 감성형',desc:'혼자만의 시간을 즐기는 타입이에요. 음악으로 감정을 정리하는 당신.',kw:['밤편지','Ivy','Slow Dancing','After Hours','낙화']},
+  {type:'⚡',name:'에너지 폭발형',desc:'활기찬 에너지로 하루를 채우는 타입. 음악이 당신의 원동력이에요.',kw:['BLINDING','Dynamite','Attention','Levitating','Butter']},
+  {type:'💜',name:'감성 인디형',desc:'남들이 모르는 좋은 음악을 아는 타입. 깊이 있는 감성을 가졌어요.',kw:['혁오','오래된','DEAN','폴킴','적재']},
+  {type:'🌸',name:'로맨틱 팝형',desc:'사랑스럽고 설레는 감성을 가진 타입.',kw:['LOVE DIVE','Celebrity','봄날','Golden Hour','Perfect']},
+  {type:'🎤',name:'트렌드 리더형',desc:'항상 최신 음악을 빠르게 접하는 타입.',kw:['NewJeans','IVE','BTS','Olivia','Harry']}
+];
 function showMoodAnalysis(){
   var history=JSON.parse(localStorage.getItem('noct_history')||'[]');
   if(!history.length){showToast('🎵 먼저 곡을 들어보세요!');return;}
   var scores=MOOD_TYPES.map(function(){return 0;});
   history.slice(0,20).forEach(function(item){MOOD_TYPES.forEach(function(type,i){type.kw.forEach(function(kw){if(item.title&&item.title.includes(kw))scores[i]+=2;if(item.channel&&item.channel.includes(kw))scores[i]+=1;});});});
-  var maxIdx=scores.indexOf(Math.max.apply(null,scores));if(Math.max.apply(null,scores)===0)maxIdx=Math.floor(Math.random()*MOOD_TYPES.length);
-  var mt=MOOD_TYPES[maxIdx];document.getElementById('maType').textContent=mt.type;document.getElementById('maName').textContent=mt.name;document.getElementById('maDesc').textContent=mt.desc;
-  document.getElementById('maTracks').innerHTML=history.slice(0,4).map(function(item){return'<div style="color:rgba(255,255,255,.6);font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);">🎵 '+item.title+' — '+item.channel+'</div>';}).join('');
-  document.getElementById('moodAnalysis').classList.add('visible');document.getElementById('moodBtn').classList.add('active');
+  var maxIdx=scores.indexOf(Math.max.apply(null,scores));
+  if(Math.max.apply(null,scores)===0)maxIdx=Math.floor(Math.random()*MOOD_TYPES.length);
+  var mt=MOOD_TYPES[maxIdx];
+  document.getElementById('maType').textContent=mt.type;
+  document.getElementById('maName').textContent=mt.name;
+  document.getElementById('maDesc').textContent=mt.desc;
+  document.getElementById('maTracks').innerHTML=history.slice(0,4).map(function(item){return'<div style="color:rgba(255,255,255,.6);font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">🎵 '+item.title+' — '+item.channel+'</div>';}).join('');
+  document.getElementById('moodAnalysis').classList.add('visible');
+  document.getElementById('moodBtn').classList.add('active');
 }
 function closeMoodAnalysis(){document.getElementById('moodAnalysis').classList.remove('visible');document.getElementById('moodBtn').classList.remove('active');}
 
 // ── 청취 기록 ──
-function addHistory(title,channel,thumb){listenHistory.unshift({title:title,channel:channel,thumb:thumb||'',time:Date.now()});if(listenHistory.length>50)listenHistory.pop();localStorage.setItem('noct_history',JSON.stringify(listenHistory));}
+function addHistory(title,channel,thumb){
+  listenHistory.unshift({title:title,channel:channel,thumb:thumb||'',time:Date.now()});
+  if(listenHistory.length>50)listenHistory.pop();
+  localStorage.setItem('noct_history',JSON.stringify(listenHistory));
+}
 function toggleHistory(){document.getElementById('historyPanel').classList.toggle('open');renderHistory();}
 function renderHistory(){
   var list=document.getElementById('historyList');
   if(!listenHistory.length){list.innerHTML='<div class="hpempty"><div class="hpei">🎵</div><div class="hpet">아직 들은 곡이 없어요</div></div>';return;}
   var now=Date.now();
-  list.innerHTML=listenHistory.map(function(item){var diff=Math.floor((now-item.time)/1000);var ago=diff<60?'방금':diff<3600?Math.floor(diff/60)+'분 전':diff<86400?Math.floor(diff/3600)+'시간 전':Math.floor(diff/86400)+'일 전';return'<div class="hpitem">'+(item.thumb?'<img class="hpthumb" src="'+item.thumb+'" alt="">':'<div class="hpthumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🎵</div>')+'<div style="flex:1;min-width:0;"><div class="hptrack">'+item.title+'</div><div class="hpartist">'+item.channel+'</div></div><span class="hptime">'+ago+'</span></div>';}).join('');
+  list.innerHTML=listenHistory.map(function(item){
+    var diff=Math.floor((now-item.time)/1000);
+    var ago=diff<60?'방금':diff<3600?Math.floor(diff/60)+'분 전':diff<86400?Math.floor(diff/3600)+'시간 전':Math.floor(diff/86400)+'일 전';
+    return'<div class="hpitem">'+(item.thumb?'<img class="hpthumb" src="'+item.thumb+'" alt="">':'<div class="hpthumb" style="display:flex;align-items:center;justify-content:center;font-size:16px;">🎵</div>')+'<div style="flex:1;min-width:0;"><div class="hptrack">'+item.title+'</div><div class="hpartist">'+item.channel+'</div></div><span class="hptime">'+ago+'</span></div>';
+  }).join('');
 }
 function clearHistory(){listenHistory=[];localStorage.removeItem('noct_history');renderHistory();showToast('🗑️ 청취 기록이 삭제됐어요');}
 
@@ -1526,117 +1688,218 @@ async function submitApply(){
   var brand=document.getElementById('applyBrand').value.trim(),contact=document.getElementById('applyContact').value.trim(),area=document.getElementById('applyArea').value.trim();
   var pkgNames={1:'Basic (월 30만원)',2:'Premium (월 100만원)',3:'Exclusive (월 300만원)'};
   if(!brand||!contact||!selectedPkg){showToast('브랜드명, 연락처, 패키지를 모두 선택해주세요');return;}
-  try{var r=await fetch('https://formspree.io/f/mjgzeadg',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({브랜드명:brand,연락처:contact,희망지역:area||'미입력',패키지:pkgNames[selectedPkg],신청시간:new Date().toLocaleString('ko-KR')})});
+  try{
+    var r=await fetch('https://formspree.io/f/mjgzeadg',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({브랜드명:brand,연락처:contact,희망지역:area||'미입력',패키지:pkgNames[selectedPkg],신청시간:new Date().toLocaleString('ko-KR')})});
     if(r.ok){document.getElementById('applySuccess').style.display='block';showToast('🎉 광고 신청이 완료됐어요!');}
-    else showToast('전송 실패. 다시 시도해주세요.');}catch(e){showToast('네트워크 오류.');}
+    else showToast('전송 실패. 다시 시도해주세요.');
+  }catch(e){showToast('네트워크 오류.');}
 }
 
 // ── 닉네임 ──
-function saveNick(){var v=document.getElementById('nickInput').value.trim();if(!v){document.getElementById('nickInput').focus();return;}myNick=v;localStorage.setItem('noct_nick',v);document.getElementById('nickOverlay').classList.remove('open');showToast('👋 안녕하세요, '+v+'님!');if(pendingSong){var s=pendingSong;pendingSong=null;selectSong(s.videoId,s.title,s.channel,s.thumb);}}
+function saveNick(){
+  var v=document.getElementById('nickInput').value.trim();
+  if(!v){document.getElementById('nickInput').focus();return;}
+  myNick=v;localStorage.setItem('noct_nick',v);
+  document.getElementById('nickOverlay').classList.remove('open');
+  showToast('👋 안녕하세요, '+v+'님!');
+  if(pendingSong){var s=pendingSong;pendingSong=null;selectSong(s.videoId,s.title,s.channel,s.thumb);}
+}
 setTimeout(function(){if(!myNick)document.getElementById('nickOverlay').classList.add('open');},2000);
 
 // ── 토스트 ──
 var toastTimer=null;
-function showToast(msg){document.getElementById('toastMsg').textContent=msg;var t=document.getElementById('toast');t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3000);}
+function showToast(msg){
+  document.getElementById('toastMsg').textContent=msg;
+  var t=document.getElementById('toast');t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3000);
+}
 
-// ── Supabase 실시간 ──
-var LIVE_COLORS=["#a78bfa","#f87171","#34d399","#60a5fa","#fbbf24","#f472b6","#67e8f9","#fb923c"];
+// ── 실시간 유저 ──
+var LIVE_COLORS=['#a78bfa','#f87171','#34d399','#60a5fa','#fbbf24','#f472b6','#67e8f9','#fb923c'];
 function getUserColor(nick){return LIVE_COLORS[(nick.charCodeAt(0)||0)%LIVE_COLORS.length];}
 function renderLiveUser(user){
-  if(user.id===myUserId)return;if(liveMarkers[user.id]){liveMarkers[user.id].remove();delete liveMarkers[user.id];}
+  if(user.id===myUserId)return;
+  if(liveMarkers[user.id]){liveMarkers[user.id].remove();delete liveMarkers[user.id];}
   var color=getUserColor(user.nick||'?');
-  var el=document.createElement('div');el.style.cssText='position:relative;width:18px;height:18px;cursor:pointer;overflow:visible;';
-  el.innerHTML='<div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid '+color+';opacity:0;animation:ro 2.8s ease-out infinite;"></div><div style="position:absolute;inset:-2px;border-radius:50%;background:'+color+';opacity:.15;animation:gb 2.8s ease-in-out infinite;"></div><div style="position:absolute;inset:3px;border-radius:50%;background:'+color+';box-shadow:0 0 10px '+color+'88;"></div><div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,.85);"></div><div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:rgba(6,4,16,.88);border:1px solid '+color+'44;border-radius:6px;padding:1px 5px;color:'+color+';font-size:9px;font-weight:600;white-space:nowrap;font-family:sans-serif;">'+(user.nick||'?')+'</div>';
-  el.addEventListener('click',function(e){e.stopPropagation();showCardData(user.song_title||'음악 없음',user.song_channel||'',(user.nick||'익명')+' · '+(user.city==='busan'?'부산':'서울'),color,user.song_thumb||null,'지금 듣는 중 🎵');});
+  var el=document.createElement('div');
+  el.style.cssText='position:relative;width:18px;height:18px;cursor:pointer;overflow:visible;';
+  el.innerHTML='<div style="position:absolute;inset:-5px;border-radius:50%;border:1.5px solid '+color+';opacity:0;animation:ringOut 2.8s ease-out infinite;"></div>'
+    +'<div style="position:absolute;inset:-2px;border-radius:50%;background:'+color+';opacity:.14;animation:glowBreath 2.8s ease-in-out infinite;"></div>'
+    +'<div style="position:absolute;inset:3px;border-radius:50%;background:'+color+';box-shadow:0 0 8px '+color+'77;"></div>'
+    +'<div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,.85);"></div>'
+    +'<div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:rgba(6,4,16,.88);border:1px solid '+color+'44;border-radius:5px;padding:1px 5px;color:'+color+';font-size:9px;font-weight:600;white-space:nowrap;font-family:sans-serif;">'+(user.nick||'?')+'</div>';
+  el.addEventListener('click',function(e){
+    e.stopPropagation();
+    showCardData(user.song_title||'음악 없음',user.song_channel||'',(user.nick||'익명')+' · '+(user.city==='busan'?'부산':'서울'),color,user.song_thumb||null,'지금 듣는 중 🎵');
+  });
   liveMarkers[user.id]=new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat([user.lng,user.lat]).addTo(map);
 }
 function removeLiveUser(id){if(liveMarkers[id]){liveMarkers[id].remove();delete liveMarkers[id];}}
 async function loadLiveUsers(){
   if(!db)return;
-  var r=await db.from('live_users').select('*').gte('updated_at',new Date(Date.now()-300000).toISOString());
-  if(r.data){Object.keys(liveMarkers).forEach(function(id){liveMarkers[id].remove();delete liveMarkers[id];});r.data.forEach(function(u){renderLiveUser(u);});
-    var cu=r.data.filter(function(u){return u.city===currentCity;});
-    document.getElementById('livenum').textContent=(CITIES[currentCity]?CITIES[currentCity].count:183)+cu.length;
-    if(r.data.length>0)document.getElementById('livesub').textContent='전국 실시간 '+r.data.length+'명 음악 중';}
+  try{
+    var r=await db.from('live_users').select('*').gte('updated_at',new Date(Date.now()-300000).toISOString());
+    if(r.data){
+      Object.keys(liveMarkers).forEach(function(id){liveMarkers[id].remove();delete liveMarkers[id];});
+      r.data.forEach(function(u){renderLiveUser(u);});
+      var cu=r.data.filter(function(u){return u.city===currentCity;});
+      var base=CITIES[currentCity]?CITIES[currentCity].count:183;
+      document.getElementById('livenum').textContent=base+cu.length;
+      if(r.data.length>0)document.getElementById('livesub').textContent='전국 실시간 '+r.data.length+'명 음악 중';
+    }
+  }catch(e){}
 }
 function subscribeRT(){
   if(!db)return;
-  db.channel('lv').on('postgres_changes',{event:'INSERT',schema:'public',table:'live_users'},function(p){renderLiveUser(p.new);showToast('🎵 '+p.new.nick+'님이 합류했어요!');}).on('postgres_changes',{event:'UPDATE',schema:'public',table:'live_users'},function(p){renderLiveUser(p.new);}).on('postgres_changes',{event:'DELETE',schema:'public',table:'live_users'},function(p){removeLiveUser(p.old.id);}).subscribe();
+  db.channel('lv')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'live_users'},function(p){renderLiveUser(p.new);showToast('🎵 '+p.new.nick+'님이 합류했어요!');})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'live_users'},function(p){renderLiveUser(p.new);})
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'live_users'},function(p){removeLiveUser(p.old.id);})
+    .subscribe();
 }
 async function upsertUser(lng,lat){
   if(!db||!myNick||!currentSong)return;
-  if(!myUserId){var ins=await db.from('live_users').insert({nick:myNick,song_title:currentSong.title,song_channel:currentSong.channel,song_thumb:currentSong.thumb||'',video_id:currentSong.videoId,lat:lat,lng:lng,city:currentCity}).select().single();if(ins.data){myUserId=ins.data.id;localStorage.setItem('noct_uid',myUserId);}}
-  else{await db.from('live_users').update({nick:myNick,song_title:currentSong.title,song_channel:currentSong.channel,song_thumb:currentSong.thumb||'',video_id:currentSong.videoId,lat:lat,lng:lng,city:currentCity,updated_at:new Date().toISOString()}).eq('id',myUserId);}
+  try{
+    if(!myUserId){
+      var ins=await db.from('live_users').insert({nick:myNick,song_title:currentSong.title,song_channel:currentSong.channel,song_thumb:currentSong.thumb||'',video_id:currentSong.videoId,lat:lat,lng:lng,city:currentCity}).select().single();
+      if(ins.data){myUserId=ins.data.id;localStorage.setItem('noct_uid',myUserId);}
+    }else{
+      await db.from('live_users').update({nick:myNick,song_title:currentSong.title,song_channel:currentSong.channel,song_thumb:currentSong.thumb||'',video_id:currentSong.videoId,lat:lat,lng:lng,city:currentCity,updated_at:new Date().toISOString()}).eq('id',myUserId);
+    }
+  }catch(e){}
 }
 window.addEventListener('beforeunload',function(){if(myUserId&&db)db.from('live_users').delete().eq('id',myUserId);});
 
-// ── 같은 곡 확인 ──
-async function checkSameSong(title){if(!db)return;var r=await db.from('live_users').select('*').eq('song_title',title).gte('updated_at',new Date(Date.now()-300000).toISOString());if(r.data){var count=r.data.filter(function(u){return u.id!==myUserId;}).length;var badge=document.getElementById('togetherBadge');if(count>0){document.getElementById('togetherCount').textContent=count;badge.style.display='flex';showToast('🎵 지금 '+count+'명이 같은 곡 듣고 있어요!');}else badge.style.display='none';}}
+// ── 같은 곡 / 이웃 ──
+async function checkSameSong(title){
+  if(!db)return;
+  try{
+    var r=await db.from('live_users').select('*').eq('song_title',title).gte('updated_at',new Date(Date.now()-300000).toISOString());
+    if(r.data){
+      var count=r.data.filter(function(u){return u.id!==myUserId;}).length;
+      var badge=document.getElementById('togetherBadge');
+      if(count>0){document.getElementById('togetherCount').textContent=count;badge.style.display='flex';showToast('🎵 지금 '+count+'명이 같은 곡 듣고 있어요!');}
+      else badge.style.display='none';
+    }
+  }catch(e){}
+}
+async function checkNeighbors(lng,lat){
+  if(!db||!currentSong)return;
+  try{
+    var r=await db.from('live_users').select('id,lat,lng').gte('updated_at',new Date(Date.now()-300000).toISOString());
+    if(!r.data)return;
+    var nb=r.data.filter(function(u){
+      if(!u.lat||!u.lng||u.id===myUserId)return false;
+      var dl=(u.lat-lat)*111320,dg=(u.lng-lng)*111320*Math.cos(lat*Math.PI/180);
+      return Math.sqrt(dl*dl+dg*dg)<2000;
+    });
+    if(nb.length>0){
+      document.getElementById('neighborCount').textContent=nb.length;
+      var a=document.getElementById('neighborAlert');a.classList.add('show');
+      setTimeout(function(){a.classList.remove('show');},5000);
+    }
+  }catch(e){}
+}
 
-// ── 이웃 확인 ──
-async function checkNeighbors(lng,lat){if(!db||!currentSong)return;var r=await db.from('live_users').select('id,lat,lng').gte('updated_at',new Date(Date.now()-300000).toISOString());if(!r.data)return;var nb=r.data.filter(function(u){if(!u.lat||!u.lng||u.id===myUserId)return false;var dl=(u.lat-lat)*111320,dg=(u.lng-lng)*111320*Math.cos(lat*Math.PI/180);return Math.sqrt(dl*dl+dg*dg)<2000;});if(nb.length>0){document.getElementById('neighborCount').textContent=nb.length;var a=document.getElementById('neighborAlert');a.classList.add('show');setTimeout(function(){a.classList.remove('show');},5000);}}
-
-// ── 방문자 ──
-function initVisitor(){var today=new Date().toDateString();var stored=JSON.parse(localStorage.getItem('noct_visits')||'{"date":"","count":0}');if(stored.date!==today)stored={date:today,count:1};else stored.count++;localStorage.setItem('noct_visits',JSON.stringify(stored));document.getElementById('visitorCount').textContent=(1240+stored.count).toLocaleString();}
-
-// ── PWA ──
-var deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;if(!localStorage.getItem('noct_install_dismissed'))setTimeout(function(){document.getElementById('installBanner').classList.add('show');},5000);});
-function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById('installBanner').classList.remove('show');});}else{showToast('브라우저 메뉴에서 홈 화면에 추가를 눌러주세요');document.getElementById('installBanner').classList.remove('show');}}
-function dismissInstall(){document.getElementById('installBanner').classList.remove('show');localStorage.setItem('noct_install_dismissed','1');}
-(function(){var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);if(isIOS&&!window.navigator.standalone&&!localStorage.getItem('noct_install_dismissed'))setTimeout(function(){var b=document.getElementById('installBanner');b.querySelector('.install-sub')||null;b.classList.add('show');},6000);})();
-
-// ── 자동 위치 ──
-function autoLocate(){if(!navigator.geolocation||sessionStorage.getItem('noct_located'))return;sessionStorage.setItem('noct_located','1');navigator.geolocation.getCurrentPosition(function(pos){var lng=pos.coords.longitude,lat=pos.coords.latitude;if(lng>124&&lng<132&&lat>33&&lat<39){map.flyTo({center:[lng,lat],zoom:13,pitch:55,duration:2000});showToast('📍 내 동네로 이동했어요');}},function(){},{enableHighAccuracy:false,timeout:5000,maximumAge:300000});}
-
-// ── 핫 배너 ──
+// ── 핫배너 ──
 async function updateHotBanner(){
   var songs=[];
-  if(db){try{var r=await db.from('live_users').select('song_title,song_channel').gte('updated_at',new Date(Date.now()-3600000).toISOString()).not('song_title','is',null);if(r.data&&r.data.length>0){var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});songs=Object.keys(c).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1]};}).slice(0,10);}}catch(e){}}
+  if(db){
+    try{
+      var r=await db.from('live_users').select('song_title,song_channel').gte('updated_at',new Date(Date.now()-3600000).toISOString()).not('song_title','is',null);
+      if(r.data&&r.data.length>0){
+        var c={};r.data.forEach(function(u){if(u.song_title){var k=u.song_title+'||'+(u.song_channel||'');c[k]=(c[k]||0)+1;}});
+        songs=Object.keys(c).map(function(k){var p=k.split('||');return{track:p[0],artist:p[1]};}).slice(0,10);
+      }
+    }catch(e){}
+  }
   if(!songs.length)songs=FAKE_SONGS.slice(0,10).map(function(s){return{track:s.title,artist:s.channel};});
-  var html='';for(var rep=0;rep<2;rep++){songs.forEach(function(s,i){html+='<span class="hb-item"><span class="hb-rank">'+(i+1)+'</span><span class="hb-track">'+s.track+'</span><span style="color:rgba(255,255,255,.3);font-size:10px"> — '+s.artist+'</span></span><span style="color:rgba(199,125,255,.25);padding:0 4px;">•</span>';});}
+  var html='';
+  for(var rep=0;rep<2;rep++){
+    songs.forEach(function(s,i){
+      html+='<span class="hb-item"><span class="hb-rank">'+(i+1)+'</span><span class="hb-track">'+s.track+'</span><span style="color:rgba(255,255,255,.3);font-size:10px"> — '+s.artist+'</span></span><span style="color:rgba(199,125,255,.2);padding:0 3px;">•</span>';
+    });
+  }
   document.getElementById('hotBannerInner').innerHTML=html;
 }
 
+// ── ambient text ──
+function updateAmbientText(){
+  var cityName=document.getElementById('cityname').textContent.toUpperCase();
+  var count=document.getElementById('livenum').textContent;
+  document.getElementById('ambientMain').textContent=count+' souls listening tonight';
+  document.getElementById('ambientSub').textContent=cityName+' · LIVE';
+  var el=document.getElementById('ambientText');el.style.opacity='1';
+}
+
 // ── 지도 검색 ──
-setTimeout(function(){Object.keys(CITIES).forEach(function(k){CITIES[k].spots.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});});NATIONAL_SPOTS.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});},2000);
-function handleMapSearch(){var q=document.getElementById('msi').value.trim();var res=document.getElementById('msr');if(!q){res.style.display='none';return;}var results=ALL_LOCATIONS.filter(function(l){return l.name.includes(q);}).slice(0,6);if(!results.length){res.style.display='none';return;}res.style.display='block';res.innerHTML='';results.forEach(function(l){var item=document.createElement('div');item.className='msi-item';item.textContent='📍 '+l.name;(function(lng,lat,name){item.addEventListener('click',function(){flyToLoc(lng,lat,name);});})(l.lng,l.lat,l.name);res.appendChild(item);});}
-function flyToLoc(lng,lat,name){map.flyTo({center:[lng,lat],zoom:15,pitch:60,duration:1500});clearMapSearch();showToast('📍 '+name+'으로 이동했어요');}
+setTimeout(function(){
+  Object.keys(CITIES).forEach(function(k){CITIES[k].spots.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});});
+  NATIONAL_SPOTS.forEach(function(s){ALL_LOCATIONS.push({name:s.name,lng:s.lng,lat:s.lat});});
+},2000);
+function handleMapSearch(){
+  var q=document.getElementById('msi').value.trim(),res=document.getElementById('msr');
+  if(!q){res.style.display='none';return;}
+  var results=ALL_LOCATIONS.filter(function(l){return l.name.includes(q);}).slice(0,6);
+  if(!results.length){res.style.display='none';return;}
+  res.style.display='block';
+  res.innerHTML='';
+  results.forEach(function(l){
+    var item=document.createElement('div');item.className='msi-item';
+    item.textContent='📍 '+l.name;
+    (function(lng,lat,name){item.addEventListener('click',function(){flyToLoc(lng,lat,name);});})(l.lng,l.lat,l.name);
+    res.appendChild(item);
+  });
+}
+function flyToLoc(lng,lat,name){map.flyTo({center:[lng,lat],zoom:15,pitch:55,duration:1400});clearMapSearch();showToast('📍 '+name+'으로 이동했어요');}
 function clearMapSearch(){document.getElementById('msi').value='';document.getElementById('msr').style.display='none';}
+
+// ── 방문자 ──
+function initVisitor(){
+  var today=new Date().toDateString();
+  var stored=JSON.parse(localStorage.getItem('noct_visits')||'{"date":"","count":0}');
+  if(stored.date!==today)stored={date:today,count:1};else stored.count++;
+  localStorage.setItem('noct_visits',JSON.stringify(stored));
+  document.getElementById('visitorCount').textContent=(1240+stored.count).toLocaleString();
+}
+
+// ── PWA ──
+var deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferredPrompt=e;
+  if(!localStorage.getItem('noct_install_dismissed'))setTimeout(function(){document.getElementById('installBanner').classList.add('show');},5000);
+});
+function installPWA(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById('installBanner').classList.remove('show');});}
+  else{showToast('브라우저 메뉴에서 홈 화면에 추가를 눌러주세요');document.getElementById('installBanner').classList.remove('show');}
+}
+function dismissInstall(){document.getElementById('installBanner').classList.remove('show');localStorage.setItem('noct_install_dismissed','1');}
 
 // ── 공유 카드 ──
 function generateShareCard(){
   if(!currentSong)return;
   var canvas=document.getElementById('shareCanvas');var ctx=canvas.getContext('2d');var W=360,H=560;canvas.width=W;canvas.height=H;
-  var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#03030a');bg.addColorStop(.5,'#0a0520');bg.addColorStop(1,'#03030a');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  rrFill(ctx,20,28,70,26,8);ctx.fillStyle='#c77dff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('noct',55,46);
-  var aS=180,aX=(W-aS)/2,aY=80;ctx.fillStyle='rgba(199,125,255,.15)';rrFill(ctx,aX,aY,aS,aS,18);
-  ctx.font='56px sans-serif';ctx.fillStyle='#c77dff';ctx.fillText('🎵',W/2,aY+aS/2+20);
-  ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';var tt=currentSong.title.length>22?currentSong.title.substring(0,22)+'...':currentSong.title;ctx.fillText(tt,W/2,aY+aS+40);
-  ctx.fillStyle='rgba(255,255,255,.42)';ctx.font='14px sans-serif';ctx.fillText(currentSong.channel,W/2,aY+aS+62);
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(40,aY+aS+82);ctx.lineTo(W-40,aY+aS+82);ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,.22)';ctx.font='12px sans-serif';ctx.fillText((myNick||'익명')+' · '+(CITIES[currentCity]?CITIES[currentCity].name:currentCity)+' · 지금 듣는 중',W/2,aY+aS+106);
-  ctx.fillStyle='rgba(199,125,255,.1)';rrFill(ctx,W/2-90,H-58,180,38,10);ctx.fillStyle='#c77dff';ctx.font='bold 11px sans-serif';ctx.fillText('hepick01.github.io/noct',W/2,H-34);
+  var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#03030a');bg.addColorStop(.5,'#0a0520');bg.addColorStop(1,'#03030a');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  function rrFill(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();}
+  ctx.fillStyle='rgba(199,125,255,.12)';rrFill(20,28,70,26,8);
+  ctx.fillStyle='#c77dff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('noct',55,46);
+  var aS=170,aX=(W-aS)/2,aY=82;
+  ctx.fillStyle='rgba(199,125,255,.15)';rrFill(aX,aY,aS,aS,16);
+  ctx.font='52px sans-serif';ctx.fillStyle='#c77dff';ctx.fillText('🎵',W/2,aY+aS/2+18);
+  ctx.fillStyle='#fff';ctx.font='bold 19px sans-serif';
+  var tt=currentSong.title.length>22?currentSong.title.substring(0,22)+'...':currentSong.title;
+  ctx.fillText(tt,W/2,aY+aS+38);
+  ctx.fillStyle='rgba(255,255,255,.42)';ctx.font='13px sans-serif';ctx.fillText(currentSong.channel,W/2,aY+aS+58);
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(40,aY+aS+76);ctx.lineTo(W-40,aY+aS+76);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.22)';ctx.font='11px sans-serif';ctx.fillText((myNick||'익명')+' · '+(CITIES[currentCity]?CITIES[currentCity].name:currentCity)+' · 지금 듣는 중',W/2,aY+aS+98);
+  ctx.fillStyle='rgba(199,125,255,.1)';rrFill(W/2-86,H-56,172,36,9);
+  ctx.fillStyle='#c77dff';ctx.font='bold 10px sans-serif';ctx.fillText('hepick01.github.io/noct',W/2,H-33);
   document.getElementById('shareCardOverlay').classList.add('open');
 }
-function rrFill(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();}
 function downloadCard(){var c=document.getElementById('shareCanvas');var l=document.createElement('a');l.download='noct.png';l.href=c.toDataURL('image/png');l.click();showToast('📥 이미지 저장됐어요!');}
 function closeShareCard(){document.getElementById('shareCardOverlay').classList.remove('open');}
-
-// ── 시간대 자동 분위기 (한국 시간 기반) ──
-function getSlotFromHour(){
-  var h=new Date().getHours();
-  if(h<6)return 'midnight';
-  if(h<9)return 'dawn';
-  if(h<17)return 'morning';
-  if(h<20)return 'sunset';
-  return 'midnight';
-}
-
-// ── 주기 업데이트 ──
-// 자동 토스트 제거 (성능)
-setInterval(renderTop,120000);
-;
 
 </script>
 </body>
