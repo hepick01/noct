@@ -900,8 +900,6 @@ function updateVibe(){
   checkDawn();
 }
 updateVibe();setInterval(updateVibe,60000);
-applyAtmosphere();
-setInterval(applyAtmosphere,300000);
 
 // Ambient text 업데이트
 function updateAmbientText(){
@@ -976,6 +974,8 @@ function applyAtmosphere(){
 }
 
 function checkDawn(){applyAtmosphere();}
+applyAtmosphere();
+setInterval(applyAtmosphere,300000);
 
 // ── 지도 ──
 var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing,antialias:true});
