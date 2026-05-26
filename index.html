@@ -1109,7 +1109,7 @@ if(map.getLayer('bld-top')){
     'circle-color':['get','color'],
     'circle-radius':['interpolate',['linear'],['zoom'],7,6,10,12,13,18,16,24],
     'circle-opacity':['interpolate',['linear'],['zoom'],7,0.05,10,0.1,14,0.18],
-    'circle-blur':1}});
+    }});
   map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
     'circle-color':['get','color'],
     'circle-radius':['interpolate',['linear'],['zoom'],7,1.5,10,3,13,5,16,7],
@@ -1121,27 +1121,36 @@ if(map.getLayer('bld-top')){
 
   // 광고 소스
   map.addSource('ad-spots',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1,'circle-blur':1}});
+  map.addLayer({id:'ad-glow',source:'ad-spots',type:'circle',paint:{'circle-radius':28,'circle-color':['get','color'],'circle-opacity':0.1}});
 
   // 서울/부산 glow (각 2레이어로 경량화)
-  map.addSource('sg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[126.978,37.566]},properties:{}}});
-  map.addLayer({id:'sg1',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,120,8,240,11,480],'circle-color':'#6d28d9','circle-opacity':0.05,'circle-blur':1}});
-  map.addLayer({id:'sg2',source:'sg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,35,10,80,13,160],'circle-color':'#a855f7','circle-opacity':0.07,'circle-blur':0.8}});
-  map.addSource('bg',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[129.076,35.180]},properties:{}}});
-  map.addLayer({id:'bg1',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,80,8,180,11,340],'circle-color':'#0ea5e9','circle-opacity':0.05,'circle-blur':1}});
-  map.addLayer({id:'bg2',source:'bg',type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,25,10,65,13,130],'circle-color':'#22d3ee','circle-opacity':0.06,'circle-blur':0.8}});
+  
+  
+  
+  
+  
+  
   // 대구/광주/대전 mini glow
   [{id:'dg',lng:128.601,lat:35.871,c:'#f59e0b'},{id:'gg',lng:126.853,lat:35.160,c:'#10b981'},{id:'dj',lng:127.385,lat:36.350,c:'#6366f1'}].forEach(function(city){
     map.addSource(city.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[city.lng,city.lat]},properties:{}}});
-    map.addLayer({id:city.id+'1',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,50,9,110,12,220],'circle-color':city.c,'circle-opacity':0.035,'circle-blur':1}});
-    map.addLayer({id:city.id+'2',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,20,11,50,13,100],'circle-color':city.c,'circle-opacity':0.05,'circle-blur':0.8}});
+    map.addLayer({id:city.id+'1',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,50,9,110,12,220],'circle-color':city.c,'circle-opacity':0.035}});
+    map.addLayer({id:city.id+'2',source:city.id,type:'circle',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,20,11,50,13,100],'circle-color':city.c,'circle-opacity':0.05}});
   });
 
   // 초기 데이터
   spawnDummy('busan');spawnAdLayer('busan');spawnAdMarkers('busan');renderTop();
 
   // moveend: 지역 감지
-  map.on('moveend',function(){clearTimeout(moveEndTimer);moveEndTimer=setTimeout(function(){var c=map.getCenter();var r=getNearestRegion(c.lat,c.lng);if(!r)return;document.getElementById('cityname').textContent=r.name;updateRegionCount(r.name,c.lat,c.lng);},1000);});
+  map.on('moveend',function(){
+  clearTimeout(moveEndTimer);
+  moveEndTimer=setTimeout(function(){
+    var center=map.getCenter();
+    var r=getNearestRegion(center.lat,center.lng);
+    if(!r)return;
+    document.getElementById('cityname').textContent=r.name;
+    document.getElementById('reportCity').textContent=r.name;
+  },800);
+});
 
   // 카메라 드리프트 시작
   
