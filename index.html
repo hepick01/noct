@@ -563,7 +563,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
     <div class="pkgcard" id="pkg2" onclick="selectPkg(2)"><div class="pkgname">Premium <span class="pkgprice">월 100만원</span></div><div class="pkgdesc">빌보드 + 상세 카드 + CTA 버튼</div></div>
     <div class="pkgcard" id="pkg3" onclick="selectPkg(3)"><div class="pkgname">Exclusive <span class="pkgprice">월 300만원</span></div><div class="pkgdesc">지역 독점 + 토스트 노출 + 리포트</div></div>
     <div style="margin-top:12px;">
-      <span class="aplabel">브랜드명</span><input class="apinput" id="applyBrand" placeholder="예: 메가커피">
+      <span class="aplabel">브랜드명</span><input class="apinput" id="applyBrand" placeholder="브랜드명">
       <span class="aplabel">연락처</span><input class="apinput" id="applyContact" placeholder="contact@brand.com">
       <span class="aplabel">희망 지역</span><input class="apinput" id="applyArea" placeholder="예: 부산 해운대">
     </div>
@@ -856,19 +856,7 @@ var VS_CITIES = [
 {key:'seogwipo',name:'서귀포',emoji:'🌺'},
 ]},
 ];
-var ADS = {
-busan:[
-{lng:129.059,lat:35.156,icon:"🎵",brand:"Melon",color:"#00CD3C",tagline:"서면 음악 스폰서",title:"Melon이 이 건물을 후원합니다",desc:"국내 1위 음악 스트리밍 서비스",cta:"Melon 3개월 무료 체험",stats:[{n:"2,400만",l:"월간 사용자"},{n:"#1",l:"국내 스트리밍"},{n:"7천만",l:"곡 보유"}]},
-{lng:129.160,lat:35.158,icon:"☕",brand:"메가커피",color:"#FFCC00",tagline:"해운대 카페 스폰서",title:"새벽 감성엔 메가커피",desc:"음악 듣다 지쳤을 때 가장 가까운 메가커피",cta:"아메리카노 500원 할인 쿠폰",stats:[{n:"2,800개",l:"전국 매장"},{n:"24시간",l:"해운대점"},{n:"500원",l:"할인 쿠폰"}]},
-{lng:129.118,lat:35.153,icon:"🛵",brand:"배달의민족",color:"#2AC1BC",tagline:"광안리 야식 스폰서",title:"새벽 음악엔 야식이 필요해",desc:"noct 유저 전용 배달비 무료",cta:"배달비 무료 쿠폰 받기",stats:[{n:"9만개",l:"입점 가게"},{n:"무료",l:"배달비"},{n:"30분",l:"평균 배달"}]},
-{lng:129.087,lat:35.204,icon:"🏋️",brand:"짐박스",color:"#FF4757",tagline:"동래 피트니스 스폰서",title:"운동할 때 음악이 필요해",desc:"noct 감성 그대로 짐박스에서",cta:"1개월 무료 이용권",stats:[{n:"50개",l:"부산 지점"},{n:"24시간",l:"연중무휴"},{n:"1개월",l:"무료 체험"}]},
-],
-seoul:[
-{lng:127.027,lat:37.497,icon:"💳",brand:"카카오페이",color:"#FFCD00",tagline:"강남 결제 스폰서",title:"음악 결제도 카카오페이로",desc:"noct 프리미엄 첫달 무료",cta:"카카오페이로 시작하기",stats:[{n:"3,800만",l:"가입자"},{n:"#1",l:"간편결제"},{n:"무료",l:"첫달"}]},
-{lng:126.987,lat:37.583,icon:"🛍️",brand:"무신사",color:"#FF6B2C",tagline:"성수 패션 스폰서",title:"감성 음악처럼 감성 패션",desc:"noct 유저 전용 15% 할인",cta:"할인 코드 · NOCT15",stats:[{n:"1,200만",l:"회원"},{n:"15%",l:"전용 할인"},{n:"성수",l:"플래그십"}]},
-{lng:126.923,lat:37.566,icon:"🍺",brand:"곰표맥주",color:"#FFA500",tagline:"홍대 야간 스폰서",title:"홍대 새벽 감성 곰표맥주",desc:"noct 음악 들으며 곰표 한 캔",cta:"주변 편의점 찾기",stats:[{n:"전국",l:"편의점"},{n:"4.8",l:"평균 별점"},{n:"새벽",l:"홍대 감성"}]},
-],
-};
+var ADS = {busan:[],seoul:[],daegu:[],incheon:[],gwangju:[]};
 var TOP5 = {
 busan:[
 {track:"밤편지",artist:"IU",color:"#60a5fa"},
