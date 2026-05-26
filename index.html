@@ -1011,8 +1011,7 @@ function applyMood(moodKey){
   var bloom=document.getElementById('atmBloom');
   if(base){base.style.transition='background 6s ease';base.style.background=m.overlay;base.style.opacity='1';}
   if(bloom){bloom.style.transition='background 6s ease';bloom.style.background=m.bloom;bloom.style.opacity='1';}
-  // fog만 업데이트 (가벼움)
-  if(map&&map.isStyleLoaded()){try{map.setFog(m.fog);}catch(e){}}
+
 }
 
 function checkDawn(){
@@ -1021,7 +1020,7 @@ function checkDawn(){
 }
 
 // ── 지도 ──
-var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing,antialias:true});
+var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:CITIES.busan.center,zoom:CITIES.busan.zoom,pitch:CITIES.busan.pitch,bearing:CITIES.busan.bearing});
 
 map.on('load',function(){
   // 3D 건물
@@ -1107,12 +1106,12 @@ if(map.getLayer('bld-top')){
   map.addSource('dummy',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addLayer({id:'dummy-glow',source:'dummy',type:'circle',paint:{
     'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],7,6,10,12,13,18,16,24],
-    'circle-opacity':['interpolate',['linear'],['zoom'],7,0.05,10,0.1,14,0.18],
+    'circle-radius':['interpolate',['linear'],['zoom'],9,8,14,16],
+    'circle-opacity':0.12,
     }});
   map.addLayer({id:'dummy-core',source:'dummy',type:'circle',paint:{
     'circle-color':['get','color'],
-    'circle-radius':['interpolate',['linear'],['zoom'],7,1.5,10,3,13,5,16,7],
+    'circle-radius':['interpolate',['linear'],['zoom'],9,2,14,5],
     'circle-opacity':['interpolate',['linear'],['zoom'],7,0.6,10,0.85,14,1]}});
   
   map.on('click','dummy-core',function(e){var p=e.features[0].properties;closeAdCard();showFakeCard({title:p.title,channel:p.channel,mood:[p.mood1,p.mood2||'감성'],color:p.color,thumb:p.thumb||''},p.district);});
