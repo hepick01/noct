@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:#02010e;font-family:"Noto Sans KR",-apple-system,sans-serif;}
+html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:"Noto Sans KR",-apple-system,sans-serif;}
 /* 지도: 최하단 레이어 */
 #map{position:fixed;inset:0;z-index:0;}
 /* UI: pointer-events:none 기본, 필요한 것만 활성 */
@@ -288,11 +288,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#02010e;font-family:
 .dstar{position:fixed;border-radius:50%;background:#fff;pointer-events:none;animation:tw 3s ease-in-out infinite;z-index:2;}
 @keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
 /* cinematic scan line effect */
-#scanLines{position:fixed;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,20,0.03) 2px,rgba(0,0,20,0.03) 4px);opacity:0.4;}
 /* bottom gradient fade */
-#bottomFade{position:fixed;bottom:0;left:0;right:0;height:200px;z-index:4;pointer-events:none;background:linear-gradient(to top,rgba(2,1,14,0.6) 0%,transparent 100%);}
+#bottomFade{position:fixed;bottom:0;left:0;right:0;height:200px;z-index:4;pointer-events:none;background:linear-gradient(to top,rgba(2,1,14,0.3) 0%,transparent 100%);}
 /* top gradient */
-#topFade{position:fixed;top:0;left:0;right:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(to bottom,rgba(2,1,14,0.5) 0%,transparent 100%);}
+#topFade{position:fixed;top:0;left:0;right:0;height:120px;z-index:4;pointer-events:none;background:linear-gradient(to bottom,rgba(2,1,14,0.25) 0%,transparent 100%);}
 /* 마커 */
 .nm{cursor:pointer;overflow:visible;}
 @keyframes ro{0%{transform:scale(.8);opacity:.6}100%{transform:scale(3);opacity:0}}
@@ -319,11 +318,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#02010e;font-family:
 <div id="map"></div>
 <!-- Atmosphere layers -->
 <div id="atmBase" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:background 4s ease,opacity 2s;opacity:0;"></div>
-<div id="atmVignette" style="position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,1,12,0.7) 100%);"></div>
+<div id="atmVignette" style="position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(2,1,12,0.35) 100%);"></div>
 <div id="atmBloom" style="position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 3s;mix-blend-mode:screen;"></div>
 <div id="dawnOverlay" style="position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s;"></div>
 <div id="vibe"></div>
-<div id="scanLines"></div>
 <div id="bottomFade"></div>
 <div id="topFade"></div>
 <div id="ytPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
@@ -920,25 +918,25 @@ var ATM = {
   midnight: {
     base:'linear-gradient(180deg,rgba(2,1,18,0.85) 0%,rgba(5,2,25,0.6) 40%,rgba(3,1,15,0.8) 100%)',
     bloom:'radial-gradient(ellipse at 50% 30%,rgba(80,20,160,0.08) 0%,transparent 60%)',
-    fog:{color:'rgb(2,1,12)','high-color':'rgb(12,5,35)','horizon-blend':0.06,'space-color':'rgb(2,1,12)','star-intensity':0.9},
+    fog:{color:'rgb(2,1,12)','high-color':'rgb(12,5,35)','horizon-blend':0.03,'space-color':'rgb(2,1,12)','star-intensity':0.9},
     vignette:'rgba(2,1,12,0.75)',label:'midnight'
   },
   dawn: {
     base:'linear-gradient(180deg,rgba(8,2,30,0.8) 0%,rgba(20,5,45,0.55) 40%,rgba(5,2,20,0.75) 100%)',
     bloom:'radial-gradient(ellipse at 50% 60%,rgba(120,40,200,0.07) 0%,transparent 60%)',
-    fog:{color:'rgb(5,2,18)','high-color':'rgb(25,8,55)','horizon-blend':0.07,'space-color':'rgb(3,1,15)','star-intensity':0.7},
+    fog:{color:'rgb(5,2,18)','high-color':'rgb(25,8,55)','horizon-blend':0.03,'space-color':'rgb(3,1,15)','star-intensity':0.7},
     vignette:'rgba(4,1,18,0.72)',label:'dawn'
   },
   morning: {
     base:'linear-gradient(180deg,rgba(10,5,30,0.7) 0%,rgba(15,8,35,0.45) 40%,rgba(8,3,22,0.65) 100%)',
     bloom:'radial-gradient(ellipse at 60% 20%,rgba(80,60,180,0.06) 0%,transparent 60%)',
-    fog:{color:'rgb(8,6,22)','high-color':'rgb(30,20,55)','horizon-blend':0.05,'space-color':'rgb(5,3,18)','star-intensity':0.3},
+    fog:{color:'rgb(8,6,22)','high-color':'rgb(30,20,55)','horizon-blend':0.03,'space-color':'rgb(5,3,18)','star-intensity':0.3},
     vignette:'rgba(5,3,18,0.68)',label:'morning'
   },
   sunset: {
     base:'linear-gradient(180deg,rgba(15,5,35,0.78) 0%,rgba(30,8,50,0.55) 40%,rgba(10,2,28,0.72) 100%)',
     bloom:'radial-gradient(ellipse at 40% 10%,rgba(180,60,120,0.07) 0%,transparent 55%)',
-    fog:{color:'rgb(12,4,22)','high-color':'rgb(50,15,60)','horizon-blend':0.07,'space-color':'rgb(8,2,18)','star-intensity':0.45},
+    fog:{color:'rgb(12,4,22)','high-color':'rgb(50,15,60)','horizon-blend':0.03,'space-color':'rgb(8,2,18)','star-intensity':0.45},
     vignette:'rgba(8,2,20,0.72)',label:'sunset'
   }
 };
@@ -957,9 +955,9 @@ function applyAtmosphere(){
   var base=document.getElementById('atmBase');
   var bloom=document.getElementById('atmBloom');
   base.style.background=atm.base;
-  base.style.opacity='1';
+  base.style.opacity='0.08';
   bloom.style.background=atm.bloom;
-  bloom.style.opacity='1';
+  bloom.style.opacity='0.12';
   // fog 업데이트
   if(map.isStyleLoaded())map.setFog(atm.fog);
   // 새벽/자정: 별 추가
@@ -1008,18 +1006,18 @@ if(map.getLayer('bld-top')){
         // 주요 도시명은 40~50% 밝기, 보조는 20~30%
         var isCity=layer.id.includes('place')&&(layer.id.includes('city')||layer.id.includes('town'));
         var isLabel=layer.id.includes('place');
-        var op=isCity?0.45:isLabel?0.25:0.12;
+        var op=isCity?0.55:isLabel?0.35:0.18;
         var sz=isCity?1.1:1.0;
         map.setPaintProperty(layer.id,'text-opacity',op);
         map.setPaintProperty(layer.id,'icon-opacity',op*0.6);
-        map.setPaintProperty(layer.id,'text-color','rgba(210,190,240,'+op+')');
+        map.setPaintProperty(layer.id,'text-color','rgba(220,200,255,'+op+')');
         if(isCity){try{map.setLayoutProperty(layer.id,'text-size',['*',['get','text-size']||12,sz]);}catch(e){}}
       }catch(e){}
     }
     if(layer.type==='line'){
       try{
         var isHighway=layer.id.includes('major')||layer.id.includes('highway')||layer.id.includes('motorway');
-        var lineOp=isHighway?0.18:0.09;
+        var lineOp=isHighway?0.28:0.15;
         map.setPaintProperty(layer.id,'line-opacity',lineOp);
         // 도로 색을 살짝 보라빛으로
         if(isHighway){try{map.setPaintProperty(layer.id,'line-color','rgba(120,100,180,0.5)');}catch(e){}}
